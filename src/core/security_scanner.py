@@ -298,7 +298,7 @@ class SecurityScanner:
                     audit=False,
                 )
                 inbound_count = int(stdout_in.strip()) if success_in else 0
-            except:
+            except Exception:
                 inbound_count = 0
 
             try:
@@ -308,7 +308,7 @@ class SecurityScanner:
                     audit=False,
                 )
                 outbound_count = int(stdout_out.strip()) if success_out else 0
-            except:
+            except Exception:
                 outbound_count = 0
 
             firewall_status = FirewallStatus(
@@ -357,7 +357,7 @@ class SecurityScanner:
             try:
                 result = sock.connect_ex((host, port))
                 results[port] = result == 0
-            except:
+            except Exception:
                 results[port] = False
             finally:
                 sock.close()
