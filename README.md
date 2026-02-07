@@ -8,6 +8,11 @@ A comprehensive, secure, and modern system maintenance suite for Windows, comple
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 
+<img width="1920" height="1032" alt="Screenshot1" src="https://github.com/user-attachments/assets/892a0722-d532-4117-9e3b-7bfa0e7c912c" />
+<img width="1920" height="1032" alt="Screenshot2" src="https://github.com/user-attachments/assets/e6b29d39-804e-40e7-9f6c-faa400f09d70" />
+<img width="1920" height="1032" alt="Screenshot3" src="https://github.com/user-attachments/assets/d734bce9-8cd9-4fa6-8e82-5138ed7f0ecf" />
+
+
 ---
 
 ## ✨ Features
