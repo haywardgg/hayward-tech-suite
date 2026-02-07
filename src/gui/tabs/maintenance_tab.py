@@ -9,6 +9,7 @@ from tkinter import messagebox
 import threading
 
 from src.utils.logger import get_logger
+from src.utils.admin_state import AdminState
 from src.core.system_operations import SystemOperations, SystemOperationError, PrivilegeError
 
 logger = get_logger("maintenance_tab")
@@ -66,36 +67,69 @@ class MaintenanceTab:
             dns_frame, text="DNS cache and configuration", font=ctk.CTkFont(size=11)
         )
         info.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        
+        # Check admin status
+        is_admin = AdminState.is_admin()
 
-        # Flush DNS button
-        ctk.CTkButton(
-            dns_frame, text="Flush DNS Cache", command=self._flush_dns
-        ).grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        # Flush DNS button (admin required)
+        self.flush_dns_btn = ctk.CTkButton(
+            dns_frame, 
+            text="Flush DNS Cache", 
+            command=self._flush_dns,
+            state="normal" if is_admin else "disabled"
+        )
+        self.flush_dns_btn.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
 
-        # Edit hosts file button
-        ctk.CTkButton(
-            dns_frame, text="Edit Hosts File", command=self._edit_hosts_file
-        ).grid(row=3, column=0, padx=10, pady=5, sticky="ew")
+        # Edit hosts file button (admin required)
+        self.edit_hosts_btn = ctk.CTkButton(
+            dns_frame, 
+            text="Edit Hosts File", 
+            command=self._edit_hosts_file,
+            state="normal" if is_admin else "disabled"
+        )
+        self.edit_hosts_btn.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
 
-        # Reset DNS to Google button
-        ctk.CTkButton(
-            dns_frame, text="DNS → Google (8.8.8.8)", command=self._reset_dns_google
-        ).grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+        # Reset DNS to Google button (admin required)
+        self.dns_google_btn = ctk.CTkButton(
+            dns_frame, 
+            text="DNS → Google (8.8.8.8)", 
+            command=self._reset_dns_google,
+            state="normal" if is_admin else "disabled"
+        )
+        self.dns_google_btn.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
 
-        # Reset DNS to Cloudflare button
-        ctk.CTkButton(
-            dns_frame, text="DNS → Cloudflare (1.1.1.1)", command=self._reset_dns_cloudflare
-        ).grid(row=5, column=0, padx=10, pady=5, sticky="ew")
+        # Reset DNS to Cloudflare button (admin required)
+        self.dns_cloudflare_btn = ctk.CTkButton(
+            dns_frame, 
+            text="DNS → Cloudflare (1.1.1.1)", 
+            command=self._reset_dns_cloudflare,
+            state="normal" if is_admin else "disabled"
+        )
+        self.dns_cloudflare_btn.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
 
-        # Reset DNS to Auto button
-        ctk.CTkButton(
-            dns_frame, text="DNS → Auto (DHCP)", command=self._reset_dns_auto
-        ).grid(row=6, column=0, padx=10, pady=5, sticky="ew")
+        # Reset DNS to Auto button (admin required)
+        self.dns_auto_btn = ctk.CTkButton(
+            dns_frame, 
+            text="DNS → Auto (DHCP)", 
+            command=self._reset_dns_auto,
+            state="normal" if is_admin else "disabled"
+        )
+        self.dns_auto_btn.grid(row=6, column=0, padx=10, pady=5, sticky="ew")
 
-        # View DNS cache button
+        # View DNS cache button (doesn't require admin)
         ctk.CTkButton(
             dns_frame, text="View DNS Cache", command=self._view_dns_cache
         ).grid(row=7, column=0, padx=10, pady=5, sticky="ew")
+        
+        # Add admin warning if not admin
+        if not is_admin:
+            warning_label = ctk.CTkLabel(
+                dns_frame,
+                text="⚠️ Most DNS operations require Administrator",
+                font=ctk.CTkFont(size=9),
+                text_color="orange"
+            )
+            warning_label.grid(row=8, column=0, padx=10, pady=5, sticky="w")
 
     def _create_restore_point_section(self, parent: ctk.CTkFrame, row: int, column: int = 0) -> None:
         """Create restore point section."""
@@ -110,18 +144,29 @@ class MaintenanceTab:
 
         info = ctk.CTkLabel(
             restore_frame,
-            text="Create restore point before making changes",
+            text="Create restore point before making changes (Requires Admin)",
             font=ctk.CTkFont(size=11),
         )
         info.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 
         self.restore_name_entry = ctk.CTkEntry(restore_frame, placeholder_text="Restore Point Name")
         self.restore_name_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        
+        # Check admin status
+        is_admin = AdminState.is_admin()
 
-        btn = ctk.CTkButton(
-            restore_frame, text="Create Restore Point", command=self._create_restore_point, width=200
+        self.create_restore_btn = ctk.CTkButton(
+            restore_frame, 
+            text="Create Restore Point", 
+            command=self._create_restore_point, 
+            width=200,
+            state="normal" if is_admin else "disabled"
         )
-        btn.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        self.create_restore_btn.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        
+        if not is_admin:
+            # Disable input as well
+            self.restore_name_entry.configure(state="disabled")
 
     def _create_system_maintenance_section(self, parent: ctk.CTkFrame, row: int, column: int = 0) -> None:
         """Create system maintenance section."""
@@ -140,6 +185,9 @@ class MaintenanceTab:
             font=ctk.CTkFont(size=11),
         )
         info.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        
+        # Check admin status
+        is_admin = AdminState.is_admin()
 
         self.maintenance_button = ctk.CTkButton(
             maint_frame,
@@ -148,6 +196,7 @@ class MaintenanceTab:
             width=200,
             fg_color="#d9534f",
             hover_color="#c9302c",
+            state="normal" if is_admin else "disabled"
         )
         self.maintenance_button.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
@@ -156,6 +205,15 @@ class MaintenanceTab:
             maint_frame, text="", font=ctk.CTkFont(size=11), text_color="gray"
         )
         self.maintenance_progress_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        
+        if not is_admin:
+            warning_label = ctk.CTkLabel(
+                maint_frame,
+                text="⚠️ Administrator privileges required",
+                font=ctk.CTkFont(size=9),
+                text_color="orange"
+            )
+            warning_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
 
     def _create_disk_section(self, parent: ctk.CTkFrame, row: int, column: int = 0) -> None:
         """Create disk operations section."""

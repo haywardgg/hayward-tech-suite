@@ -10,6 +10,7 @@ import threading
 from pathlib import Path
 
 from src.utils.logger import get_logger
+from src.utils.admin_state import AdminState
 from src.core.registry_manager import RegistryManager, RegistryError
 
 logger = get_logger("danger_tab")
@@ -87,8 +88,11 @@ class DangerTab:
         btn_frame = ctk.CTkFrame(backup_frame, fg_color="transparent")
         btn_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
         btn_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        
+        # Check admin status
+        is_admin = AdminState.is_admin()
 
-        ctk.CTkButton(
+        self.backup_button = ctk.CTkButton(
             btn_frame,
             text="📦 Backup Registry Now",
             command=self._backup_registry,
@@ -96,9 +100,11 @@ class DangerTab:
             height=40,
             fg_color="green",
             hover_color="darkgreen",
-        ).grid(row=0, column=0, padx=5, pady=5)
+            state="normal" if is_admin else "disabled"
+        )
+        self.backup_button.grid(row=0, column=0, padx=5, pady=5)
 
-        ctk.CTkButton(
+        self.restore_button = ctk.CTkButton(
             btn_frame,
             text="↩️ Restore Registry",
             command=self._restore_registry,
@@ -106,9 +112,11 @@ class DangerTab:
             height=40,
             fg_color="orange",
             hover_color="darkorange",
-        ).grid(row=0, column=1, padx=5, pady=5)
+            state="normal" if is_admin else "disabled"
+        )
+        self.restore_button.grid(row=0, column=1, padx=5, pady=5)
 
-        ctk.CTkButton(
+        self.undo_button = ctk.CTkButton(
             btn_frame,
             text="⏪ Undo Last Change",
             command=self._undo_last_change,
@@ -116,7 +124,19 @@ class DangerTab:
             height=40,
             fg_color="#d9534f",
             hover_color="#c9302c",
-        ).grid(row=0, column=2, padx=5, pady=5)
+            state="normal" if is_admin else "disabled"
+        )
+        self.undo_button.grid(row=0, column=2, padx=5, pady=5)
+        
+        # Add admin warning if not admin
+        if not is_admin:
+            warning_label = ctk.CTkLabel(
+                backup_frame,
+                text="⚠️ Administrator privileges required for registry operations",
+                font=ctk.CTkFont(size=11),
+                text_color="orange"
+            )
+            warning_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
 
     def _create_tweaks_section(self, parent: ctk.CTkFrame) -> None:
         """Create registry tweaks section."""
@@ -203,7 +223,10 @@ class DangerTab:
         # Check if tweak is already applied
         is_applied = self.registry_manager.is_tweak_applied(tweak.id)
         button_text = "RESTORE" if is_applied else "APPLY"
-        button_state = "normal"  # Always enabled
+        
+        # Check admin status
+        is_admin = AdminState.is_admin()
+        button_state = "normal" if is_admin else "disabled"
         fg_color = "orange" if is_applied else "green"
 
         # Apply/Restore button
