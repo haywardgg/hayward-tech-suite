@@ -372,12 +372,14 @@ class RegistryManager:
                         # Convert JSON format to RegistryTweak format
                         apply_data = tweak_data.get("apply", {})
                         
+                        # JSON uses escaped backslashes (\\) which Python reads as single backslash
+                        # No need to replace - just use as-is
                         tweak = RegistryTweak(
                             id=tweak_data.get("id"),
                             name=tweak_data.get("name"),
                             description=tweak_data.get("description"),
                             category=tweak_data.get("category"),
-                            registry_key=apply_data.get("key", "").replace("\\\\", "\\"),
+                            registry_key=apply_data.get("key", ""),
                             value_name=apply_data.get("value_name"),
                             value_data=str(apply_data.get("value_data")),
                             value_type=apply_data.get("value_type"),

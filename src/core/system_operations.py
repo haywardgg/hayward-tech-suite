@@ -483,7 +483,7 @@ class SystemOperations:
                     continue
                 
                 # Skip the header line (contains "Admin State", "State", "Type", "Interface Name")
-                if 'Admin State' in line or 'State' in line and 'Type' in line:
+                if ('Admin State' in line) or ('State' in line and 'Type' in line):
                     continue
                 
                 # Parse data lines - adapter name is the last field

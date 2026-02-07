@@ -194,10 +194,11 @@ class SettingsTab:
         result = messagebox.askyesno(
             "Reset to Defaults",
             "⚠️ WARNING: This will:\n\n"
-            "• Undo ALL registry changes (restore to Windows defaults)\n"
             "• Delete all registry backups from temp folder\n"
             "• Reset application settings to defaults\n"
             "• Clear all logs\n\n"
+            "Note: Registry tweaks will NOT be automatically restored.\n"
+            "Use the RESTORE button in DANGER ZONE to undo individual tweaks.\n\n"
             "This action cannot be undone!\n\n"
             "Are you sure you want to continue?",
             icon='warning'
@@ -220,12 +221,13 @@ class SettingsTab:
                 # Restore all registry changes to defaults
                 logger.info("Restoring all registry changes to defaults...")
                 try:
-                    # Note: restore_all_to_defaults() is not yet implemented in RegistryManager
-                    # For now, we only clear backups. TODO: Implement full restore functionality
+                    # TODO: Implement restore_all_to_defaults() in RegistryManager
+                    # This would iterate through all applied tweaks and restore them to Windows defaults
+                    # For now, RESET only clears backups, config, and logs
                     if hasattr(registry_manager, 'restore_all_to_defaults'):
                         registry_manager.restore_all_to_defaults()
                     else:
-                        logger.warning("restore_all_to_defaults() not implemented, skipping registry restore")
+                        logger.info("Registry restore not yet implemented - only clearing backups and config")
                 except Exception as e:
                     logger.warning(f"Failed to restore registry defaults: {e}")
 
