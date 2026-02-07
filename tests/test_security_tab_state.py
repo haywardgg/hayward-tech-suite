@@ -13,17 +13,14 @@ from src.core.automated_remediation import AutomatedRemediation, RemediationActi
 class TestSecurityTabStateFix:
     """Test suite for security tab state management fix."""
     
-    def test_initial_state_is_none(self):
-        """Test that last_vulnerabilities is initialized as None, not empty list."""
-        # This test verifies the fix at line 24 of security_tab.py
-        # The critical fix: None indicates no scan has been run
-        # Empty list [] indicates scan was run but found no vulnerabilities
+    def test_state_logic_with_none_vs_empty_list(self):
+        """Test that the logic correctly distinguishes None from empty list."""
+        # This test verifies the logic that depends on the initialization fix.
+        # The critical fix at line 24 of security_tab.py: self.last_vulnerabilities = None
+        # This allows the _run_all_fixes method to distinguish between:
+        #   - None: no scan has been run
+        #   - []: scan was run but found no vulnerabilities
         
-        # We can't easily test GUI initialization in this context,
-        # but we document the expected behavior:
-        # SecurityTab.__init__ should set: self.last_vulnerabilities = None
-        
-        # Instead, we verify the logic that depends on this initialization:
         remediation = AutomatedRemediation()
         
         # Simulate the initial state (None)
@@ -37,7 +34,7 @@ class TestSecurityTabStateFix:
         assert len(actions) == 0, "Empty state ([]) should also have no actions"
         
         # Both return empty lists, but the UI layer (security_tab.py) 
-        # uses the difference to display appropriate messages
+        # uses the difference between None and [] to display appropriate messages
     
     def test_get_available_actions_handles_none(self):
         """Test that get_available_actions returns empty list for None (no scan)."""

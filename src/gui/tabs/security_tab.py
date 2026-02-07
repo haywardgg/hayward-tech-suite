@@ -461,8 +461,9 @@ class SecurityTab:
                 self._update_results(result_text)
                 
                 # Debug logging to track vulnerability state
+                vuln_count = len(self.last_vulnerabilities) if self.last_vulnerabilities is not None else 0
                 logger.debug(f"last_vulnerabilities state: {self.last_vulnerabilities}")
-                logger.debug(f"Number of vulnerabilities: {len(self.last_vulnerabilities) if self.last_vulnerabilities is not None else 'None'}")
+                logger.debug(f"Number of vulnerabilities: {vuln_count if self.last_vulnerabilities is not None else 'None'}")
                 
                 # Get available actions based on last scan
                 available_actions = self.remediation.get_available_actions(self.last_vulnerabilities)
