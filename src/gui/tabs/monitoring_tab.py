@@ -215,7 +215,7 @@ class MonitoringTab:
         self.battery_progress.set(0)
 
     def _create_network_display(self) -> None:
-        """Create network monitoring display."""
+        """Create network monitoring display with enhanced details."""
         network_frame = ctk.CTkFrame(self.content_frame)
         network_frame.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
         network_frame.grid_columnconfigure(0, weight=1)
@@ -226,23 +226,9 @@ class MonitoringTab:
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        # Bytes sent
-        self.net_sent_label = ctk.CTkLabel(
-            network_frame, text="Sent: --- MB", font=ctk.CTkFont(size=12)
-        )
-        self.net_sent_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
-
-        # Bytes received
-        self.net_recv_label = ctk.CTkLabel(
-            network_frame, text="Received: --- MB", font=ctk.CTkFont(size=12)
-        )
-        self.net_recv_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-
-        # Active interfaces
-        self.net_interfaces_label = ctk.CTkLabel(
-            network_frame, text="Active: ---", font=ctk.CTkFont(size=12)
-        )
-        self.net_interfaces_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        # Network details text box for comprehensive info
+        self.net_details_text = ctk.CTkTextbox(network_frame, height=250, wrap="word", state="disabled")
+        self.net_details_text.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
 
     def start_monitoring(self) -> None:
         """Start monitoring service."""
@@ -352,18 +338,98 @@ class MonitoringTab:
         self.battery_progress.set(percent / 100)
 
     def _update_network_display(self, data: Dict[str, Any]) -> None:
-        """Update network display with new data."""
+        """Update network display with enhanced information."""
         if "error" in data:
             return
 
         bytes_sent = data.get("bytes_sent", 0) / (1024**2)  # Convert to MB
         bytes_recv = data.get("bytes_recv", 0) / (1024**2)
         interfaces = data.get("interfaces", [])
-        active_count = sum(1 for iface in interfaces if iface.get("is_up", False))
-
-        self.net_sent_label.configure(text=f"Sent: {bytes_sent:.2f} MB")
-        self.net_recv_label.configure(text=f"Received: {bytes_recv:.2f} MB")
-        self.net_interfaces_label.configure(text=f"Active: {active_count} interface(s)")
+        
+        # Build detailed network info text
+        info_text = "Network Statistics:\n"
+        info_text += f"  Sent: {bytes_sent:.2f} MB\n"
+        info_text += f"  Received: {bytes_recv:.2f} MB\n\n"
+        
+        # Find active interface with details
+        active_interface = None
+        mac_address = None
+        local_ip = None
+        subnet_mask = None
+        
+        for iface in interfaces:
+            if iface.get("is_up", False):
+                active_interface = iface.get("name", "Unknown")
+                # Extract MAC address and IP info
+                for addr in iface.get("addresses", []):
+                    addr_str = str(addr.get("family", ""))
+                    address = addr.get("address", "")
+                    
+                    # MAC address (AddressFamily.AF_LINK or packet)
+                    if "packet" in addr_str.lower() or "link" in addr_str.lower():
+                        mac_address = address
+                    # IPv4 address
+                    elif "AF_INET" in addr_str and ":" not in address:
+                        if not local_ip:  # Use first IPv4 found
+                            local_ip = address
+                            subnet_mask = addr.get("netmask", "N/A")
+                
+                if active_interface:
+                    break  # Use first active interface
+        
+        # Get additional network details from data
+        public_ip = data.get("public_ip", "Fetching...")
+        default_gateway = data.get("default_gateway", "N/A")
+        dns_servers = data.get("dns_servers", [])
+        dhcp_enabled = data.get("dhcp_enabled", False)
+        behind_nat = data.get("behind_nat", False)
+        
+        # Use local_ip from data if not found in interfaces
+        if not local_ip:
+            local_ip = data.get("local_ip", "N/A")
+        
+        info_text += "Active Interface:\n"
+        if active_interface:
+            info_text += f"  Name: {active_interface}\n"
+            if mac_address:
+                info_text += f"  MAC: {mac_address}\n"
+            
+            # Find speed for this interface
+            for iface in interfaces:
+                if iface.get("name") == active_interface:
+                    speed = iface.get("speed", 0)
+                    if speed > 0:
+                        info_text += f"  Speed: {speed} Mbps\n"
+                    info_text += f"  Status: Connected\n"
+                    break
+        else:
+            info_text += "  No active interface detected\n"
+        
+        info_text += "\nIP Addressing:\n"
+        info_text += f"  Local IP: {local_ip or 'N/A'}\n"
+        info_text += f"  Public IP: {public_ip}\n"
+        if subnet_mask and subnet_mask != "N/A":
+            info_text += f"  Subnet Mask: {subnet_mask}\n"
+        if default_gateway:
+            info_text += f"  Gateway: {default_gateway}\n"
+        
+        info_text += "\nNetwork Configuration:\n"
+        info_text += f"  DHCP: {'Enabled' if dhcp_enabled else 'Disabled/Unknown'}\n"
+        
+        if dns_servers:
+            info_text += f"  DNS Servers:\n"
+            for dns in dns_servers[:3]:  # Show max 3 DNS servers
+                info_text += f"    - {dns}\n"
+        else:
+            info_text += f"  DNS Servers: N/A\n"
+        
+        info_text += f"  Network Type: {'Behind NAT' if behind_nat else 'Direct/Unknown'}\n"
+        
+        # Update the text box
+        self.net_details_text.configure(state="normal")
+        self.net_details_text.delete("1.0", "end")
+        self.net_details_text.insert("1.0", info_text)
+        self.net_details_text.configure(state="disabled")
 
 
     def _run_performance_profile(self) -> None:

@@ -287,9 +287,16 @@ class MonitoringService:
         Get network interface information and statistics.
 
         Returns:
-            Dictionary with network metrics
+            Dictionary with network metrics including public IP, gateway, DNS, etc.
         """
         try:
+            import socket
+            import urllib.request
+            import urllib.error
+            
+            # DNS test server for local IP detection
+            DNS_TEST_SERVER = "8.8.8.8"
+            
             net_io = psutil.net_io_counters()
             net_if_addrs = psutil.net_if_addrs()
             net_if_stats = psutil.net_if_stats()
@@ -316,6 +323,96 @@ class MonitoringService:
                     )
 
                 interfaces.append(interface_info)
+            
+            # Get public IP (with timeout and error handling)
+            # Note: Uses HTTPS with default SSL verification
+            public_ip = None
+            try:
+                with urllib.request.urlopen('https://api.ipify.org', timeout=3) as response:
+                    public_ip = response.read().decode('utf-8')
+            except (urllib.error.URLError, Exception) as e:
+                logger.debug(f"Could not fetch public IP: {e}")
+                public_ip = "Unavailable"
+            
+            # Get default gateway
+            default_gateway = None
+            try:
+                # Try to get gateway via netifaces if available
+                import netifaces
+                gws = netifaces.gateways()
+                if 'default' in gws and netifaces.AF_INET in gws['default']:
+                    default_gateway = gws['default'][netifaces.AF_INET][0]
+            except (ImportError, Exception):
+                # Fallback: try to parse route output on Windows
+                try:
+                    import subprocess
+                    result = subprocess.run(['route', 'print', '0.0.0.0'], 
+                                          capture_output=True, text=True, timeout=2)
+                    for line in result.stdout.split('\n'):
+                        if '0.0.0.0' in line and 'On-link' not in line:
+                            parts = line.split()
+                            if len(parts) >= 3:
+                                default_gateway = parts[2]
+                                break
+                except Exception as e:
+                    logger.debug(f"Could not determine default gateway: {e}")
+            
+            # Get DNS servers (Windows-specific)
+            dns_servers = []
+            try:
+                import subprocess
+                result = subprocess.run(['ipconfig', '/all'], 
+                                      capture_output=True, text=True, timeout=5)
+                for line in result.stdout.split('\n'):
+                    if 'DNS Servers' in line or 'DNS-Server' in line:
+                        # Extract DNS server IP
+                        parts = line.split(':')
+                        if len(parts) > 1:
+                            dns_ip = parts[1].strip()
+                            if dns_ip and dns_ip[0].isdigit():
+                                dns_servers.append(dns_ip)
+            except Exception as e:
+                logger.debug(f"Could not get DNS servers: {e}")
+            
+            # Detect DHCP status and NAT
+            dhcp_enabled = False
+            behind_nat = False
+            local_ip = None
+            
+            # Find primary local IP
+            try:
+                # Get local IP by creating a socket
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect((DNS_TEST_SERVER, 80))
+                local_ip = s.getsockname()[0]
+                s.close()
+                
+                # Check if behind NAT (private IP ranges)
+                if local_ip:
+                    octets = local_ip.split('.')
+                    if len(octets) == 4:
+                        first_octet = int(octets[0])
+                        second_octet = int(octets[1])
+                        # Check private IP ranges
+                        if (first_octet == 10 or 
+                            (first_octet == 172 and 16 <= second_octet <= 31) or
+                            (first_octet == 192 and second_octet == 168)):
+                            behind_nat = True
+            except Exception as e:
+                logger.debug(f"Could not determine local IP: {e}")
+            
+            # Try to detect DHCP (Windows-specific)
+            try:
+                import subprocess
+                result = subprocess.run(['ipconfig', '/all'], 
+                                      capture_output=True, text=True, timeout=5)
+                if 'DHCP Enabled' in result.stdout:
+                    for line in result.stdout.split('\n'):
+                        if 'DHCP Enabled' in line:
+                            dhcp_enabled = 'Yes' in line or 'True' in line
+                            break
+            except Exception as e:
+                logger.debug(f"Could not determine DHCP status: {e}")
 
             return {
                 "bytes_sent": net_io.bytes_sent,
@@ -327,6 +424,12 @@ class MonitoringService:
                 "dropin": net_io.dropin,
                 "dropout": net_io.dropout,
                 "interfaces": interfaces,
+                "public_ip": public_ip,
+                "local_ip": local_ip,
+                "default_gateway": default_gateway,
+                "dns_servers": dns_servers,
+                "dhcp_enabled": dhcp_enabled,
+                "behind_nat": behind_nat,
                 "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
