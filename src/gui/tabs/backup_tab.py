@@ -72,15 +72,39 @@ class BackupTab:
         self.backup_name_entry = ctk.CTkEntry(backup_frame, placeholder_text="My Backup")
         self.backup_name_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
 
-        # Source paths
-        ctk.CTkLabel(backup_frame, text="Source Folders:").grid(
+        # Destination folder
+        ctk.CTkLabel(backup_frame, text="Destination Folder:").grid(
             row=3, column=0, padx=10, pady=5, sticky="w"
         )
+        
+        dest_frame = ctk.CTkFrame(backup_frame, fg_color="transparent")
+        dest_frame.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+        dest_frame.grid_columnconfigure(0, weight=1)
+        
+        self.destination_entry = ctk.CTkEntry(
+            dest_frame, 
+            placeholder_text="Select destination folder..."
+        )
+        self.destination_entry.grid(row=0, column=0, padx=(0, 5), pady=0, sticky="ew")
+        # Set default destination
+        self.destination_entry.insert(0, str(self.backup_manager.backup_dir))
+        
+        ctk.CTkButton(
+            dest_frame, 
+            text="Browse", 
+            command=self._browse_destination,
+            width=100
+        ).grid(row=0, column=1, padx=0, pady=0)
+
+        # Source paths
+        ctk.CTkLabel(backup_frame, text="Source Folders:").grid(
+            row=5, column=0, padx=10, pady=5, sticky="w"
+        )
         self.source_paths_text = ctk.CTkTextbox(backup_frame, height=80)
-        self.source_paths_text.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+        self.source_paths_text.grid(row=6, column=0, padx=10, pady=5, sticky="ew")
 
         btn_frame = ctk.CTkFrame(backup_frame, fg_color="transparent")
-        btn_frame.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
+        btn_frame.grid(row=7, column=0, padx=10, pady=5, sticky="ew")
 
         ctk.CTkButton(btn_frame, text="Add Folder", command=self._add_source_folder, width=120).grid(
             row=0, column=0, padx=5
@@ -129,6 +153,13 @@ class BackupTab:
             else:
                 self.source_paths_text.insert("1.0", folder)
 
+    def _browse_destination(self) -> None:
+        """Browse for destination folder."""
+        folder = filedialog.askdirectory(title="Select Backup Destination Folder")
+        if folder:
+            self.destination_entry.delete(0, "end")
+            self.destination_entry.insert(0, folder)
+
     def _create_backup(self) -> None:
         """Create new backup."""
         name = self.backup_name_entry.get().strip()
@@ -140,34 +171,45 @@ class BackupTab:
         if not source_paths_text:
             messagebox.showwarning("Warning", "Please add at least one source folder")
             return
+        
+        destination = self.destination_entry.get().strip()
+        if not destination:
+            messagebox.showwarning("Warning", "Please select a destination folder")
+            return
 
         source_paths = [p.strip() for p in source_paths_text.split("\n") if p.strip()]
 
-        logger.info(f"Creating backup: {name}")
+        logger.info(f"Creating backup: {name} to {destination}")
 
         def task():
             try:
                 backup_config = BackupConfig(
                     name=name,
                     source_paths=source_paths,
-                    destination=str(self.backup_manager.backup_dir),
+                    destination=destination,
                     compression=True,
                 )
 
                 backup_id = self.backup_manager.create_backup(backup_config)
 
+                # Store success message as local variable before defining callback
+                success_msg = (
+                    f"Backup created successfully!\n\n"
+                    f"Backup ID: {backup_id}\n"
+                    f"Location: {destination}"
+                )
+
                 self.parent.after(
                     0,
-                    lambda: messagebox.showinfo(
-                        "Success", f"Backup created successfully!\n\nBackup ID: {backup_id}"
-                    ),
+                    lambda: messagebox.showinfo("Success", success_msg),
                 )
                 self.parent.after(0, self._refresh_backup_list)
 
             except Exception as e:
                 logger.error(f"Backup creation failed: {e}")
+                error_msg = f"Failed to create backup: {e}"
                 self.parent.after(
-                    0, lambda: messagebox.showerror("Error", f"Failed to create backup: {e}")
+                    0, lambda: messagebox.showerror("Error", error_msg)
                 )
 
         threading.Thread(target=task, daemon=True).start()

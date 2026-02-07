@@ -5,4 +5,5 @@ __all__ = [
     "backup_manager",
     "security_scanner",
     "monitoring",
+    "registry_manager",
 ]

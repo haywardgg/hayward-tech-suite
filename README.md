@@ -33,9 +33,25 @@ A comprehensive, secure, and modern system maintenance suite for Windows, comple
 
 ### 💾 **Backup & Restore**
 - File and folder backup with compression
+- **User-selectable backup destination**
 - Backup metadata tracking
 - Checksum verification
 - Automated old backup cleanup
+
+### ⚠️ **DANGER Zone - Registry Tweaks**
+- **12 common Windows 11 registry tweaks**
+- **Automatic backup before every change**
+- **One-click undo functionality**
+- Risk level indicators (LOW/MEDIUM/HIGH)
+- Tweaks organized by category:
+  - Privacy (Telemetry, Cortana, Ads)
+  - Performance (Startup delay, Transparency, Game Bar)
+  - UI (File extensions, Hidden files, Lock screen, Context menu)
+  - Security (UAC controls)
+  - System (Windows Update)
+- Manual registry backup/restore
+- Complete backup history tracking
+- **All backups saved to temp folder**
 
 ### 🔒 **Security Features**
 - Vulnerability scanning
@@ -83,15 +99,39 @@ src/
 │   ├── system_operations.py
 │   ├── backup_manager.py
 │   ├── security_scanner.py
-│   └── monitoring.py
+│   ├── monitoring.py
+│   └── registry_manager.py    # NEW: Registry operations
 ├── gui/                        # User interface
 │   ├── main_window.py
 │   └── tabs/
+│       ├── monitoring_tab.py
+│       ├── diagnostics_tab.py
+│       ├── maintenance_tab.py
+│       ├── backup_tab.py
+│       ├── security_tab.py
+│       ├── danger_tab.py      # NEW: DANGER zone
+│       └── settings_tab.py
 └── utils/                      # Utilities
     ├── logger.py
     ├── config.py
     └── validators.py
 ```
+
+---
+
+## ⚠️ DANGER Zone Warning
+
+**The DANGER tab contains advanced registry tweaks that can modify Windows system behavior.**
+
+**Important Safety Information:**
+- 🔴 **HIGH risk tweaks** can cause system instability
+- 📦 **Automatic backups** are created before every change
+- ↩️ **Undo functionality** available for recent changes
+- 💾 **Registry backups** stored in temp folder: `/tmp/ghosty_toolz_registry_backups/`
+- ⚠️ **Some tweaks require system restart** to take effect
+- 🛡️ **Always test on non-production systems first**
+
+**Use at your own risk!** The application provides safety features, but registry modifications can potentially break Windows functionality if misused.
 
 ---
 
