@@ -13,6 +13,9 @@ from src.core.performance_profiler import PerformanceProfiler
 
 logger = get_logger("monitoring_tab")
 
+# Conversion constants
+BYTES_TO_MB = 1024**2
+
 
 class MonitoringTab:
     """System monitoring tab with real-time resource display."""
@@ -270,79 +273,105 @@ class MonitoringTab:
         if "error" in data:
             return
 
+        # Extract data outside closure to avoid late binding issues
         percent = data.get("percent", 0)
         physical_cores = data.get("physical_cores", 0)
         logical_cores = data.get("logical_cores", 0)
         freq = data.get("frequency", {}).get("current", 0)
 
-        self.cpu_usage_label.configure(text=f"Usage: {percent:.1f}%")
-        self.cpu_cores_label.configure(text=f"Cores: {physical_cores} physical, {logical_cores} logical")
-        self.cpu_freq_label.configure(text=f"Frequency: {freq:.0f} MHz")
-        self.cpu_progress.set(percent / 100)
+        def update_ui():
+            """GUI update closure - runs on main thread."""
+            self.cpu_usage_label.configure(text=f"Usage: {percent:.1f}%")
+            self.cpu_cores_label.configure(text=f"Cores: {physical_cores} physical, {logical_cores} logical")
+            self.cpu_freq_label.configure(text=f"Frequency: {freq:.0f} MHz")
+            self.cpu_progress.set(percent / 100)
+        
+        # Schedule on main thread as soon as possible
+        self.parent.after(0, update_ui)
 
     def _update_ram_display(self, data: Dict[str, Any]) -> None:
         """Update RAM display with new data."""
         if "error" in data:
             return
 
+        # Extract data outside closure to avoid late binding issues
         percent = data.get("percent", 0)
         used_gb = data.get("used_gb", 0)
         total_gb = data.get("total_gb", 0)
         available_gb = data.get("available_gb", 0)
 
-        self.ram_usage_label.configure(text=f"Usage: {percent:.1f}%")
-        self.ram_details_label.configure(text=f"{used_gb:.1f} GB / {total_gb:.1f} GB")
-        self.ram_available_label.configure(text=f"Available: {available_gb:.1f} GB")
-        self.ram_progress.set(percent / 100)
+        def update_ui():
+            """GUI update closure - runs on main thread."""
+            self.ram_usage_label.configure(text=f"Usage: {percent:.1f}%")
+            self.ram_details_label.configure(text=f"{used_gb:.1f} GB / {total_gb:.1f} GB")
+            self.ram_available_label.configure(text=f"Available: {available_gb:.1f} GB")
+            self.ram_progress.set(percent / 100)
+        
+        # Schedule on main thread as soon as possible
+        self.parent.after(0, update_ui)
 
     def _update_disk_display(self, data: Dict[str, Any]) -> None:
         """Update disk display with new data."""
         if "error" in data:
             return
 
+        # Extract data outside closure to avoid late binding issues
         disks = data.get("disks", [])
         
-        self.disk_info_text.configure(state="normal")
-        self.disk_info_text.delete("1.0", "end")
+        def update_ui():
+            """GUI update closure - runs on main thread."""
+            self.disk_info_text.configure(state="normal")
+            self.disk_info_text.delete("1.0", "end")
 
-        for disk in disks:
-            device = disk.get("device", "Unknown")
-            total_gb = disk.get("total_gb", 0)
-            used_gb = disk.get("used_gb", 0)
-            free_gb = disk.get("free_gb", 0)
-            percent = disk.get("percent", 0)
+            for disk in disks:
+                device = disk.get("device", "Unknown")
+                total_gb = disk.get("total_gb", 0)
+                used_gb = disk.get("used_gb", 0)
+                free_gb = disk.get("free_gb", 0)
+                percent = disk.get("percent", 0)
 
-            info = f"{device}: {used_gb:.1f} GB / {total_gb:.1f} GB ({percent:.1f}% used, {free_gb:.1f} GB free)\n"
-            self.disk_info_text.insert("end", info)
+                info = f"{device}: {used_gb:.1f} GB / {total_gb:.1f} GB ({percent:.1f}% used, {free_gb:.1f} GB free)\n"
+                self.disk_info_text.insert("end", info)
 
-        self.disk_info_text.configure(state="disabled")
+            self.disk_info_text.configure(state="disabled")
+        
+        # Schedule on main thread as soon as possible
+        self.parent.after(0, update_ui)
 
     def _update_battery_display(self, data: Dict[str, Any]) -> None:
         """Update battery display with new data."""
         if "error" in data:
             return
 
-        if not data.get("present", False):
-            self.battery_status_label.configure(text="Status: No battery detected")
-            return
-
+        # Extract data outside closure to avoid late binding issues
+        present = data.get("present", False)
         percent = data.get("percent", 0)
         power_plugged = data.get("power_plugged", False)
         time_left = data.get("time_left", "Unknown")
 
-        status = "Charging" if power_plugged else "Discharging"
-        self.battery_status_label.configure(text=f"Status: {status}")
-        self.battery_level_label.configure(text=f"Level: {percent}%")
-        self.battery_time_label.configure(text=f"Time: {time_left}")
-        self.battery_progress.set(percent / 100)
+        def update_ui():
+            """GUI update closure - runs on main thread."""
+            if not present:
+                self.battery_status_label.configure(text="Status: No battery detected")
+                return
+
+            status = "Charging" if power_plugged else "Discharging"
+            self.battery_status_label.configure(text=f"Status: {status}")
+            self.battery_level_label.configure(text=f"Level: {percent}%")
+            self.battery_time_label.configure(text=f"Time: {time_left}")
+            self.battery_progress.set(percent / 100)
+        
+        # Schedule on main thread as soon as possible
+        self.parent.after(0, update_ui)
 
     def _update_network_display(self, data: Dict[str, Any]) -> None:
         """Update network display with enhanced information."""
         if "error" in data:
             return
 
-        bytes_sent = data.get("bytes_sent", 0) / (1024**2)  # Convert to MB
-        bytes_recv = data.get("bytes_recv", 0) / (1024**2)
+        # Extract data outside closure to avoid late binding issues
+        bytes_sent = data.get("bytes_sent", 0) / BYTES_TO_MB  # Convert to MB
+        bytes_recv = data.get("bytes_recv", 0) / BYTES_TO_MB
         interfaces = data.get("interfaces", [])
         
         # Build detailed network info text
@@ -424,11 +453,16 @@ class MonitoringTab:
         
         info_text += f"  Network Type: {'Behind NAT' if behind_nat else 'Direct/Unknown'}\n"
         
-        # Update the text box
-        self.net_details_text.configure(state="normal")
-        self.net_details_text.delete("1.0", "end")
-        self.net_details_text.insert("1.0", info_text)
-        self.net_details_text.configure(state="disabled")
+        def update_ui():
+            """GUI update closure - runs on main thread."""
+            # Update the text box
+            self.net_details_text.configure(state="normal")
+            self.net_details_text.delete("1.0", "end")
+            self.net_details_text.insert("1.0", info_text)
+            self.net_details_text.configure(state="disabled")
+        
+        # Schedule on main thread as soon as possible
+        self.parent.after(0, update_ui)
 
 
     def _run_performance_profile(self) -> None:
