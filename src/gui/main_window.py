@@ -66,10 +66,7 @@ class MainWindow(ctk.CTk):
         self.main_container.grid_rowconfigure(1, weight=1)
         self.main_container.grid_columnconfigure(0, weight=1)
 
-        # Create header
-        self._create_header()
-
-        # Create tabview
+         # Create tabview
         self._create_tabview()
 
         # Create status bar
