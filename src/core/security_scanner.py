@@ -318,7 +318,8 @@ class SecurityScanner:
             # Check if we're in a Unix-like shell (Git Bash, WSL, etc.)
             # MSYSTEM indicates Git Bash/MSYS2, SHELL with bash/sh/zsh indicates Unix-like shell
             is_unix_shell = 'MSYSTEM' in os.environ or (
-                'SHELL' in os.environ and
+                'SHELL' in os.environ and 
+                os.environ['SHELL'] and  # Ensure SHELL is not empty
                 os.path.basename(os.environ['SHELL']).lower() in 
                 ['bash', 'sh', 'zsh', 'bash.exe', 'sh.exe', 'zsh.exe']
             )
