@@ -1,5 +1,5 @@
 """
-Configuration manager for Ghosty Tools Pro.
+Configuration manager for Ghost Toolz Evolved.
 
 Loads and manages application configuration from YAML files and environment variables.
 """
@@ -73,7 +73,7 @@ class Config:
         """
         return {
             "app": {
-                "name": "Ghosty Tools Pro",
+                "name": "Ghost Toolz Evolved",
                 "version": "2.0.0",
                 "debug": False,
             },

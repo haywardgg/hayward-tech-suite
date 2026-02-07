@@ -1,5 +1,5 @@
 """
-Input validation utilities for Ghosty Tools Pro.
+Input validation utilities for Ghost Toolz Evolved.
 
 Provides validation functions for user inputs, system paths, and command arguments.
 """
@@ -75,13 +75,14 @@ class Validators:
         return True
 
     @staticmethod
-    def validate_command(command: str, allowed_commands: Optional[List[str]] = None) -> bool:
+    def validate_command(command: str, allowed_commands: Optional[List[str]] = None, allow_shell: bool = False) -> bool:
         """
         Validate a system command.
 
         Args:
             command: Command to validate
             allowed_commands: Optional whitelist of allowed commands
+            allow_shell: If True, allow shell metacharacters for PowerShell commands
 
         Returns:
             True if valid
@@ -92,17 +93,21 @@ class Validators:
         if not command:
             raise ValidationError("Command cannot be empty")
 
-        # Check for command injection patterns
-        dangerous_patterns = [
-            r"[;&|`$]",  # Command chaining/injection
-            r"\$\(",  # Command substitution
-            r">\s*/",  # Writing to system paths
-            r"<\s*/",  # Reading from system paths
-        ]
+        # Check if this is a PowerShell command
+        is_powershell = command.strip().lower().startswith(('powershell', 'pwsh'))
 
-        for pattern in dangerous_patterns:
-            if re.search(pattern, command):
-                raise ValidationError(f"Command contains dangerous pattern: {pattern}")
+        # Check for command injection patterns (relaxed for PowerShell)
+        if not (allow_shell and is_powershell):
+            dangerous_patterns = [
+                r"[;&|`]",  # Command chaining/injection including pipes
+                r"\$\(",  # Command substitution
+                r">\s*/",  # Writing to system paths
+                r"<\s*/",  # Reading from system paths
+            ]
+
+            for pattern in dangerous_patterns:
+                if re.search(pattern, command):
+                    raise ValidationError(f"Command contains dangerous pattern: {pattern}")
 
         # Check whitelist if provided
         if allowed_commands:
@@ -110,8 +115,14 @@ class Validators:
             if command_base not in allowed_commands:
                 raise ValidationError(f"Command not in whitelist: {command_base}")
 
-        # Check for unsafe characters
-        unsafe_chars = set(command) - (Validators.SAFE_COMMAND_CHARS | {"|", ">", "<"})
+        # Check for unsafe characters (more permissive for PowerShell)
+        if allow_shell and is_powershell:
+            # Allow only necessary characters for PowerShell commands
+            safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "=", "-"}
+        else:
+            safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<"}
+        
+        unsafe_chars = set(command) - safe_chars
         if unsafe_chars:
             raise ValidationError(f"Command contains unsafe characters: {unsafe_chars}")
 

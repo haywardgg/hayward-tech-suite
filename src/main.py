@@ -1,5 +1,5 @@
 """
-Main entry point for Ghosty Tools Pro.
+Main entry point for Ghost Toolz Evolved.
 
 This module initializes the application and starts the main GUI.
 """
@@ -76,7 +76,7 @@ def check_requirements() -> bool:
 def show_welcome_message() -> None:
     """Show welcome message in console."""
     config = get_config()
-    app_name = config.get("app.name", "Ghosty Tools Pro")
+    app_name = config.get("app.name", "Ghost Toolz Evolved")
     app_version = config.get("app.version", "2.0.0")
 
     welcome_msg = f"""

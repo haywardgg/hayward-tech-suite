@@ -1,5 +1,5 @@
 """
-Main window for Ghosty Tools Pro.
+Main window for Ghost Toolz Evolved.
 
 Provides the main application window with tabbed interface for different functionality.
 """
@@ -28,7 +28,7 @@ class MainWindow(ctk.CTk):
         super().__init__()
 
         # Window configuration
-        self.title(config.get("app.name", "Ghosty Tools Pro"))
+        self.title(config.get("app.name", "Ghost Toolz Evolved"))
         
         # Get window dimensions from config
         width = config.get("ui.window.width", 1200)
@@ -88,7 +88,7 @@ class MainWindow(ctk.CTk):
         # App title
         title_label = ctk.CTkLabel(
             header_frame,
-            text=config.get("app.name", "Ghosty Tools Pro"),
+            text=config.get("app.name", "Ghost Toolz Evolved"),
             font=ctk.CTkFont(size=24, weight="bold"),
         )
         title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     from src.utils.logger import get_logger
 
     logger = get_logger("main")
-    logger.info("Starting Ghosty Tools Pro")
+    logger.info("Starting Ghost Toolz Evolved")
 
     # Create and run main window
     app = MainWindow()

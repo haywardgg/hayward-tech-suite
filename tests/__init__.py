@@ -1,4 +1,4 @@
-"""Unit tests for Ghosty Tools Pro.
+"""Unit tests for Ghost Toolz Evolved.
 
 This package contains unit and integration tests for all modules.
 """

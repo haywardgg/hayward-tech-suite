@@ -1,4 +1,4 @@
-# 🛠️ Ghosty Tools Pro
+# 🛠️ Ghost Toolz Evolved
 
 **Professional Windows System Maintenance Tool v2.0.0**
 

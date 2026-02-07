@@ -1,5 +1,5 @@
 """
-Backup and restore management module for Ghosty Tools Pro.
+Backup and restore management module for Ghost Toolz Evolved.
 
 Provides comprehensive backup and restore functionality with scheduling,
 compression, and verification.

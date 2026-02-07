@@ -1,5 +1,5 @@
 """
-Logging utility for Ghosty Tools Pro.
+Logging utility for Ghost Toolz Evolved.
 
 Provides centralized logging functionality with file and console output,
 color-coded console messages, and audit trail support.

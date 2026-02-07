@@ -1,5 +1,5 @@
 """
-Ghosty Tools Pro - Professional Windows System Maintenance Tool
+Ghost Toolz Evolved - Professional Windows System Maintenance Tool
 
 A comprehensive suite of system maintenance, monitoring, and security tools
 for Windows systems.

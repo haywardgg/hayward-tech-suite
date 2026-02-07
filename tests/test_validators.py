@@ -58,3 +58,42 @@ class TestValidators:
         validator = Validators()
         with pytest.raises(ValidationError):
             validator.validate_timeout(5000)
+
+    def test_validate_powershell_command_with_pipes(self):
+        """Test PowerShell command validation with pipes."""
+        validator = Validators()
+        # Should pass with allow_shell=True
+        assert validator.validate_command(
+            'powershell -Command "Get-Process | Select-Object Name"',
+            allow_shell=True
+        ) is True
+
+    def test_validate_powershell_command_with_quotes_and_parens(self):
+        """Test PowerShell command validation with quotes and parentheses."""
+        validator = Validators()
+        # Should pass with allow_shell=True
+        assert validator.validate_command(
+            'powershell -Command "(Get-ItemProperty HKLM:\\SOFTWARE).Value"',
+            allow_shell=True
+        ) is True
+
+    def test_validate_command_with_net_command(self):
+        """Test validation of net command."""
+        validator = Validators()
+        # Should pass with net in whitelist
+        assert validator.validate_command("net share", ["net"]) is True
+
+    def test_validate_command_injection_still_blocked(self):
+        """Test that dangerous command injection is still blocked."""
+        validator = Validators()
+        with pytest.raises(ValidationError):
+            # Semicolon should still be blocked even with allow_shell
+            validator.validate_command("ipconfig; del /f /s /q C:\\Windows", allow_shell=True)
+
+    def test_validate_command_pipes_blocked_without_allow_shell(self):
+        """Test that pipes are blocked when allow_shell=False."""
+        validator = Validators()
+        with pytest.raises(ValidationError):
+            # Pipes should be blocked for non-PowerShell commands
+            validator.validate_command("ipconfig | findstr", allow_shell=False)
+

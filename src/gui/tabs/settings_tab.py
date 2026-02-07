@@ -116,7 +116,7 @@ class SettingsTab:
         title = ctk.CTkLabel(about_frame, text="About", font=ctk.CTkFont(size=14, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        app_name = self.config.get("app.name", "Ghosty Tools Pro")
+        app_name = self.config.get("app.name", "Ghost Toolz Evolved")
         app_version = self.config.get("app.version", "2.0.0")
         description = self.config.get("app.description", "Professional Windows System Maintenance Tool")
 

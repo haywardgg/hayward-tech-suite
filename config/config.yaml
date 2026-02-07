@@ -1,8 +1,8 @@
-# Ghosty Tools Pro Configuration
+# Ghost Toolz Evolved Configuration
 # This file contains default configuration values
 
 app:
-  name: "Ghosty Tools Pro"
+  name: "Ghost Toolz Evolved"
   version: "2.0.0"
   author: "Ghosty"
   description: "Professional Windows System Maintenance Tool"
