@@ -281,13 +281,21 @@ class MonitoringTab:
 
         def update_ui():
             """GUI update closure - runs on main thread."""
-            self.cpu_usage_label.configure(text=f"Usage: {percent:.1f}%")
-            self.cpu_cores_label.configure(text=f"Cores: {physical_cores} physical, {logical_cores} logical")
-            self.cpu_freq_label.configure(text=f"Frequency: {freq:.0f} MHz")
-            self.cpu_progress.set(percent / 100)
+            try:
+                if not self.parent.winfo_exists():
+                    return
+                self.cpu_usage_label.configure(text=f"Usage: {percent:.1f}%")
+                self.cpu_cores_label.configure(text=f"Cores: {physical_cores} physical, {logical_cores} logical")
+                self.cpu_freq_label.configure(text=f"Frequency: {freq:.0f} MHz")
+                self.cpu_progress.set(percent / 100)
+            except Exception as e:
+                logger.debug(f"CPU display update error (widget may be destroyed): {e}")
         
-        # Schedule on main thread as soon as possible
-        self.parent.after(0, update_ui)
+        # Schedule on main thread - use try/except in case parent is destroyed
+        try:
+            self.parent.after(0, update_ui)
+        except Exception as e:
+            logger.debug(f"Failed to schedule CPU update: {e}")
 
     def _update_ram_display(self, data: Dict[str, Any]) -> None:
         """Update RAM display with new data."""
@@ -302,13 +310,21 @@ class MonitoringTab:
 
         def update_ui():
             """GUI update closure - runs on main thread."""
-            self.ram_usage_label.configure(text=f"Usage: {percent:.1f}%")
-            self.ram_details_label.configure(text=f"{used_gb:.1f} GB / {total_gb:.1f} GB")
-            self.ram_available_label.configure(text=f"Available: {available_gb:.1f} GB")
-            self.ram_progress.set(percent / 100)
+            try:
+                if not self.parent.winfo_exists():
+                    return
+                self.ram_usage_label.configure(text=f"Usage: {percent:.1f}%")
+                self.ram_details_label.configure(text=f"{used_gb:.1f} GB / {total_gb:.1f} GB")
+                self.ram_available_label.configure(text=f"Available: {available_gb:.1f} GB")
+                self.ram_progress.set(percent / 100)
+            except Exception as e:
+                logger.debug(f"RAM display update error (widget may be destroyed): {e}")
         
-        # Schedule on main thread as soon as possible
-        self.parent.after(0, update_ui)
+        # Schedule on main thread - use try/except in case parent is destroyed
+        try:
+            self.parent.after(0, update_ui)
+        except Exception as e:
+            logger.debug(f"Failed to schedule RAM update: {e}")
 
     def _update_disk_display(self, data: Dict[str, Any]) -> None:
         """Update disk display with new data."""
@@ -320,23 +336,31 @@ class MonitoringTab:
         
         def update_ui():
             """GUI update closure - runs on main thread."""
-            self.disk_info_text.configure(state="normal")
-            self.disk_info_text.delete("1.0", "end")
+            try:
+                if not self.parent.winfo_exists():
+                    return
+                self.disk_info_text.configure(state="normal")
+                self.disk_info_text.delete("1.0", "end")
 
-            for disk in disks:
-                device = disk.get("device", "Unknown")
-                total_gb = disk.get("total_gb", 0)
-                used_gb = disk.get("used_gb", 0)
-                free_gb = disk.get("free_gb", 0)
-                percent = disk.get("percent", 0)
+                for disk in disks:
+                    device = disk.get("device", "Unknown")
+                    total_gb = disk.get("total_gb", 0)
+                    used_gb = disk.get("used_gb", 0)
+                    free_gb = disk.get("free_gb", 0)
+                    percent = disk.get("percent", 0)
 
-                info = f"{device}: {used_gb:.1f} GB / {total_gb:.1f} GB ({percent:.1f}% used, {free_gb:.1f} GB free)\n"
-                self.disk_info_text.insert("end", info)
+                    info = f"{device}: {used_gb:.1f} GB / {total_gb:.1f} GB ({percent:.1f}% used, {free_gb:.1f} GB free)\n"
+                    self.disk_info_text.insert("end", info)
 
-            self.disk_info_text.configure(state="disabled")
+                self.disk_info_text.configure(state="disabled")
+            except Exception as e:
+                logger.debug(f"Disk display update error (widget may be destroyed): {e}")
         
-        # Schedule on main thread as soon as possible
-        self.parent.after(0, update_ui)
+        # Schedule on main thread - use try/except in case parent is destroyed
+        try:
+            self.parent.after(0, update_ui)
+        except Exception as e:
+            logger.debug(f"Failed to schedule Disk update: {e}")
 
     def _update_battery_display(self, data: Dict[str, Any]) -> None:
         """Update battery display with new data."""
@@ -351,18 +375,26 @@ class MonitoringTab:
 
         def update_ui():
             """GUI update closure - runs on main thread."""
-            if not present:
-                self.battery_status_label.configure(text="Status: No battery detected")
-                return
+            try:
+                if not self.parent.winfo_exists():
+                    return
+                if not present:
+                    self.battery_status_label.configure(text="Status: No battery detected")
+                    return
 
-            status = "Charging" if power_plugged else "Discharging"
-            self.battery_status_label.configure(text=f"Status: {status}")
-            self.battery_level_label.configure(text=f"Level: {percent}%")
-            self.battery_time_label.configure(text=f"Time: {time_left}")
-            self.battery_progress.set(percent / 100)
+                status = "Charging" if power_plugged else "Discharging"
+                self.battery_status_label.configure(text=f"Status: {status}")
+                self.battery_level_label.configure(text=f"Level: {percent}%")
+                self.battery_time_label.configure(text=f"Time: {time_left}")
+                self.battery_progress.set(percent / 100)
+            except Exception as e:
+                logger.debug(f"Battery display update error (widget may be destroyed): {e}")
         
-        # Schedule on main thread as soon as possible
-        self.parent.after(0, update_ui)
+        # Schedule on main thread - use try/except in case parent is destroyed
+        try:
+            self.parent.after(0, update_ui)
+        except Exception as e:
+            logger.debug(f"Failed to schedule Battery update: {e}")
 
     def _update_network_display(self, data: Dict[str, Any]) -> None:
         """Update network display with enhanced information."""
@@ -455,14 +487,22 @@ class MonitoringTab:
         
         def update_ui():
             """GUI update closure - runs on main thread."""
-            # Update the text box
-            self.net_details_text.configure(state="normal")
-            self.net_details_text.delete("1.0", "end")
-            self.net_details_text.insert("1.0", info_text)
-            self.net_details_text.configure(state="disabled")
+            try:
+                if not self.parent.winfo_exists():
+                    return
+                # Update the text box
+                self.net_details_text.configure(state="normal")
+                self.net_details_text.delete("1.0", "end")
+                self.net_details_text.insert("1.0", info_text)
+                self.net_details_text.configure(state="disabled")
+            except Exception as e:
+                logger.debug(f"Network display update error (widget may be destroyed): {e}")
         
-        # Schedule on main thread as soon as possible
-        self.parent.after(0, update_ui)
+        # Schedule on main thread - use try/except in case parent is destroyed
+        try:
+            self.parent.after(0, update_ui)
+        except Exception as e:
+            logger.debug(f"Failed to schedule Network update: {e}")
 
 
     def _run_performance_profile(self) -> None:

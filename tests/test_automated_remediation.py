@@ -106,10 +106,13 @@ class TestAutomatedRemediation:
         """Test remediation that requires admin privileges."""
         remediation.system_ops.is_admin = Mock(return_value=False)
         
-        with pytest.raises(RemediationError) as exc_info:
-            remediation.execute_remediation('enable_firewall', dry_run=False)
+        result = remediation.execute_remediation('enable_firewall', dry_run=False)
         
-        assert 'Administrator privileges required' in str(exc_info.value)
+        assert result.status == RemediationStatus.FAILED
+        assert result.action_id == 'enable_firewall'
+        assert 'Administrator privileges required' in result.message
+        assert 'Not running as administrator' in result.error
+        assert len(remediation.remediation_history) == 1
     
     def test_execute_remediation_unknown_action(self, remediation):
         """Test execution of unknown remediation action."""

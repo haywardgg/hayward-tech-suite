@@ -371,10 +371,9 @@ class SecurityTab:
                 success_count = 0
                 fail_count = 0
                 
-                for action_id in available_actions:
-                    action = self.remediation.REMEDIATION_ACTIONS.get(action_id)
-                    if not action:
-                        continue
+                for action in available_actions:
+                    # Extract the action ID from the RemediationAction object
+                    action_id = action.id
                     
                     timestamp = datetime.now().strftime("%H:%M:%S")
                     result_text += f"[{timestamp}] Running: {action.name}\n"

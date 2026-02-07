@@ -228,11 +228,20 @@ class AutomatedRemediation:
             logger.info(f"Dry run completed: {action.name}")
             return result
         
+        # Check admin privileges if required
+        if action.requires_admin and not self.system_ops.is_admin():
+            logger.error(f"Admin privileges required for: {action.name}")
+            result = RemediationResult(
+                action_id=action_id,
+                status=RemediationStatus.FAILED,
+                message="Administrator privileges required for this action",
+                timestamp=datetime.now(),
+                error="Not running as administrator"
+            )
+            self.remediation_history.append(result)
+            return result
+        
         try:
-            # Check admin requirements
-            if action.requires_admin and not self.system_ops.is_admin():
-                raise RemediationError("Administrator privileges required")
-            
             # Execute the remediation command
             success, stdout, stderr = self.system_ops.execute_command(
                 action.command,
