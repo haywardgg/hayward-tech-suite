@@ -5,10 +5,10 @@
 A comprehensive, secure, and modern system maintenance suite for Windows, completely redesigned with a focus on security, modularity, and user experience.
 
 <img width="1920" height="1032" alt="Monitoring_" src="https://github.com/user-attachments/assets/49645e6a-f3f7-4cc7-94be-52fdb4d6f9ba" />
+<img width="1920" height="1032" alt="Security_" src="https://github.com/user-attachments/assets/7dbe2a98-c602-4499-9025-3e061ee47aa9" />
 <img width="1920" height="1032" alt="PerformanceProfileReport" src="https://github.com/user-attachments/assets/cd639514-3d34-48dd-a2d9-9de156b25fb8" />
 <img width="1920" height="1032" alt="Diagnostics" src="https://github.com/user-attachments/assets/e6ecc390-2ec4-403d-b306-47d61d85d2d7" />
 <img width="1920" height="1032" alt="Maintenance" src="https://github.com/user-attachments/assets/27cd2d48-7aed-431f-bca2-cf6f29f45282" />
-<img width="1920" height="1032" alt="Security" src="https://github.com/user-attachments/assets/5c5e3f2c-0735-4b04-a99d-e53766def511" />
 <img width="1920" height="1032" alt="DangerZoneREGISTRY" src="https://github.com/user-attachments/assets/3201f7a2-e9d9-429b-ba42-d9ba0f815d57" />
 <img width="1920" height="1032" alt="Screenshot 2026-02-07 171013" src="https://github.com/user-attachments/assets/6682e4e3-f272-4e6d-b992-fcacbdd29720" />
 
