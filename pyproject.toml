@@ -28,13 +28,13 @@ classifiers = [
 ]
 dependencies = [
     "customtkinter>=5.2.1",
-    "Pillow>=10.2.0",
+    "Pillow>=10.3.0",
     "psutil>=5.9.8",
     "speedtest-cli>=2.1.3",
     "PyYAML>=6.0.1",
     "python-dotenv>=1.0.0",
     "colorlog>=6.8.0",
-    "cryptography>=42.0.2",
+    "cryptography>=42.0.4",
     "schedule>=1.2.1",
     "reportlab>=4.0.9",
     "jinja2>=3.1.3",
