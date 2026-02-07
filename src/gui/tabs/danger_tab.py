@@ -111,7 +111,7 @@ class DangerTab:
 
         warning_label = ctk.CTkLabel(
             warning_frame,
-            text="⚠️ WARNING: Proceed at Your Own Risk ⚠️\n\n"
+            text="WARNING: Proceed at Your Own Risk\n\n"
                  "The registry modifications in this section can potentially cause system instability "
                  "or break Windows functionality. Only proceed if you understand the implications.\n\n"
                  "A registry backup is automatically created before each change, allowing you to "
@@ -183,7 +183,7 @@ class DangerTab:
         if not is_admin:
             warning_label = ctk.CTkLabel(
                 backup_frame,
-                text="⚠️ Administrator privileges required for registry operations",
+                text="WARNING: Administrator privileges required for registry operations",
                 font=ctk.CTkFont(size=11),
                 text_color="orange"
             )
@@ -316,7 +316,7 @@ class DangerTab:
         # Refresh button
         ctk.CTkButton(
             history_frame,
-            text="🔄 Refresh History",
+            text="Refresh History",
             command=self._refresh_history,
             width=150,
         ).grid(row=2, column=0, padx=10, pady=10)
@@ -573,7 +573,7 @@ class DangerTab:
         risk_warnings = {
             "low": "This tweak is generally safe but will modify your registry.",
             "medium": "This tweak has moderate risk and may affect system behavior.",
-            "high": "⚠️ WARNING: This tweak is HIGH RISK and could cause system instability!",
+            "high": "WARNING: This tweak is HIGH RISK and could cause system instability!",
         }
 
         warning = risk_warnings.get(tweak.risk_level, "This will modify your registry.")

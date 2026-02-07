@@ -62,7 +62,7 @@ class MaintenanceTab:
         dns_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            dns_frame, text="🌐 DNS Operations", font=ctk.CTkFont(size=14, weight="bold")
+            dns_frame, text="DNS Operations", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -128,7 +128,7 @@ class MaintenanceTab:
         if not is_admin:
             warning_label = ctk.CTkLabel(
                 dns_frame,
-                text="⚠️ Most DNS operations require Administrator",
+                text="WARNING: Most DNS operations require Administrator",
                 font=ctk.CTkFont(size=9),
                 text_color="orange"
             )
@@ -141,7 +141,7 @@ class MaintenanceTab:
         restore_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            restore_frame, text="🔄 System Restore", font=ctk.CTkFont(size=14, weight="bold")
+            restore_frame, text="System Restore", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -212,7 +212,7 @@ class MaintenanceTab:
         if not is_admin:
             warning_label = ctk.CTkLabel(
                 maint_frame,
-                text="⚠️ Administrator privileges required",
+                text="WARNING: Administrator privileges required",
                 font=ctk.CTkFont(size=9),
                 text_color="orange"
             )
@@ -225,7 +225,7 @@ class MaintenanceTab:
         disk_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            disk_frame, text="💾 Disk Health", font=ctk.CTkFont(size=14, weight="bold")
+            disk_frame, text="Disk Health", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 

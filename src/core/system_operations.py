@@ -381,7 +381,7 @@ class SystemOperations:
         try:
             # Set primary DNS
             cmd_primary = f'netsh interface ip set dns name="{adapter}" static {primary}'
-            success, stdout, stderr = self.execute_command(cmd_primary, require_admin=True)
+            success, stdout, stderr = self.execute_command(cmd_primary, shell=True, require_admin=True)
             
             if not success:
                 raise SystemOperationError(f"Failed to set primary DNS: {stderr}")
@@ -389,7 +389,7 @@ class SystemOperations:
             # Set secondary DNS if provided
             if secondary:
                 cmd_secondary = f'netsh interface ip add dns name="{adapter}" {secondary} index=2'
-                success, stdout, stderr = self.execute_command(cmd_secondary, require_admin=True)
+                success, stdout, stderr = self.execute_command(cmd_secondary, shell=True, require_admin=True)
                 
                 if not success:
                     logger.warning(f"Failed to set secondary DNS: {stderr}")
@@ -422,7 +422,7 @@ class SystemOperations:
         
         try:
             cmd = f'netsh interface ip set dns name="{adapter}" dhcp'
-            success, stdout, stderr = self.execute_command(cmd, require_admin=True)
+            success, stdout, stderr = self.execute_command(cmd, shell=True, require_admin=True)
             
             if not success:
                 raise SystemOperationError(f"Failed to reset DNS: {stderr}")

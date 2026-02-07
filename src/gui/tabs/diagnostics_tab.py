@@ -50,33 +50,35 @@ class DiagnosticsTab:
         ping_frame = ctk.CTkFrame(parent)
         ping_frame.grid(row=row, column=column, sticky="nsew", padx=5, pady=5)
         ping_frame.grid_columnconfigure(0, weight=1)
+        ping_frame.grid_columnconfigure(1, weight=0)
 
         title = ctk.CTkLabel(
-            ping_frame, text="🌐 Ping Test", font=ctk.CTkFont(size=14, weight="bold")
+            ping_frame, text="Ping Test", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
 
-        # Host input
+        # Host and Count labels on row 1
         ctk.CTkLabel(ping_frame, text="Host:", font=ctk.CTkFont(size=11)).grid(
-            row=1, column=0, padx=10, pady=5, sticky="w"
+            row=1, column=0, padx=(10, 5), pady=5, sticky="w"
         )
+        ctk.CTkLabel(ping_frame, text="Count:", font=ctk.CTkFont(size=11)).grid(
+            row=1, column=1, padx=(5, 10), pady=5, sticky="w"
+        )
+        
+        # Host and Count inputs on row 2 - same line
         self.ping_host_entry = ctk.CTkEntry(ping_frame, placeholder_text="8.8.8.8")
-        self.ping_host_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        self.ping_host_entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky="ew")
         self.ping_host_entry.insert(0, "8.8.8.8")
 
-        # Count input
-        ctk.CTkLabel(ping_frame, text="Count:", font=ctk.CTkFont(size=11)).grid(
-            row=3, column=0, padx=10, pady=5, sticky="w"
-        )
-        self.ping_count_entry = ctk.CTkEntry(ping_frame, placeholder_text="10")
-        self.ping_count_entry.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+        self.ping_count_entry = ctk.CTkEntry(ping_frame, placeholder_text="10", width=80)
+        self.ping_count_entry.grid(row=2, column=1, padx=(5, 10), pady=5, sticky="ew")
         self.ping_count_entry.insert(0, "10")
 
         # Ping button
         self.ping_button = ctk.CTkButton(
             ping_frame, text="Run Ping Test", command=self._run_ping_test
         )
-        self.ping_button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
+        self.ping_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
 
     def _create_dns_section(self, parent: ctk.CTkFrame, row: int = 0, column: int = 0) -> None:
         """Create DNS lookup section."""
@@ -85,7 +87,7 @@ class DiagnosticsTab:
         dns_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            dns_frame, text="🔍 DNS Lookup", font=ctk.CTkFont(size=14, weight="bold")
+            dns_frame, text="DNS Lookup", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -112,7 +114,7 @@ class DiagnosticsTab:
         trace_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            trace_frame, text="🛣️ Traceroute", font=ctk.CTkFont(size=14, weight="bold")
+            trace_frame, text="Traceroute", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 

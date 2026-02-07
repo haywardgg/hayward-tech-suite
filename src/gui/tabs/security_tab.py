@@ -22,6 +22,10 @@ class SecurityTab:
         self.security_scanner = SecurityScanner()
         self.remediation = AutomatedRemediation()
         self.last_vulnerabilities = []
+        
+        # Button references for dynamic state updates
+        self.defender_button = None
+        self.firewall_button = None
 
         self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
@@ -80,7 +84,7 @@ class SecurityTab:
         remediation_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            remediation_frame, text="🔧 Automated Remediation", font=ctk.CTkFont(size=14, weight="bold")
+            remediation_frame, text="Automated Remediation", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -95,16 +99,24 @@ class SecurityTab:
         btn_frame.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
         ctk.CTkButton(
-            btn_frame, text="View Available Fixes", command=self._view_remediation_actions, width=180
+            btn_frame, text="Run Available Fixes", command=self._run_all_fixes, width=180
         ).grid(row=0, column=0, padx=5)
 
-        ctk.CTkButton(
-            btn_frame, text="Enable Defender", command=lambda: self._execute_remediation("enable_defender"), width=150
-        ).grid(row=0, column=1, padx=5)
+        # Check defender status and create dynamic button
+        defender_enabled = self._check_defender_status()
+        defender_text = "Disable Defender" if defender_enabled else "Enable Defender"
+        self.defender_button = ctk.CTkButton(
+            btn_frame, text=defender_text, command=self._toggle_defender, width=150
+        )
+        self.defender_button.grid(row=0, column=1, padx=5)
 
-        ctk.CTkButton(
-            btn_frame, text="Enable Firewall", command=lambda: self._execute_remediation("enable_firewall"), width=150
-        ).grid(row=0, column=2, padx=5)
+        # Check firewall status and create dynamic button
+        firewall_enabled = self._check_firewall_enabled()
+        firewall_text = "Disable Firewall" if firewall_enabled else "Enable Firewall"
+        self.firewall_button = ctk.CTkButton(
+            btn_frame, text=firewall_text, command=self._toggle_firewall, width=150
+        )
+        self.firewall_button.grid(row=0, column=2, padx=5)
 
         ctk.CTkButton(
             btn_frame, text="Flush DNS", command=lambda: self._execute_remediation("flush_dns"), width=120
@@ -117,7 +129,7 @@ class SecurityTab:
         results_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
-            results_frame, text="Scan Results", font=ctk.CTkFont(size=14, weight="bold")
+            results_frame, text="Real-Time Output", font=ctk.CTkFont(size=14, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -151,8 +163,8 @@ class SecurityTab:
                     # Show remediation suggestions
                     available_actions = self.remediation.get_available_actions(vulnerabilities)
                     if available_actions:
-                        result_text += f"\n🔧 {len(available_actions)} automated fix(es) available\n"
-                        result_text += "Click 'View Available Fixes' to see remediation options.\n"
+                        result_text += f"\n{len(available_actions)} automated fix(es) available\n"
+                        result_text += "Click 'Run Available Fixes' to automatically apply all fixes.\n"
 
                 self._update_results(result_text)
 
@@ -260,6 +272,153 @@ class SecurityTab:
                 self._update_results(error_text)
                 messagebox.showerror("Error", f"Remediation failed: {e}")
 
+        threading.Thread(target=task, daemon=True).start()
+
+    def _check_defender_status(self) -> bool:
+        """
+        Check if Windows Defender is currently enabled.
+        
+        Returns:
+            True if Defender is enabled, False otherwise
+        """
+        try:
+            from src.core.system_operations import SystemOperations
+            sys_ops = SystemOperations()
+            success, stdout, stderr = sys_ops.execute_command(
+                'powershell -Command "Get-MpComputerStatus | Select-Object -ExpandProperty AntivirusEnabled"',
+                shell=True,
+                audit=False,
+            )
+            if success and "True" in stdout:
+                return True
+        except Exception as e:
+            logger.warning(f"Failed to check Defender status: {e}")
+        return False
+
+    def _check_firewall_enabled(self) -> bool:
+        """
+        Check if Windows Firewall is currently enabled.
+        
+        Returns:
+            True if Firewall is enabled, False otherwise
+        """
+        try:
+            firewall_status = self.security_scanner.check_firewall_status()
+            return firewall_status.enabled
+        except Exception as e:
+            logger.warning(f"Failed to check Firewall status: {e}")
+        return False
+
+    def _toggle_defender(self) -> None:
+        """Toggle Windows Defender on/off."""
+        defender_enabled = self._check_defender_status()
+        if defender_enabled:
+            # Defender is on, so disable it
+            self._execute_remediation("disable_defender")
+        else:
+            # Defender is off, so enable it
+            self._execute_remediation("enable_defender")
+        
+        # Update button text after toggle
+        self.parent.after(1000, self._update_button_states)
+
+    def _toggle_firewall(self) -> None:
+        """Toggle Windows Firewall on/off."""
+        firewall_enabled = self._check_firewall_enabled()
+        if firewall_enabled:
+            # Firewall is on, so disable it
+            self._execute_remediation("disable_firewall")
+        else:
+            # Firewall is off, so enable it
+            self._execute_remediation("enable_firewall")
+        
+        # Update button text after toggle
+        self.parent.after(1000, self._update_button_states)
+
+    def _update_button_states(self) -> None:
+        """Update button text to reflect current system state."""
+        if self.defender_button:
+            defender_enabled = self._check_defender_status()
+            defender_text = "Disable Defender" if defender_enabled else "Enable Defender"
+            self.defender_button.configure(text=defender_text)
+        
+        if self.firewall_button:
+            firewall_enabled = self._check_firewall_enabled()
+            firewall_text = "Disable Firewall" if firewall_enabled else "Enable Firewall"
+            self.firewall_button.configure(text=firewall_text)
+
+    def _run_all_fixes(self) -> None:
+        """Run all available automated fixes."""
+        logger.info("User requested to run all available fixes")
+        
+        def task():
+            try:
+                from datetime import datetime
+                
+                self._update_results("Running all available fixes...\n\n")
+                
+                # Get available actions based on last scan
+                available_actions = self.remediation.get_available_actions(self.last_vulnerabilities)
+                
+                if not available_actions:
+                    result_text = "No fixes available. Run a vulnerability scan first.\n"
+                    self._update_results(result_text)
+                    return
+                
+                result_text = f"Found {len(available_actions)} fix(es) to apply\n"
+                result_text += "=" * 60 + "\n\n"
+                
+                success_count = 0
+                fail_count = 0
+                
+                for action_id in available_actions:
+                    action = self.remediation.REMEDIATION_ACTIONS.get(action_id)
+                    if not action:
+                        continue
+                    
+                    timestamp = datetime.now().strftime("%H:%M:%S")
+                    result_text += f"[{timestamp}] Running: {action.name}\n"
+                    self._update_results(result_text)
+                    
+                    try:
+                        result = self.remediation.execute_remediation(action_id, dry_run=False)
+                        
+                        if result.status == RemediationStatus.SUCCESS:
+                            result_text += f"[{timestamp}] ✓ SUCCESS: {action.name}\n"
+                            result_text += f"  {result.message}\n"
+                            success_count += 1
+                        else:
+                            result_text += f"[{timestamp}] ❌ FAILED: {action.name}\n"
+                            result_text += f"  {result.message}\n"
+                            if result.error:
+                                result_text += f"  Error: {result.error}\n"
+                            fail_count += 1
+                        
+                        result_text += "\n"
+                        self._update_results(result_text)
+                        
+                    except Exception as e:
+                        result_text += f"[{timestamp}] ❌ ERROR: {action.name}\n"
+                        result_text += f"  {str(e)}\n\n"
+                        fail_count += 1
+                        self._update_results(result_text)
+                
+                # Summary
+                result_text += "=" * 60 + "\n"
+                result_text += f"SUMMARY: {success_count} succeeded, {fail_count} failed\n"
+                self._update_results(result_text)
+                
+                if fail_count == 0:
+                    messagebox.showinfo("Success", f"All {success_count} fix(es) applied successfully!")
+                else:
+                    messagebox.showwarning("Partial Success", f"{success_count} fix(es) succeeded, {fail_count} failed. Check output for details.")
+                
+            except Exception as e:
+                logger.error(f"Failed to run all fixes: {e}")
+                error_text = f"Failed to run fixes\n\nError: {str(e)}\n"
+                self._update_results(error_text)
+                messagebox.showerror("Error", f"Failed to run fixes: {e}")
+        
         threading.Thread(target=task, daemon=True).start()
 
     def _update_results(self, text: str) -> None:

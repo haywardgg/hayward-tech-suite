@@ -79,6 +79,17 @@ class AutomatedRemediation:
             rollback_command='powershell -Command "Set-MpPreference -DisableRealtimeMonitoring $true"',
             risk_level='low'
         ),
+        'disable_defender': RemediationAction(
+            id='disable_defender',
+            name='Disable Windows Defender',
+            description='Disable Windows Defender real-time protection (NOT RECOMMENDED)',
+            target_vulnerability=None,
+            command='powershell -Command "Set-MpPreference -DisableRealtimeMonitoring $true"',
+            requires_admin=True,
+            reversible=True,
+            rollback_command='powershell -Command "Set-MpPreference -DisableRealtimeMonitoring $false"',
+            risk_level='high'
+        ),
         'enable_firewall': RemediationAction(
             id='enable_firewall',
             name='Enable Windows Firewall',
@@ -89,6 +100,17 @@ class AutomatedRemediation:
             reversible=True,
             rollback_command='netsh advfirewall set allprofiles state off',
             risk_level='medium'
+        ),
+        'disable_firewall': RemediationAction(
+            id='disable_firewall',
+            name='Disable Windows Firewall',
+            description='Disable Windows Firewall on all profiles (NOT RECOMMENDED)',
+            target_vulnerability=None,
+            command='netsh advfirewall set allprofiles state off',
+            requires_admin=True,
+            reversible=True,
+            rollback_command='netsh advfirewall set allprofiles state on',
+            risk_level='high'
         ),
         'enable_uac': RemediationAction(
             id='enable_uac',

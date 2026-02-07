@@ -67,7 +67,7 @@ class MonitoringTab:
         # Performance Profile button
         self.perf_profile_btn = ctk.CTkButton(
             control_frame,
-            text="🔍 Run Performance Profile",
+            text="Run Performance Profile",
             command=self._run_performance_profile,
             width=200,
         )
@@ -100,8 +100,8 @@ class MonitoringTab:
         cpu_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         cpu_frame.grid_columnconfigure(0, weight=1)
 
-        # Title with proper spacing
-        title = ctk.CTkLabel(cpu_frame, text="🖥️  CPU", font=ctk.CTkFont(size=16, weight="bold"))
+        # Title
+        title = ctk.CTkLabel(cpu_frame, text="CPU", font=ctk.CTkFont(size=16, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # CPU usage
@@ -133,8 +133,8 @@ class MonitoringTab:
         ram_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
         ram_frame.grid_columnconfigure(0, weight=1)
 
-        # Title with proper spacing
-        title = ctk.CTkLabel(ram_frame, text="💾  RAM", font=ctk.CTkFont(size=16, weight="bold"))
+        # Title
+        title = ctk.CTkLabel(ram_frame, text="RAM", font=ctk.CTkFont(size=16, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # RAM usage
@@ -219,9 +219,9 @@ class MonitoringTab:
         network_frame.grid_columnconfigure(0, weight=1)
         network_frame.grid_rowconfigure(1, weight=1)
 
-        # Title with proper spacing
+        # Title
         title = ctk.CTkLabel(
-            network_frame, text="🌐  Network", font=ctk.CTkFont(size=16, weight="bold")
+            network_frame, text="Network", font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -560,5 +560,5 @@ class MonitoringTab:
         """Reset performance profile button to normal state."""
         self.perf_profile_btn.configure(
             state="normal",
-            text="🔍 Run Performance Profile"
+            text="Run Performance Profile"
         )

@@ -149,7 +149,7 @@ class SettingsTab:
             # Add tooltip-like label
             ctk.CTkLabel(
                 about_frame,
-                text="⚠️ Requires Administrator - Restart app as admin",
+                text="WARNING: Requires Administrator - Restart app as admin",
                 font=ctk.CTkFont(size=9),
                 text_color="gray"
             ).grid(row=4, column=0, padx=10, pady=(0, 10), sticky="w")
@@ -194,7 +194,7 @@ class SettingsTab:
         # Show confirmation dialog
         result = messagebox.askyesno(
             "Reset to Defaults",
-            "⚠️ WARNING: This will:\n\n"
+            "WARNING: This will:\n\n"
             "• Delete all registry backups from temp folder\n"
             "• Reset application settings to defaults\n"
             "• Clear all logs\n\n"
