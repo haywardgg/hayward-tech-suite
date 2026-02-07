@@ -27,6 +27,10 @@ class Validators:
     # Allowed characters for different input types
     SAFE_PATH_CHARS = set(string.ascii_letters + string.digits + r":\/-_. ()")
     SAFE_COMMAND_CHARS = set(string.ascii_letters + string.digits + r":\/-_. ")
+    
+    # Safe characters for shell commands
+    SAFE_SHELL_CHARS = {"|", ">", "<", '"', "'", "(", ")", "=", "-", ","}
+    SAFE_POWERSHELL_CHARS = SAFE_SHELL_CHARS | {"{", "}", "[", "]", "\\", "@", "$", ".", "?", ";", "`"}
 
     @staticmethod
     def validate_path(path: str, must_exist: bool = False, must_be_dir: bool = False) -> bool:
@@ -113,11 +117,11 @@ class Validators:
             # When allow_shell is True, still check for obvious command injection
             # Block semicolons for non-PowerShell commands (command chaining)
             if not is_powershell and ';' in command:
-                raise ValidationError(f"Command contains dangerous pattern: [;&|`]")
+                raise ValidationError("Semicolon not allowed for non-PowerShell commands")
             
             # Block backticks for command substitution
             if '`' in command and not is_powershell:
-                raise ValidationError(f"Command contains dangerous pattern: [;&|`]")
+                raise ValidationError("Backtick not allowed for non-PowerShell commands")
 
         # Check whitelist if provided
         if allowed_commands:
@@ -129,11 +133,12 @@ class Validators:
         if allow_shell:
             if is_powershell:
                 # Allow PowerShell-specific characters
-                safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "=", "-", ",", "{", "}", "[", "]", "\\", "@", "$", ".", "?", ";", "`"}
+                safe_chars = Validators.SAFE_COMMAND_CHARS | Validators.SAFE_POWERSHELL_CHARS
             else:
-                # Allow common shell characters for non-PowerShell commands (no semicolons for safety)
-                safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "=", "-", ","}
+                # Allow common shell characters for non-PowerShell commands
+                safe_chars = Validators.SAFE_COMMAND_CHARS | Validators.SAFE_SHELL_CHARS
         else:
+            # Basic safe characters plus minimal redirections
             safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<"}
         
         unsafe_chars = set(command) - safe_chars
