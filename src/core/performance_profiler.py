@@ -1,5 +1,5 @@
 """
-System performance profiler for Ghost Toolz Evolved.
+System performance profiler for Ghosty Toolz Evolved.
 
 Provides detailed system performance analysis including CPU, memory,
 disk, and process profiling with trend analysis and recommendations.

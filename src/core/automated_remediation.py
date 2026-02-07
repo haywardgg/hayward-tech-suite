@@ -1,5 +1,5 @@
 """
-Automated remediation module for Ghost Toolz Evolved.
+Automated remediation module for Ghosty Toolz Evolved.
 
 Provides automated fixes for common security issues and system problems
 with user approval and rollback capabilities.

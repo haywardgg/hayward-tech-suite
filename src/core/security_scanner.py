@@ -1,5 +1,5 @@
 """
-Security scanner module for Ghost Toolz Evolved.
+Security scanner module for Ghosty Toolz Evolved.
 
 Provides security assessment tools including vulnerability scanning,
 firewall monitoring, and port checking.

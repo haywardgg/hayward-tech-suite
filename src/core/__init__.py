@@ -1,4 +1,4 @@
-"""Core functionality modules for Ghost Toolz Evolved."""
+"""Core functionality modules for Ghosty Toolz Evolved."""
 
 __all__ = [
     "system_operations",
