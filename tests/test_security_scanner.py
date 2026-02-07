@@ -58,7 +58,8 @@ RealTimeProtectionEnabled : True
     @patch('src.core.security_scanner.SystemOperations')
     def test_check_windows_updates_pending(self, mock_sys_ops, scanner):
         """Test Windows Update check with pending updates."""
-        scanner.system_ops.execute_command = Mock(return_value=(True, "5", ""))
+        mock_execute = Mock(return_value=(True, "5", ""))
+        scanner.system_ops.execute_command = mock_execute
         
         vuln = scanner._check_windows_updates()
         
@@ -67,6 +68,11 @@ RealTimeProtectionEnabled : True
         assert vuln.severity == VulnerabilitySeverity.MEDIUM
         assert "Updates" in vuln.name
         assert vuln.details['pending_count'] == 5
+        
+        # Verify timeout was set to 180 seconds (increased from 60)
+        mock_execute.assert_called_once()
+        call_kwargs = mock_execute.call_args[1]
+        assert call_kwargs['timeout'] == 180
     
     @patch('src.core.security_scanner.SystemOperations')
     def test_check_windows_updates_none_pending(self, mock_sys_ops, scanner):
