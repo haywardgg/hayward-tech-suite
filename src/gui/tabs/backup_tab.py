@@ -192,7 +192,7 @@ class BackupTab:
 
                 backup_id = self.backup_manager.create_backup(backup_config)
 
-                # Store error message as local variable before defining callback
+                # Store success message as local variable before defining callback
                 success_msg = (
                     f"Backup created successfully!\n\n"
                     f"Backup ID: {backup_id}\n"

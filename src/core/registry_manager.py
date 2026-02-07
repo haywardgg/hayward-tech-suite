@@ -61,7 +61,7 @@ class RegistryManager:
     
     def __init__(self) -> None:
         """Initialize registry manager."""
-        self.tmp_dir = Path(tempfile.gettempdir()) / "ghosty_registry_backups"
+        self.tmp_dir = Path(tempfile.gettempdir()) / "ghosty_toolz_registry_backups"
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
         
         self.metadata_file = self.tmp_dir / "registry_metadata.json"
@@ -299,12 +299,15 @@ class RegistryManager:
         try:
             if registry_keys:
                 # Backup specific keys
+                # Create header first
                 with open(backup_path, "w", encoding="utf-16le") as f:
                     f.write("Windows Registry Editor Version 5.00\n\n")
                 
+                # Export each key to a temp file and append to main backup
                 for key in registry_keys:
+                    temp_file = self.tmp_dir / f"temp_{datetime.now().timestamp()}.reg"
                     result = subprocess.run(
-                        ["reg", "export", key, str(backup_path), "/y"],
+                        ["reg", "export", key, str(temp_file), "/y"],
                         capture_output=True,
                         text=True,
                         timeout=30
@@ -312,6 +315,18 @@ class RegistryManager:
                     
                     if result.returncode != 0:
                         logger.warning(f"Failed to export key {key}: {result.stderr}")
+                    elif temp_file.exists():
+                        # Append to main backup file (skip header from temp file)
+                        with open(temp_file, "r", encoding="utf-16le") as tf:
+                            content = tf.read()
+                            # Skip header if present
+                            if "Windows Registry Editor" in content:
+                                content = content.split("\n\n", 1)[1] if "\n\n" in content else content
+                        
+                        with open(backup_path, "a", encoding="utf-16le") as f:
+                            f.write(content)
+                        
+                        temp_file.unlink()
             else:
                 # Full system registry backup (common keys only for safety)
                 common_keys = [
@@ -319,9 +334,11 @@ class RegistryManager:
                     r"HKEY_LOCAL_MACHINE\SOFTWARE\Policies",
                 ]
                 
+                # Create header first
                 with open(backup_path, "w", encoding="utf-16le") as f:
                     f.write("Windows Registry Editor Version 5.00\n\n")
                 
+                # Export each key to a temp file and append to main backup
                 for key in common_keys:
                     temp_file = self.tmp_dir / f"temp_{datetime.now().timestamp()}.reg"
                     result = subprocess.run(
@@ -332,13 +349,16 @@ class RegistryManager:
                     )
                     
                     if result.returncode == 0 and temp_file.exists():
-                        # Append to main backup file
+                        # Append to main backup file (skip header from temp file)
                         with open(temp_file, "r", encoding="utf-16le") as tf:
                             content = tf.read()
                             # Skip header if not first key
                             if "Windows Registry Editor" in content:
                                 content = content.split("\n\n", 1)[1] if "\n\n" in content else content
+                        
+                        with open(backup_path, "a", encoding="utf-16le") as f:
                             f.write(content)
+                        
                         temp_file.unlink()
             
             # Save metadata
