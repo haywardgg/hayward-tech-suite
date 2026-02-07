@@ -11,6 +11,7 @@ from pathlib import Path
 from src.utils.logger import get_logger
 from src.utils.config import get_config
 from src.gui.tabs.monitoring_tab import MonitoringTab
+from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
 from src.gui.tabs.backup_tab import BackupTab
 from src.gui.tabs.security_tab import SecurityTab
@@ -109,6 +110,7 @@ class MainWindow(ctk.CTk):
 
         # Add tabs
         self.monitoring_tab = None
+        self.diagnostics_tab = None
         self.maintenance_tab = None
         self.backup_tab = None
         self.security_tab = None
@@ -123,6 +125,16 @@ class MainWindow(ctk.CTk):
 
         except Exception as e:
             logger.error(f"Failed to create Monitoring tab: {e}")
+
+        try:
+            # Diagnostics tab (Network Diagnostics)
+            self.tabview.add("Diagnostics")
+            tab_frame = self.tabview.tab("Diagnostics")
+            self.diagnostics_tab = DiagnosticsTab(tab_frame)
+            logger.info("Diagnostics tab created")
+
+        except Exception as e:
+            logger.error(f"Failed to create Diagnostics tab: {e}")
 
         try:
             # Maintenance tab

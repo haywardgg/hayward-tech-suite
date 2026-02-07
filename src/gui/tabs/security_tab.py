@@ -8,6 +8,7 @@ import threading
 
 from src.utils.logger import get_logger
 from src.core.security_scanner import SecurityScanner
+from src.core.automated_remediation import AutomatedRemediation, RemediationStatus
 
 logger = get_logger("security_tab")
 
@@ -19,6 +20,8 @@ class SecurityTab:
         """Initialize security tab."""
         self.parent = parent
         self.security_scanner = SecurityScanner()
+        self.remediation = AutomatedRemediation()
+        self.last_vulnerabilities = []
 
         self.parent.grid_rowconfigure(1, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
@@ -46,6 +49,9 @@ class SecurityTab:
 
         # Scan section
         self._create_scan_section(content_frame)
+
+        # Remediation section
+        self._create_remediation_section(content_frame)
 
         # Results section
         self._create_results_section(content_frame)
@@ -78,10 +84,47 @@ class SecurityTab:
             row=0, column=1, padx=5
         )
 
+    def _create_remediation_section(self, parent: ctk.CTkFrame) -> None:
+        """Create automated remediation section."""
+        remediation_frame = ctk.CTkFrame(parent)
+        remediation_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        remediation_frame.grid_columnconfigure(0, weight=1)
+
+        title = ctk.CTkLabel(
+            remediation_frame, text="🔧 Automated Remediation", font=ctk.CTkFont(size=14, weight="bold")
+        )
+        title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        info = ctk.CTkLabel(
+            remediation_frame,
+            text="Automatically fix detected security issues with one click",
+            font=ctk.CTkFont(size=11),
+        )
+        info.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+
+        btn_frame = ctk.CTkFrame(remediation_frame, fg_color="transparent")
+        btn_frame.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+        ctk.CTkButton(
+            btn_frame, text="View Available Fixes", command=self._view_remediation_actions, width=180
+        ).grid(row=0, column=0, padx=5)
+
+        ctk.CTkButton(
+            btn_frame, text="Enable Defender", command=lambda: self._execute_remediation("enable_defender"), width=150
+        ).grid(row=0, column=1, padx=5)
+
+        ctk.CTkButton(
+            btn_frame, text="Enable Firewall", command=lambda: self._execute_remediation("enable_firewall"), width=150
+        ).grid(row=0, column=2, padx=5)
+
+        ctk.CTkButton(
+            btn_frame, text="Flush DNS", command=lambda: self._execute_remediation("flush_dns"), width=120
+        ).grid(row=0, column=3, padx=5)
+
     def _create_results_section(self, parent: ctk.CTkFrame) -> None:
         """Create results display section."""
         results_frame = ctk.CTkFrame(parent)
-        results_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+        results_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         results_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
@@ -104,6 +147,7 @@ class SecurityTab:
                 self._update_results("Scanning for vulnerabilities...\n\n")
 
                 vulnerabilities = self.security_scanner.scan_vulnerabilities()
+                self.last_vulnerabilities = vulnerabilities
 
                 if not vulnerabilities:
                     result_text = "✓ No vulnerabilities detected!\n\nYour system appears to be secure."
@@ -114,6 +158,12 @@ class SecurityTab:
                         result_text += f"{i}. [{vuln.severity.value.upper()}] {vuln.name}\n"
                         result_text += f"   {vuln.description}\n"
                         result_text += f"   Recommendation: {vuln.recommendation}\n\n"
+
+                    # Show remediation suggestions
+                    available_actions = self.remediation.get_available_actions(vulnerabilities)
+                    if available_actions:
+                        result_text += f"\n🔧 {len(available_actions)} automated fix(es) available\n"
+                        result_text += "Click 'View Available Fixes' to see remediation options.\n"
 
                 self._update_results(result_text)
 
@@ -147,6 +197,87 @@ class SecurityTab:
             except Exception as e:
                 logger.error(f"Firewall check failed: {e}")
                 self._update_results(f"Firewall check failed: {e}")
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def _view_remediation_actions(self) -> None:
+        """View available remediation actions."""
+        logger.info("User viewing remediation actions")
+
+        available_actions = self.remediation.get_available_actions(self.last_vulnerabilities)
+
+        if not available_actions:
+            result_text = "No automated remediation actions available.\n"
+            result_text += "Run a vulnerability scan first to detect issues."
+        else:
+            result_text = f"Available Automated Fixes ({len(available_actions)}):\n"
+            result_text += "=" * 50 + "\n\n"
+
+            for action in available_actions:
+                result_text += f"• {action.name}\n"
+                result_text += f"  {action.description}\n"
+                result_text += f"  Risk Level: {action.risk_level.upper()}\n"
+                result_text += f"  Requires Admin: {'Yes' if action.requires_admin else 'No'}\n"
+                result_text += f"  Reversible: {'Yes' if action.reversible else 'No'}\n"
+                result_text += f"  Est. Time: {action.estimated_time}s\n\n"
+
+        self._update_results(result_text)
+
+    def _execute_remediation(self, action_id: str) -> None:
+        """Execute a remediation action."""
+        logger.info(f"User requested remediation: {action_id}")
+
+        # Get action details
+        actions = self.remediation.REMEDIATION_ACTIONS
+        if action_id not in actions:
+            messagebox.showerror("Error", f"Unknown remediation action: {action_id}")
+            return
+
+        action = actions[action_id]
+
+        # Confirm with user
+        confirm_msg = f"Execute: {action.name}\n\n"
+        confirm_msg += f"{action.description}\n\n"
+        confirm_msg += f"Risk Level: {action.risk_level.upper()}\n"
+        confirm_msg += f"Requires Admin: {'Yes' if action.requires_admin else 'No'}\n\n"
+        confirm_msg += "Do you want to proceed?"
+
+        if not messagebox.askyesno("Confirm Remediation", confirm_msg):
+            logger.info("User cancelled remediation")
+            return
+
+        def task():
+            try:
+                self._update_results(f"Executing: {action.name}...\n\n")
+
+                result = self.remediation.execute_remediation(action_id, dry_run=False)
+
+                result_text = f"Remediation: {action.name}\n"
+                result_text += "=" * 50 + "\n\n"
+                result_text += f"Status: {result.status.value.upper()}\n"
+                result_text += f"Message: {result.message}\n"
+
+                if result.output:
+                    result_text += f"\nOutput:\n{result.output}\n"
+
+                if result.error:
+                    result_text += f"\nError:\n{result.error}\n"
+
+                if result.status == RemediationStatus.SUCCESS:
+                    result_text += "\n✓ Remediation completed successfully!"
+                    messagebox.showinfo("Success", f"{action.name} completed successfully!")
+                else:
+                    result_text += "\n❌ Remediation failed!"
+                    messagebox.showerror("Failed", f"{action.name} failed. Check the output for details.")
+
+                self._update_results(result_text)
+
+            except Exception as e:
+                logger.error(f"Remediation execution failed: {e}")
+                error_text = f"Failed to execute {action.name}\n\n"
+                error_text += f"Error: {str(e)}\n"
+                self._update_results(error_text)
+                messagebox.showerror("Error", f"Remediation failed: {e}")
 
         threading.Thread(target=task, daemon=True).start()
 
