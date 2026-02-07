@@ -509,6 +509,58 @@ class RegistryManager:
             logger.debug(f"Error checking tweak {tweak_id}: {e}")
             return False
     
+    def get_registry_value(self, registry_key: str, value_name: str) -> Optional[Dict[str, str]]:
+        """
+        Get current registry value.
+        
+        Args:
+            registry_key: Registry key path (e.g. "HKEY_CURRENT_USER\\Software\\...")
+            value_name: Value name (empty string "" for default value, named string for specific values)
+        
+        Returns:
+            Dictionary with 'type' and 'data' keys if value exists, None if not found
+            
+        Note:
+            For default values, pass empty string "" as value_name (not None).
+            This method uses the /ve parameter for querying default registry values.
+        """
+        try:
+            # Build command: use /ve for default value (empty string), /v <name> for named values
+            cmd = ["reg", "query", registry_key] + (["/ve"] if value_name == "" else ["/v", value_name])
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            
+            if result.returncode != 0:
+                return None
+            
+            # Parse output to extract type and data
+            output = result.stdout.strip()
+            for line in output.split('\n'):
+                line = line.strip()
+                if not line or line.startswith("HKEY"):
+                    continue
+                
+                # Parse line like: "    ValueName    REG_DWORD    0x1"
+                parts = line.split(None, 2)  # Split into max 3 parts
+                if len(parts) >= 3:
+                    name = parts[0]
+                    reg_type = parts[1]
+                    data = parts[2]
+                    
+                    # Match the value name (handle empty string for default values)
+                    # Note: value_name should be empty string for defaults (not None)
+                    is_default_value = (value_name == "") and name == "(Default)"
+                    is_named_value = value_name and name == value_name
+                    
+                    if is_default_value or is_named_value:
+                        return {"type": reg_type, "data": data}
+            
+            return None
+            
+        except Exception as e:
+            logger.debug(f"Error getting registry value {registry_key}\\{value_name}: {e}")
+            return None
+    
     def _cleanup_old_backups(self) -> None:
         """Keep only the most recent registry backups based on MAX_REGISTRY_BACKUPS."""
         backups = sorted(
@@ -833,6 +885,54 @@ class RegistryManager:
             logger.error(f"Failed to restore registry tweak: {e}")
             audit_logger.error(f"Registry tweak restore failed: {tweak.name} - {str(e)}")
             raise RegistryError(f"Failed to restore tweak: {e}")
+    
+    def restore_all_to_defaults(self) -> Tuple[int, int, List[str]]:
+        """
+        Restore all applied registry tweaks to Windows defaults.
+        
+        This iterates through all available tweaks, checks if they're applied,
+        and restores them to default values.
+        
+        Returns:
+            Tuple of (success_count, total_applied, failed_tweaks)
+        
+        Raises:
+            RegistryError: If critical failure occurs
+        """
+        logger.info("Restoring all registry tweaks to defaults")
+        audit_logger.info("Restore all registry tweaks to defaults initiated")
+        
+        success_count = 0
+        failed_tweaks = []
+        applied_tweaks = []
+        
+        # Find all applied tweaks
+        for tweak in self.available_tweaks:
+            if self.is_tweak_applied(tweak.id):
+                applied_tweaks.append(tweak)
+        
+        total_applied = len(applied_tweaks)
+        
+        if total_applied == 0:
+            logger.info("No applied tweaks found to restore")
+            return 0, 0, []
+        
+        logger.info(f"Found {total_applied} applied tweaks to restore")
+        
+        # Restore each applied tweak
+        for tweak in applied_tweaks:
+            try:
+                self.restore_tweak_to_default(tweak.id)
+                success_count += 1
+                logger.info(f"Restored tweak to default: {tweak.name}")
+            except Exception as e:
+                failed_tweaks.append(tweak.name)
+                logger.error(f"Failed to restore tweak {tweak.name}: {e}")
+        
+        logger.info(f"Restore all completed: {success_count}/{total_applied} successful")
+        audit_logger.info(f"Restore all completed: {success_count}/{total_applied} successful, {len(failed_tweaks)} failed")
+        
+        return success_count, total_applied, failed_tweaks
     
     def undo_last_change(self) -> bool:
         """

@@ -8,10 +8,11 @@ import customtkinter as ctk
 from tkinter import messagebox, filedialog
 import threading
 from pathlib import Path
+from typing import Optional, Dict
 
 from src.utils.logger import get_logger
 from src.utils.admin_state import AdminState
-from src.core.registry_manager import RegistryManager, RegistryError
+from src.core.registry_manager import RegistryManager, RegistryError, RegistryTweak
 
 logger = get_logger("danger_tab")
 
@@ -52,6 +53,56 @@ class DangerTab:
         # Backup history section
         self._create_history_section(content_frame)
 
+    def _format_registry_value_text(self, value: Optional[Dict[str, str]], default: str = "Not Set") -> str:
+        """
+        Format registry value dictionary into display text.
+        
+        Args:
+            value: Registry value dict with 'type' and 'data' keys, or None
+            default: Default text to return if value is None or invalid
+        
+        Returns:
+            Formatted text like "REG_DWORD: 0x1" or default if value is invalid
+        """
+        if value and 'type' in value and 'data' in value:
+            return f"{value['type']}: {value['data']}"
+        return default
+    
+    def _format_registry_change_message(
+        self,
+        tweak: RegistryTweak,
+        before_value: Optional[Dict[str, str]],
+        after_value: Optional[Dict[str, str]],
+        is_restore: bool = False
+    ) -> str:
+        """
+        Format a message showing before/after registry changes.
+        
+        Args:
+            tweak: The registry tweak being applied or restored
+            before_value: Registry value before change (dict with 'type' and 'data' keys, or None if not set)
+            after_value: Registry value after change (dict with 'type' and 'data' keys, or None)
+            is_restore: True if this is a restore operation where the value is expected to be deleted (after_value=None means success),
+                       False if this is an apply operation where the value should exist (after_value=None means error)
+        
+        Returns:
+            Formatted message string showing the registry change details
+        """
+        # Format before text
+        before_text = self._format_registry_value_text(before_value, "Not Set")
+        
+        # Format after text - different default based on operation type
+        after_default = "Deleted (Default)" if is_restore else "Failed to read"
+        after_text = self._format_registry_value_text(after_value, after_default)
+        
+        return (
+            f"\n\n📋 Registry Changes:\n"
+            f"Key: {tweak.registry_key}\n"
+            f"Value: {tweak.value_name or '(Default)'}\n\n"
+            f"Before: {before_text}\n"
+            f"After:  {after_text}"
+        )
+    
     def _create_warning_disclaimer(self, parent: ctk.CTkFrame) -> None:
         """Create professional warning disclaimer."""
         warning_frame = ctk.CTkFrame(parent, fg_color="#8B0000")
@@ -443,6 +494,11 @@ class DangerTab:
 
     def _restore_tweak(self, tweak) -> None:
         """Restore a registry tweak to Windows default."""
+        # Get current value before restore
+        before_value = self.registry_manager.get_registry_value(
+            tweak.registry_key, tweak.value_name
+        )
+        
         if not messagebox.askyesno(
             f"Restore: {tweak.name}",
             f"This will restore the registry setting to Windows default.\n\n"
@@ -464,12 +520,20 @@ class DangerTab:
 
                 # Restore to default - delete the registry value/key
                 success = self.registry_manager.restore_tweak_to_default(tweak.id)
+                
+                # Get value after restore
+                after_value = self.registry_manager.get_registry_value(
+                    tweak.registry_key, tweak.value_name
+                )
 
                 restart_msg = (
                     "\n\nℹ️ A system restart may be required for this change to take effect."
                     if tweak.requires_restart
                     else ""
                 )
+                
+                # Build before/after message using helper
+                change_msg = self._format_registry_change_message(tweak, before_value, after_value, is_restore=True)
 
                 self.parent.after(
                     0,
@@ -477,6 +541,7 @@ class DangerTab:
                         "Success",
                         f"Tweak restored to default successfully!\n\n"
                         f"Backup ID: {backup_id}"
+                        f"{change_msg}"
                         f"{restart_msg}",
                     ),
                 )
@@ -499,6 +564,11 @@ class DangerTab:
 
     def _apply_tweak(self, tweak) -> None:
         """Apply a registry tweak."""
+        # Get current value before applying
+        before_value = self.registry_manager.get_registry_value(
+            tweak.registry_key, tweak.value_name
+        )
+        
         # Show confirmation dialog with risk level
         risk_warnings = {
             "low": "This tweak is generally safe but will modify your registry.",
@@ -524,12 +594,20 @@ class DangerTab:
         def task():
             try:
                 success, backup_id = self.registry_manager.apply_tweak(tweak.id)
+                
+                # Get value after applying
+                after_value = self.registry_manager.get_registry_value(
+                    tweak.registry_key, tweak.value_name
+                )
 
                 restart_msg = (
                     "\n\nℹ️ A system restart is required for this change to take effect."
                     if tweak.requires_restart
                     else ""
                 )
+                
+                # Build before/after message using helper
+                change_msg = self._format_registry_change_message(tweak, before_value, after_value, is_restore=False)
 
                 self.parent.after(
                     0,
@@ -538,6 +616,7 @@ class DangerTab:
                         f"Tweak applied successfully!\n\n"
                         f"Backup ID: {backup_id}\n"
                         f"You can undo this change using the 'Undo Last Change' button."
+                        f"{change_msg}"
                         f"{restart_msg}",
                     ),
                 )

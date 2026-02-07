@@ -76,26 +76,23 @@ class MonitoringTab:
         control_frame.grid_columnconfigure(0, weight=1)
 
     def _create_monitoring_displays(self) -> None:
-        """Create monitoring display panels."""
-        # Main content frame with scroll
-        self.content_frame = ctk.CTkScrollableFrame(self.parent)
+        """Create monitoring display panels in 2x3 grid layout."""
+        # Main content frame without scroll - use regular frame
+        self.content_frame = ctk.CTkFrame(self.parent)
         self.content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
         self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        self.content_frame.grid_rowconfigure((0, 1, 2), weight=1)
 
-        # CPU Display
+        # Row 0: CPU (left) and RAM (right)
         self._create_cpu_display()
-
-        # RAM Display
         self._create_ram_display()
 
-        # Disk Display
+        # Row 1: Disk (left) and Network (right, first part)
         self._create_disk_display()
-
-        # Battery Display
-        self._create_battery_display()
-
-        # Network Display
         self._create_network_display()
+
+        # Row 2: Battery (left) and Network stats (right, second part continues)
+        self._create_battery_display()
 
     def _create_cpu_display(self) -> None:
         """Create CPU monitoring display."""
@@ -103,8 +100,8 @@ class MonitoringTab:
         cpu_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         cpu_frame.grid_columnconfigure(0, weight=1)
 
-        # Title
-        title = ctk.CTkLabel(cpu_frame, text="🖥️ CPU", font=ctk.CTkFont(size=16, weight="bold"))
+        # Title with proper spacing
+        title = ctk.CTkLabel(cpu_frame, text="🖥️  CPU", font=ctk.CTkFont(size=16, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # CPU usage
@@ -136,8 +133,8 @@ class MonitoringTab:
         ram_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
         ram_frame.grid_columnconfigure(0, weight=1)
 
-        # Title
-        title = ctk.CTkLabel(ram_frame, text="💾 RAM", font=ctk.CTkFont(size=16, weight="bold"))
+        # Title with proper spacing
+        title = ctk.CTkLabel(ram_frame, text="💾  RAM", font=ctk.CTkFont(size=16, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # RAM usage
@@ -166,11 +163,11 @@ class MonitoringTab:
     def _create_disk_display(self) -> None:
         """Create disk monitoring display."""
         disk_frame = ctk.CTkFrame(self.content_frame)
-        disk_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
+        disk_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         disk_frame.grid_columnconfigure(0, weight=1)
 
-        # Title
-        title = ctk.CTkLabel(disk_frame, text="💿 Disk", font=ctk.CTkFont(size=16, weight="bold"))
+        # Title with proper spacing
+        title = ctk.CTkLabel(disk_frame, text="💿  Disk", font=ctk.CTkFont(size=16, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # Disk info text
@@ -185,9 +182,9 @@ class MonitoringTab:
         battery_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         battery_frame.grid_columnconfigure(0, weight=1)
 
-        # Title
+        # Title with proper spacing
         title = ctk.CTkLabel(
-            battery_frame, text="🔋 Battery", font=ctk.CTkFont(size=16, weight="bold")
+            battery_frame, text="🔋  Battery", font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -215,20 +212,22 @@ class MonitoringTab:
         self.battery_progress.set(0)
 
     def _create_network_display(self) -> None:
-        """Create network monitoring display with enhanced details."""
+        """Create network monitoring display spanning two rows on the right."""
         network_frame = ctk.CTkFrame(self.content_frame)
-        network_frame.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
+        # Span rows 1 and 2, column 1 (right side)
+        network_frame.grid(row=1, column=1, rowspan=2, sticky="nsew", padx=5, pady=5)
         network_frame.grid_columnconfigure(0, weight=1)
+        network_frame.grid_rowconfigure(1, weight=1)
 
-        # Title
+        # Title with proper spacing
         title = ctk.CTkLabel(
-            network_frame, text="🌐 Network", font=ctk.CTkFont(size=16, weight="bold")
+            network_frame, text="🌐  Network", font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        # Network details text box for comprehensive info
-        self.net_details_text = ctk.CTkTextbox(network_frame, height=250, wrap="word", state="disabled")
-        self.net_details_text.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        # Network details text box - now takes up more space, with parent's row weight for sizing
+        self.net_details_text = ctk.CTkTextbox(network_frame, wrap="word", state="disabled", height=300)
+        self.net_details_text.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
 
     def start_monitoring(self) -> None:
         """Start monitoring service."""
