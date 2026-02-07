@@ -435,7 +435,7 @@ class DangerTab:
             try:
                 # Create backup before restoring
                 backup_id = self.registry_manager.backup_registry(
-                    keys=[tweak.registry_key],
+                    registry_keys=[tweak.registry_key],
                     description=f"Before restoring {tweak.name}"
                 )
 

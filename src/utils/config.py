@@ -195,6 +195,22 @@ class Config:
         self._load_config()
         logger.info("Configuration reloaded")
 
+    def reset_to_defaults(self) -> None:
+        """Reset configuration to default values."""
+        logger.info("Resetting configuration to defaults")
+        self._config = self._get_default_config()
+        self._apply_env_overrides()
+        
+        # Save defaults to file if config file exists
+        if self._config_path.exists() or self._config_path.parent.exists():
+            try:
+                self._config_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(self._config_path, "w", encoding="utf-8") as f:
+                    yaml.dump(self._config, f, default_flow_style=False, sort_keys=False)
+                logger.info(f"Default configuration saved to {self._config_path}")
+            except Exception as e:
+                logger.error(f"Failed to save default config: {e}")
+
     @property
     def all(self) -> Dict[str, Any]:
         """
