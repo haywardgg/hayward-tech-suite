@@ -73,9 +73,10 @@ class DiagnosticsTab:
         self.ping_count_entry.insert(0, "10")
 
         # Ping button
-        ctk.CTkButton(
+        self.ping_button = ctk.CTkButton(
             ping_frame, text="Run Ping Test", command=self._run_ping_test
-        ).grid(row=5, column=0, padx=10, pady=10, sticky="ew")
+        )
+        self.ping_button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
 
     def _create_dns_section(self, parent: ctk.CTkFrame, row: int = 0, column: int = 0) -> None:
         """Create DNS lookup section."""
@@ -99,9 +100,10 @@ class DiagnosticsTab:
         self.dns_hostname_entry.insert(0, "www.google.com")
 
         # DNS button
-        ctk.CTkButton(
+        self.dns_button = ctk.CTkButton(
             dns_frame, text="DNS Lookup", command=self._run_dns_lookup
-        ).grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+        )
+        self.dns_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
     def _create_traceroute_section(self, parent: ctk.CTkFrame, row: int = 0, column: int = 0) -> None:
         """Create traceroute section."""
@@ -125,9 +127,10 @@ class DiagnosticsTab:
         self.trace_host_entry.insert(0, "8.8.8.8")
 
         # Traceroute button
-        ctk.CTkButton(
+        self.traceroute_button = ctk.CTkButton(
             trace_frame, text="Run Traceroute", command=self._run_traceroute
-        ).grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+        )
+        self.traceroute_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
     def _create_results_section(self, parent: ctk.CTkFrame) -> None:
         """Create results display section."""
@@ -166,6 +169,9 @@ class DiagnosticsTab:
 
         logger.info(f"User initiated ping test to {host}")
 
+        # Disable button
+        self.ping_button.configure(state="disabled", text="Running...")
+
         def task():
             try:
                 self._update_results(f"Running ping test to {host}...\n\n")
@@ -203,6 +209,9 @@ class DiagnosticsTab:
             except Exception as e:
                 logger.error(f"Unexpected error during ping test: {e}")
                 self._update_results(f"Unexpected error: {e}")
+            finally:
+                # Re-enable button
+                self.parent.after(0, lambda: self.ping_button.configure(state="normal", text="Run Ping Test"))
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -214,6 +223,9 @@ class DiagnosticsTab:
             return
 
         logger.info(f"User initiated DNS lookup for {hostname}")
+
+        # Disable button
+        self.dns_button.configure(state="disabled", text="Looking up...")
 
         def task():
             try:
@@ -244,6 +256,9 @@ class DiagnosticsTab:
             except Exception as e:
                 logger.error(f"Unexpected error during DNS lookup: {e}")
                 self._update_results(f"Unexpected error: {e}")
+            finally:
+                # Re-enable button
+                self.parent.after(0, lambda: self.dns_button.configure(state="normal", text="DNS Lookup"))
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -255,6 +270,9 @@ class DiagnosticsTab:
             return
 
         logger.info(f"User initiated traceroute to {host}")
+
+        # Disable button
+        self.traceroute_button.configure(state="disabled", text="Tracing...")
 
         def task():
             try:
@@ -293,6 +311,9 @@ class DiagnosticsTab:
             except Exception as e:
                 logger.error(f"Unexpected error during traceroute: {e}")
                 self._update_results(f"Unexpected error: {e}")
+            finally:
+                # Re-enable button
+                self.parent.after(0, lambda: self.traceroute_button.configure(state="normal", text="Run Traceroute"))
 
         threading.Thread(target=task, daemon=True).start()
 
