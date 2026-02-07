@@ -23,27 +23,17 @@ class SecurityTab:
         self.remediation = AutomatedRemediation()
         self.last_vulnerabilities = []
 
-        self.parent.grid_rowconfigure(1, weight=1)
+        self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
 
         self._create_content()
 
         logger.info("Security tab initialized")
 
-    def _create_header(self) -> None:
-        """Create header."""
-        header_frame = ctk.CTkFrame(self.parent)
-        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
-
-        title = ctk.CTkLabel(
-            header_frame, text="Security Scanner", font=ctk.CTkFont(size=18, weight="bold")
-        )
-        title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-
     def _create_content(self) -> None:
         """Create content area."""
         content_frame = ctk.CTkScrollableFrame(self.parent)
-        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        content_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         content_frame.grid_columnconfigure(0, weight=1)
 
         # Scan section

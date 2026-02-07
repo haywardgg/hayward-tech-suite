@@ -29,7 +29,9 @@ class MainWindow(ctk.CTk):
         super().__init__()
 
         # Window configuration
-        self.title(config.get("app.name", "Ghosty Toolz Evolved"))
+        app_name = config.get("app.name", "Ghosty Toolz Evolved")
+        app_version = config.get("app.version", "2.0.0")
+        self.title(f"{app_name} v{app_version}")
         
         # Get window dimensions from config
         width = config.get("ui.window.width", 1200)
@@ -63,11 +65,8 @@ class MainWindow(ctk.CTk):
         # Create main container
         self.main_container = ctk.CTkFrame(self)
         self.main_container.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        self.main_container.grid_rowconfigure(1, weight=1)
+        self.main_container.grid_rowconfigure(0, weight=1)
         self.main_container.grid_columnconfigure(0, weight=1)
-
-        # Create header
-        self._create_header()
 
         # Create tabview
         self._create_tabview()
@@ -80,33 +79,10 @@ class MainWindow(ctk.CTk):
 
         logger.info("Main window initialized")
 
-    def _create_header(self) -> None:
-        """Create header section."""
-        header_frame = ctk.CTkFrame(self.main_container)
-        header_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-        header_frame.grid_columnconfigure(1, weight=1)
-
-        # App title
-        title_label = ctk.CTkLabel(
-            header_frame,
-            text=config.get("app.name", "Ghosty Toolz Evolved"),
-            font=ctk.CTkFont(size=24, weight="bold"),
-        )
-        title_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-
-        # Version info
-        version_label = ctk.CTkLabel(
-            header_frame,
-            text=f"v{config.get('app.version', '2.0.0')}",
-            font=ctk.CTkFont(size=12),
-            text_color="gray",
-        )
-        version_label.grid(row=0, column=1, padx=10, pady=10, sticky="e")
-
     def _create_tabview(self) -> None:
         """Create main tabview with all tabs."""
         self.tabview = ctk.CTkTabview(self.main_container)
-        self.tabview.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+        self.tabview.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
         # Add tabs
         self.monitoring_tab = None
@@ -160,9 +136,15 @@ class MainWindow(ctk.CTk):
             # DANGER ZONE tab
             self.tabview.add("DANGER ZONE")
             tab_frame = self.tabview.tab("DANGER ZONE")
-            # Set the tab background to red
-            tab_frame.configure(fg_color="#8B0000")  # Dark red background
             self.danger_tab = DangerTab(tab_frame)
+            # Set the DANGER ZONE tab button to red
+            try:
+                self.tabview._segmented_button.configure(
+                    selected_color="#8B0000",  # Dark red for selected button
+                    selected_hover_color="#A52A2A"  # Slightly lighter red on hover
+                )
+            except Exception as e:
+                logger.warning(f"Could not customize DANGER ZONE tab button color: {e}")
             logger.info("DANGER ZONE tab created")
 
         except Exception as e:
@@ -184,7 +166,7 @@ class MainWindow(ctk.CTk):
     def _create_status_bar(self) -> None:
         """Create status bar at bottom."""
         self.status_bar = ctk.CTkFrame(self.main_container, height=30)
-        self.status_bar.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        self.status_bar.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
         self.status_bar.grid_columnconfigure(0, weight=1)
 
         self.status_label = ctk.CTkLabel(
