@@ -16,7 +16,7 @@ Use the `subprocess.CREATE_NO_WINDOW` flag when creating subprocess calls on Win
 
 ### Implementation Details
 
-1. **Cross-platform compatibility**: The `CREATE_NO_WINDOW` constant is only available on Windows (Python 3.7+). We handle this gracefully:
+1. **Cross-platform compatibility**: The `CREATE_NO_WINDOW` constant is only available on Windows (Python 3.6+). We handle this gracefully:
    ```python
    CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
    ```
