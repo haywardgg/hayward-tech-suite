@@ -472,14 +472,27 @@ class SystemOperations:
                 raise SystemOperationError(f"Failed to get network adapters: {stderr}")
             
             # Parse adapter names from output
+            # Expected format has header like: "Admin State  State       Type             Interface Name"
             adapters = []
-            for line in stdout.split('\n'):
+            lines = stdout.split('\n')
+            
+            # Skip header lines (first 2-3 lines typically)
+            for i, line in enumerate(lines):
                 line = line.strip()
-                if line and not line.startswith('-') and not line.startswith('Admin'):
-                    # Extract adapter name (last column)
-                    parts = line.split()
-                    if len(parts) >= 4:
-                        adapter_name = ' '.join(parts[3:])
+                if not line or '---' in line:
+                    continue
+                
+                # Skip the header line (contains "Admin State", "State", "Type", "Interface Name")
+                if 'Admin State' in line or 'State' in line and 'Type' in line:
+                    continue
+                
+                # Parse data lines - adapter name is the last field
+                # Line format: "Enabled      Connected    Dedicated    Ethernet"
+                parts = line.split()
+                if len(parts) >= 4:
+                    # Join all parts from index 3 onwards as the adapter name (handles names with spaces)
+                    adapter_name = ' '.join(parts[3:])
+                    if adapter_name and adapter_name not in adapters:
                         adapters.append(adapter_name)
             
             return adapters

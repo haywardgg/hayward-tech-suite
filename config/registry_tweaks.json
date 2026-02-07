@@ -2,162 +2,22 @@
   "version": "1.0",
   "tweaks": [
     {
-      "id": "disable_telemetry",
-      "name": "Disable Telemetry",
-      "description": "Disables Windows telemetry and data collection",
-      "category": "Privacy",
-      "risk_level": "medium",
-      "requires_restart": true,
-      "apply": {
-        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-        "value_name": "AllowTelemetry",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-        "value_name": "AllowTelemetry",
-        "value_data": "1",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "disable_cortana",
-      "name": "Disable Cortana",
-      "description": "Disables Cortana voice assistant",
-      "category": "Privacy",
+      "id": "example_custom_tweak",
+      "name": "Example Custom Tweak",
+      "description": "This is an example of a custom tweak that can be added via JSON. Replace this with your own custom tweaks or remove it.",
+      "category": "Custom",
       "risk_level": "low",
       "requires_restart": false,
       "apply": {
-        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
-        "value_name": "AllowCortana",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
-        "value_name": "AllowCortana",
-        "value_data": "1",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "show_file_extensions",
-      "name": "Show File Extensions",
-      "description": "Always show file extensions in File Explorer",
-      "category": "UI",
-      "risk_level": "low",
-      "requires_restart": false,
-      "apply": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-        "value_name": "HideFileExt",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-        "value_name": "HideFileExt",
-        "value_data": "1",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "disable_copilot",
-      "name": "Disable Windows Copilot",
-      "description": "Disables Windows Copilot AI assistant",
-      "category": "Privacy",
-      "risk_level": "low",
-      "requires_restart": false,
-      "apply": {
-        "key": "HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
-        "value_name": "TurnOffWindowsCopilot",
+        "key": "HKEY_CURRENT_USER\\Software\\Example",
+        "value_name": "ExampleValue",
         "value_data": "1",
         "value_type": "REG_DWORD"
       },
       "restore": {
-        "key": "HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
-        "value_name": "TurnOffWindowsCopilot",
+        "key": "HKEY_CURRENT_USER\\Software\\Example",
+        "value_name": "ExampleValue",
         "value_data": "0",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "disable_widgets",
-      "name": "Disable Widgets",
-      "description": "Disables Windows 11 widgets feature",
-      "category": "Performance",
-      "risk_level": "low",
-      "requires_restart": false,
-      "apply": {
-        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Dsh",
-        "value_name": "AllowNewsAndInterests",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Dsh",
-        "value_name": "AllowNewsAndInterests",
-        "value_data": "1",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "disable_chat_icon",
-      "name": "Disable Chat Icon",
-      "description": "Removes the chat icon from the taskbar",
-      "category": "UI",
-      "risk_level": "low",
-      "requires_restart": false,
-      "apply": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-        "value_name": "TaskbarMn",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-        "value_name": "TaskbarMn",
-        "value_data": "1",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "enable_compact_mode",
-      "name": "Enable Compact Mode in Explorer",
-      "description": "Enables compact view mode in File Explorer for Windows 11",
-      "category": "UI",
-      "risk_level": "low",
-      "requires_restart": false,
-      "apply": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-        "value_name": "UseCompactMode",
-        "value_data": "1",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-        "value_name": "UseCompactMode",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      }
-    },
-    {
-      "id": "show_all_tray_icons",
-      "name": "Show All Tray Icons",
-      "description": "Shows all system tray icons instead of hiding them",
-      "category": "UI",
-      "risk_level": "low",
-      "requires_restart": false,
-      "apply": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
-        "value_name": "EnableAutoTray",
-        "value_data": "0",
-        "value_type": "REG_DWORD"
-      },
-      "restore": {
-        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
-        "value_name": "EnableAutoTray",
-        "value_data": "1",
         "value_type": "REG_DWORD"
       }
     }

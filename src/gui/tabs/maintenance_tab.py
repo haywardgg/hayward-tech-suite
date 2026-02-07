@@ -362,8 +362,8 @@ class MaintenanceTab:
                     ))
                     return
 
-                # Use first active adapter (typically Ethernet or Wi-Fi)
-                adapter = adapters[0] if adapters else "Ethernet"
+                # Use first active adapter
+                adapter = adapters[0]
                 self.system_ops.set_dns_servers(adapter, "8.8.8.8", "8.8.4.4")
                 
                 self.parent.after(0, lambda: messagebox.showinfo(
@@ -401,7 +401,7 @@ class MaintenanceTab:
                     return
 
                 # Use first active adapter
-                adapter = adapters[0] if adapters else "Ethernet"
+                adapter = adapters[0]
                 self.system_ops.set_dns_servers(adapter, "1.1.1.1", "1.0.0.1")
                 
                 self.parent.after(0, lambda: messagebox.showinfo(
@@ -439,7 +439,7 @@ class MaintenanceTab:
                     return
 
                 # Use first active adapter
-                adapter = adapters[0] if adapters else "Ethernet"
+                adapter = adapters[0]
                 self.system_ops.reset_dns_to_auto(adapter)
                 
                 self.parent.after(0, lambda: messagebox.showinfo(
