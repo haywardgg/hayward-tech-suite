@@ -443,6 +443,11 @@ class DangerTab:
 
     def _restore_tweak(self, tweak) -> None:
         """Restore a registry tweak to Windows default."""
+        # Get current value before restore
+        before_value = self.registry_manager.get_registry_value(
+            tweak.registry_key, tweak.value_name
+        )
+        
         if not messagebox.askyesno(
             f"Restore: {tweak.name}",
             f"This will restore the registry setting to Windows default.\n\n"
@@ -464,11 +469,28 @@ class DangerTab:
 
                 # Restore to default - delete the registry value/key
                 success = self.registry_manager.restore_tweak_to_default(tweak.id)
+                
+                # Get value after restore
+                after_value = self.registry_manager.get_registry_value(
+                    tweak.registry_key, tweak.value_name
+                )
 
                 restart_msg = (
                     "\n\nℹ️ A system restart may be required for this change to take effect."
                     if tweak.requires_restart
                     else ""
+                )
+                
+                # Build before/after message
+                before_text = f"{before_value['type']}: {before_value['data']}" if before_value else "Not Set"
+                after_text = f"{after_value['type']}: {after_value['data']}" if after_value else "Deleted (Default)"
+                
+                change_msg = (
+                    f"\n\n📋 Registry Changes:\n"
+                    f"Key: {tweak.registry_key}\n"
+                    f"Value: {tweak.value_name or '(Default)'}\n\n"
+                    f"Before: {before_text}\n"
+                    f"After:  {after_text}"
                 )
 
                 self.parent.after(
@@ -477,6 +499,7 @@ class DangerTab:
                         "Success",
                         f"Tweak restored to default successfully!\n\n"
                         f"Backup ID: {backup_id}"
+                        f"{change_msg}"
                         f"{restart_msg}",
                     ),
                 )
@@ -499,6 +522,11 @@ class DangerTab:
 
     def _apply_tweak(self, tweak) -> None:
         """Apply a registry tweak."""
+        # Get current value before applying
+        before_value = self.registry_manager.get_registry_value(
+            tweak.registry_key, tweak.value_name
+        )
+        
         # Show confirmation dialog with risk level
         risk_warnings = {
             "low": "This tweak is generally safe but will modify your registry.",
@@ -524,11 +552,28 @@ class DangerTab:
         def task():
             try:
                 success, backup_id = self.registry_manager.apply_tweak(tweak.id)
+                
+                # Get value after applying
+                after_value = self.registry_manager.get_registry_value(
+                    tweak.registry_key, tweak.value_name
+                )
 
                 restart_msg = (
                     "\n\nℹ️ A system restart is required for this change to take effect."
                     if tweak.requires_restart
                     else ""
+                )
+                
+                # Build before/after message
+                before_text = f"{before_value['type']}: {before_value['data']}" if before_value else "Not Set"
+                after_text = f"{after_value['type']}: {after_value['data']}" if after_value else "Failed to read"
+                
+                change_msg = (
+                    f"\n\n📋 Registry Changes:\n"
+                    f"Key: {tweak.registry_key}\n"
+                    f"Value: {tweak.value_name or '(Default)'}\n\n"
+                    f"Before: {before_text}\n"
+                    f"After:  {after_text}"
                 )
 
                 self.parent.after(
@@ -538,6 +583,7 @@ class DangerTab:
                         f"Tweak applied successfully!\n\n"
                         f"Backup ID: {backup_id}\n"
                         f"You can undo this change using the 'Undo Last Change' button."
+                        f"{change_msg}"
                         f"{restart_msg}",
                     ),
                 )

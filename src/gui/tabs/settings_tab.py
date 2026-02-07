@@ -133,12 +133,13 @@ class SettingsTab:
         # RESET button - admin required
         self.reset_button = ctk.CTkButton(
             about_frame,
-            text="🔄 RESET TO DEFAULTS",
+            text="↻  RESET TO DEFAULTS",  # Using larger unicode icon with spacing
             command=self._reset_to_defaults,
             width=200,
-            height=35,
+            height=40,  # Increased height for better visibility
             fg_color="#dc3545",
             hover_color="#c82333",
+            font=ctk.CTkFont(size=14, weight="bold"),  # Larger font for icon
         )
         self.reset_button.grid(row=3, column=0, padx=10, pady=10, sticky="w")
         
@@ -220,14 +221,14 @@ class SettingsTab:
 
                 # Restore all registry changes to defaults
                 logger.info("Restoring all registry changes to defaults...")
+                restore_results = None
                 try:
-                    # TODO: Implement restore_all_to_defaults() in RegistryManager
-                    # This would iterate through all applied tweaks and restore them to Windows defaults
-                    # For now, RESET only clears backups, config, and logs
-                    if hasattr(registry_manager, 'restore_all_to_defaults'):
-                        registry_manager.restore_all_to_defaults()
+                    success_count, total_applied, failed_tweaks = registry_manager.restore_all_to_defaults()
+                    restore_results = (success_count, total_applied, failed_tweaks)
+                    if failed_tweaks:
+                        logger.warning(f"Some tweaks failed to restore: {', '.join(failed_tweaks)}")
                     else:
-                        logger.info("Registry restore not yet implemented - only clearing backups and config")
+                        logger.info(f"Successfully restored {success_count} registry tweaks to defaults")
                 except Exception as e:
                     logger.warning(f"Failed to restore registry defaults: {e}")
 
@@ -265,10 +266,21 @@ class SettingsTab:
                 self.parent.after(0, lambda: self.reset_button.configure(
                     state="normal", text="🔄 RESET TO DEFAULTS"
                 ))
-                self.parent.after(0, lambda: messagebox.showinfo(
-                    "Reset Complete",
-                    "Application has been reset to defaults!\n\n"
-                    "Please restart the application for changes to take full effect."
+                
+                # Build success message with restore results
+                success_msg = "Application has been reset to defaults!\n\n"
+                if restore_results:
+                    success_count, total_applied, failed_tweaks = restore_results
+                    if total_applied > 0:
+                        success_msg += f"Registry Tweaks Restored: {success_count}/{total_applied}\n"
+                        if failed_tweaks:
+                            success_msg += f"Failed Tweaks: {', '.join(failed_tweaks)}\n"
+                        success_msg += "\n"
+                
+                success_msg += "Please restart the application for changes to take full effect."
+                
+                self.parent.after(0, lambda msg=success_msg: messagebox.showinfo(
+                    "Reset Complete", msg
                 ))
 
             except Exception as e:
