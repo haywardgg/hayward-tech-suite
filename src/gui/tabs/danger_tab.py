@@ -23,40 +23,17 @@ class DangerTab:
         self.parent = parent
         self.registry_manager = RegistryManager()
 
-        self.parent.grid_rowconfigure(1, weight=1)
+        self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
 
         self._create_content()
 
         logger.info("DANGER tab initialized")
 
-    def _create_header(self) -> None:
-        """Create header with prominent warning."""
-        header_frame = ctk.CTkFrame(self.parent, fg_color="#8B0000")  # Dark red
-        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
-
-        title = ctk.CTkLabel(
-            header_frame,
-            text="⚠️ DANGER ZONE ⚠️",
-            font=ctk.CTkFont(size=20, weight="bold"),
-            text_color="#FFD700",
-        )
-        title.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
-
-        warning = ctk.CTkLabel(
-            header_frame,
-            text="WARNING: The registry tweaks in this section can potentially break Windows functionality.\n"
-            "Proceed at your own risk! A registry backup is automatically created before each change.",
-            font=ctk.CTkFont(size=12),
-            text_color="white",
-            wraplength=900,
-        )
-        warning.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
-
     def _create_content(self) -> None:
         """Create content area."""
         content_frame = ctk.CTkScrollableFrame(self.parent)
-        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        content_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         content_frame.grid_columnconfigure(0, weight=1)
 
         # Backup/Restore section

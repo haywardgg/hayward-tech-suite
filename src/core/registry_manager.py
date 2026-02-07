@@ -299,67 +299,49 @@ class RegistryManager:
         try:
             if registry_keys:
                 # Backup specific keys
-                # Create header first
-                with open(backup_path, "w", encoding="utf-16le") as f:
-                    f.write("Windows Registry Editor Version 5.00\n\n")
+                # Note: For simplicity and reliability, we only backup the first key
+                # to avoid file concatenation issues that break the .reg format
+                if isinstance(registry_keys, list):
+                    if len(registry_keys) > 1:
+                        logger.warning(f"Multiple keys provided ({len(registry_keys)}), only backing up first key: {registry_keys[0]}")
+                    key_to_backup = registry_keys[0]
+                else:
+                    key_to_backup = registry_keys
                 
-                # Export each key to a temp file and append to main backup
-                for key in registry_keys:
-                    temp_file = self.tmp_dir / f"temp_{datetime.now().timestamp()}.reg"
-                    result = subprocess.run(
-                        ["reg", "export", key, str(temp_file), "/y"],
-                        capture_output=True,
-                        text=True,
-                        timeout=30
-                    )
+                logger.info(f"Backing up registry key: {key_to_backup}")
+                result = subprocess.run(
+                    ["reg", "export", key_to_backup, str(backup_path), "/y"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode != 0:
+                    error_msg = f"Failed to export key {key_to_backup}: {result.stderr}"
+                    logger.error(error_msg)
+                    raise RegistryError(error_msg)
                     
-                    if result.returncode != 0:
-                        logger.warning(f"Failed to export key {key}: {result.stderr}")
-                    elif temp_file.exists():
-                        # Append to main backup file (skip header from temp file)
-                        with open(temp_file, "r", encoding="utf-16le") as tf:
-                            content = tf.read()
-                            # Skip header if present
-                            if "Windows Registry Editor" in content:
-                                content = content.split("\n\n", 1)[1] if "\n\n" in content else content
-                        
-                        with open(backup_path, "a", encoding="utf-16le") as f:
-                            f.write(content)
-                        
-                        temp_file.unlink()
+                # Verify the backup file was created and is valid
+                if not backup_path.exists() or backup_path.stat().st_size == 0:
+                    raise RegistryError(f"Backup file not created or is empty: {backup_path}")
             else:
-                # Full system registry backup (common keys only for safety)
-                common_keys = [
-                    r"HKEY_CURRENT_USER\Software",
-                    r"HKEY_LOCAL_MACHINE\SOFTWARE\Policies",
-                ]
+                # For full backup, just export HKEY_CURRENT_USER which is safer
+                logger.info("Creating full registry backup (HKEY_CURRENT_USER)")
+                result = subprocess.run(
+                    ["reg", "export", "HKEY_CURRENT_USER", str(backup_path), "/y"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
                 
-                # Create header first
-                with open(backup_path, "w", encoding="utf-16le") as f:
-                    f.write("Windows Registry Editor Version 5.00\n\n")
-                
-                # Export each key to a temp file and append to main backup
-                for key in common_keys:
-                    temp_file = self.tmp_dir / f"temp_{datetime.now().timestamp()}.reg"
-                    result = subprocess.run(
-                        ["reg", "export", key, str(temp_file), "/y"],
-                        capture_output=True,
-                        text=True,
-                        timeout=60
-                    )
+                if result.returncode != 0:
+                    error_msg = f"Failed to export HKEY_CURRENT_USER: {result.stderr}"
+                    logger.error(error_msg)
+                    raise RegistryError(error_msg)
                     
-                    if result.returncode == 0 and temp_file.exists():
-                        # Append to main backup file (skip header from temp file)
-                        with open(temp_file, "r", encoding="utf-16le") as tf:
-                            content = tf.read()
-                            # Skip header if not first key
-                            if "Windows Registry Editor" in content:
-                                content = content.split("\n\n", 1)[1] if "\n\n" in content else content
-                        
-                        with open(backup_path, "a", encoding="utf-16le") as f:
-                            f.write(content)
-                        
-                        temp_file.unlink()
+                # Verify the backup file was created and is valid
+                if not backup_path.exists() or backup_path.stat().st_size == 0:
+                    raise RegistryError(f"Backup file not created or is empty: {backup_path}")
             
             # Save metadata
             metadata = RegistryBackup(
