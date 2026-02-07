@@ -322,7 +322,7 @@ class SecurityScanner:
             # Get rule counts
             try:
                 success_in, stdout_in, _ = self.system_ops.execute_command(
-                    f'netsh advfirewall firewall show rule name=all dir=in | {count_cmd} "Rule Name"',
+                    f"netsh advfirewall firewall show rule name=all dir=in | {count_cmd} \"Rule Name\"",
                     shell=True,
                     audit=False,
                 )
@@ -332,7 +332,7 @@ class SecurityScanner:
 
             try:
                 success_out, stdout_out, _ = self.system_ops.execute_command(
-                    f'netsh advfirewall firewall show rule name=all dir=out | {count_cmd} "Rule Name"',
+                    f"netsh advfirewall firewall show rule name=all dir=out | {count_cmd} \"Rule Name\"",
                     shell=True,
                     audit=False,
                 )
