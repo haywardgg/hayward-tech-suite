@@ -221,7 +221,6 @@ class SettingsTab:
 
                 # Restore all registry changes to defaults
                 logger.info("Restoring all registry changes to defaults...")
-                restore_results = None
                 try:
                     restore_results = registry_manager.restore_all_to_defaults()
                     success_count, total_applied, failed_tweaks = restore_results
@@ -230,6 +229,7 @@ class SettingsTab:
                     else:
                         logger.info(f"Successfully restored {success_count} registry tweaks to defaults")
                 except Exception as e:
+                    restore_results = None
                     logger.warning(f"Failed to restore registry defaults: {e}")
 
                 # Delete registry backup directory

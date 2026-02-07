@@ -54,7 +54,10 @@ class DangerTab:
         self._create_history_section(content_frame)
 
     def _format_registry_change_message(
-        self, tweak: RegistryTweak, before_value: Optional[Dict[str, str]], after_value: Optional[Dict[str, str]], 
+        self,
+        tweak: RegistryTweak,
+        before_value: Optional[Dict[str, str]],
+        after_value: Optional[Dict[str, str]],
         is_restore: bool = False
     ) -> str:
         """
