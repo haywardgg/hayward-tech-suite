@@ -15,6 +15,7 @@ from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
 from src.gui.tabs.backup_tab import BackupTab
 from src.gui.tabs.security_tab import SecurityTab
+from src.gui.tabs.danger_tab import DangerTab
 from src.gui.tabs.settings_tab import SettingsTab
 
 logger = get_logger("main_window")
@@ -114,6 +115,7 @@ class MainWindow(ctk.CTk):
         self.maintenance_tab = None
         self.backup_tab = None
         self.security_tab = None
+        self.danger_tab = None
         self.settings_tab = None
 
         try:
@@ -165,6 +167,16 @@ class MainWindow(ctk.CTk):
 
         except Exception as e:
             logger.error(f"Failed to create Security tab: {e}")
+
+        try:
+            # DANGER tab
+            self.tabview.add("DANGER")
+            tab_frame = self.tabview.tab("DANGER")
+            self.danger_tab = DangerTab(tab_frame)
+            logger.info("DANGER tab created")
+
+        except Exception as e:
+            logger.error(f"Failed to create DANGER tab: {e}")
 
         try:
             # Settings tab
