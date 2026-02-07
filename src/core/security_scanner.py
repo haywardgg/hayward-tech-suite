@@ -145,8 +145,12 @@ class SecurityScanner:
     def _check_windows_updates(self) -> Optional[Vulnerability]:
         """Check for pending Windows updates."""
         try:
+            # Try using Windows Update COM object (works without PSWindowsUpdate module)
             success, stdout, stderr = self.system_ops.execute_command(
-                'powershell -Command "Get-WindowsUpdate | Measure-Object | Select-Object -ExpandProperty Count"',
+                'powershell -Command "$UpdateSession = New-Object -ComObject Microsoft.Update.Session; '
+                '$UpdateSearcher = $UpdateSession.CreateUpdateSearcher(); '
+                '$SearchResult = $UpdateSearcher.Search(\'IsInstalled=0 and IsHidden=0\'); '
+                '$SearchResult.Updates.Count"',
                 timeout=60,
                 shell=True,
                 audit=False,

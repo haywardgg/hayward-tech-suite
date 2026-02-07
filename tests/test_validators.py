@@ -97,3 +97,21 @@ class TestValidators:
             # Pipes should be blocked for non-PowerShell commands
             validator.validate_command("ipconfig | findstr", allow_shell=False)
 
+    def test_validate_powershell_command_with_commas(self):
+        """Test PowerShell command validation with commas."""
+        validator = Validators()
+        # Should pass with allow_shell=True for PowerShell commands with commas
+        assert validator.validate_command(
+            'powershell -Command "Get-MpComputerStatus | Select-Object AntivirusEnabled, RealTimeProtectionEnabled"',
+            allow_shell=True
+        ) is True
+
+    def test_validate_powershell_command_with_special_chars(self):
+        """Test PowerShell command validation with various special characters."""
+        validator = Validators()
+        # Should pass with allow_shell=True for PowerShell with brackets, backslashes, etc.
+        assert validator.validate_command(
+            'powershell -Command "$UpdateSession = New-Object -ComObject Microsoft.Update.Session"',
+            allow_shell=True
+        ) is True
+

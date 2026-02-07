@@ -118,7 +118,7 @@ class Validators:
         # Check for unsafe characters (more permissive for PowerShell)
         if allow_shell and is_powershell:
             # Allow only necessary characters for PowerShell commands
-            safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "=", "-"}
+            safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "=", "-", ",", "{", "}", "[", "]", "\\", "@", "$", ".", "?"}
         else:
             safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<"}
         
