@@ -90,3 +90,10 @@ class TestValidators:
             # Semicolon should still be blocked even with allow_shell
             validator.validate_command("ipconfig; rm -rf /", allow_shell=True)
 
+    def test_validate_command_pipes_blocked_without_allow_shell(self):
+        """Test that pipes are blocked when allow_shell=False."""
+        validator = Validators()
+        with pytest.raises(ValidationError):
+            # Pipes should be blocked for non-PowerShell commands
+            validator.validate_command("ipconfig | findstr", allow_shell=False)
+

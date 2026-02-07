@@ -94,12 +94,12 @@ class Validators:
             raise ValidationError("Command cannot be empty")
 
         # Check if this is a PowerShell command
-        is_powershell = command.strip().startswith("powershell") or "powershell -Command" in command
+        is_powershell = command.strip().lower().startswith(('powershell', 'pwsh'))
 
         # Check for command injection patterns (relaxed for PowerShell)
         if not (allow_shell and is_powershell):
             dangerous_patterns = [
-                r"[;&`]",  # Command chaining/injection (but not | for pipes)
+                r"[;&|`]",  # Command chaining/injection including pipes
                 r"\$\(",  # Command substitution
                 r">\s*/",  # Writing to system paths
                 r"<\s*/",  # Reading from system paths
@@ -117,8 +117,8 @@ class Validators:
 
         # Check for unsafe characters (more permissive for PowerShell)
         if allow_shell and is_powershell:
-            # Allow more characters for PowerShell commands
-            safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "{", "}", "[", "]", "=", ",", "-"}
+            # Allow only necessary characters for PowerShell commands
+            safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<", '"', "'", "(", ")", "=", "-"}
         else:
             safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<"}
         
