@@ -9,14 +9,12 @@ import customtkinter as ctk
 from tkinter import messagebox
 import threading
 from typing import List, Optional, Dict
-from datetime import datetime
 
 from src.utils.logger import get_logger
 from src.core.automated_remediation import (
     AutomatedRemediation,
     RemediationAction,
     RemediationStatus,
-    RemediationResult,
 )
 from src.core.security_scanner import Vulnerability
 
@@ -409,6 +407,7 @@ class RemediationDialog(ctk.CTkToplevel):
 
             except Exception as e:
                 logger.error(f"Execution failed: {e}")
+                error_msg = str(e)
 
                 def show_error():
                     if widgets:
@@ -421,7 +420,7 @@ class RemediationDialog(ctk.CTkToplevel):
                             widgets["rollback_btn"].configure(state="normal")
                         widgets["test_btn"].configure(state="normal")
 
-                    messagebox.showerror("Error", f"Execution failed: {str(e)}")
+                    messagebox.showerror("Error", f"Execution failed: {error_msg}")
 
                 self.after(0, show_error)
 
@@ -448,7 +447,7 @@ class RemediationDialog(ctk.CTkToplevel):
 
         # Confirm with user
         confirm_msg = f"Rollback: {action.name}\n\n"
-        confirm_msg += f"This will revert the changes made by this action.\n\n"
+        confirm_msg += "This will revert the changes made by this action.\n\n"
         confirm_msg += "Do you want to proceed?"
 
         if not messagebox.askyesno("Confirm Rollback", confirm_msg):
@@ -507,6 +506,7 @@ class RemediationDialog(ctk.CTkToplevel):
 
             except Exception as e:
                 logger.error(f"Rollback failed: {e}")
+                error_msg = str(e)
 
                 def show_error():
                     if widgets:
@@ -518,7 +518,7 @@ class RemediationDialog(ctk.CTkToplevel):
                             )
                         widgets["test_btn"].configure(state="normal")
 
-                    messagebox.showerror("Error", f"Rollback failed: {str(e)}")
+                    messagebox.showerror("Error", f"Rollback failed: {error_msg}")
 
                 self.after(0, show_error)
 
@@ -575,6 +575,7 @@ class RemediationDialog(ctk.CTkToplevel):
 
             except Exception as e:
                 logger.error(f"Test run failed: {e}")
+                error_msg = str(e)
 
                 def show_error():
                     if widgets:
@@ -586,7 +587,7 @@ class RemediationDialog(ctk.CTkToplevel):
                         if widgets["rollback_btn"]:
                             widgets["rollback_btn"].configure(state="normal")
 
-                    messagebox.showerror("Error", f"Test run failed: {str(e)}")
+                    messagebox.showerror("Error", f"Test run failed: {error_msg}")
 
                 self.after(0, show_error)
 
