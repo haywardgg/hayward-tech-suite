@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any
 
 from src.utils.logger import get_logger
 from src.core.monitoring import MonitoringService
+from src.core.performance_profiler import PerformanceProfiler
 
 logger = get_logger("monitoring_tab")
 
@@ -25,6 +26,7 @@ class MonitoringTab:
         """
         self.parent = parent
         self.monitoring_service = MonitoringService()
+        self.performance_profiler = PerformanceProfiler()
         self.is_monitoring = False
 
         # Configure parent grid
@@ -61,6 +63,15 @@ class MonitoringTab:
             width=150,
         )
         self.toggle_button.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        
+        # Performance Profile button
+        ctk.CTkButton(
+            control_frame,
+            text="Run Performance Profile",
+            command=self._run_performance_profile,
+            width=180,
+        ).grid(row=0, column=2, padx=10, pady=10, sticky="e")
+        
         control_frame.grid_columnconfigure(0, weight=1)
 
     def _create_monitoring_displays(self) -> None:
@@ -352,3 +363,117 @@ class MonitoringTab:
         self.net_sent_label.configure(text=f"Sent: {bytes_sent:.2f} MB")
         self.net_recv_label.configure(text=f"Received: {bytes_recv:.2f} MB")
         self.net_interfaces_label.configure(text=f"Active: {active_count} interface(s)")
+
+
+    def _run_performance_profile(self) -> None:
+        """Run comprehensive performance profile."""
+        logger.info("User initiated performance profiling")
+
+        import threading
+        from tkinter import messagebox
+
+        def task():
+            try:
+                # Show progress dialog
+                self.parent.after(0, lambda: messagebox.showinfo(
+                    "Performance Profile",
+                    "Running performance analysis...\nThis will take about 5-10 seconds."
+                ))
+
+                # Profile CPU
+                cpu_profile = self.performance_profiler.profile_cpu(duration=5)
+
+                # Profile memory
+                mem_profile = self.performance_profiler.profile_memory()
+
+                # Get top processes
+                top_cpu_procs = self.performance_profiler.get_top_processes(sort_by='cpu', limit=5)
+                top_mem_procs = self.performance_profiler.get_top_processes(sort_by='memory', limit=5)
+
+                # Assess performance
+                perf_level = self.performance_profiler.assess_performance()
+
+                # Get bottlenecks
+                bottlenecks = self.performance_profiler.get_system_bottlenecks()
+
+                # Build report
+                report = "=" * 60 + "\n"
+                report += "PERFORMANCE PROFILE REPORT\n"
+                report += "=" * 60 + "\n\n"
+
+                report += f"Overall Performance: {perf_level.value.upper()}\n\n"
+
+                # CPU section
+                report += "CPU Performance:\n"
+                report += f"  Average Usage: {cpu_profile.average_usage:.1f}%\n"
+                report += f"  Current Usage: {cpu_profile.current_usage:.1f}%\n"
+                report += f"  Cores: {cpu_profile.core_count} physical, {cpu_profile.thread_count} logical\n"
+                if cpu_profile.frequency_current:
+                    report += f"  Frequency: {cpu_profile.frequency_current:.0f} MHz (Max: {cpu_profile.frequency_max:.0f} MHz)\n"
+                report += "\n"
+
+                # Memory section
+                report += "Memory Usage:\n"
+                report += f"  Used: {mem_profile.used / (1024**3):.2f} GB / {mem_profile.total / (1024**3):.2f} GB ({mem_profile.percent_used:.1f}%)\n"
+                report += f"  Available: {mem_profile.available / (1024**3):.2f} GB\n"
+                if mem_profile.swap_total > 0:
+                    report += f"  Swap: {mem_profile.swap_used / (1024**3):.2f} GB / {mem_profile.swap_total / (1024**3):.2f} GB ({mem_profile.swap_percent:.1f}%)\n"
+                report += "\n"
+
+                # Top CPU processes
+                report += "Top CPU Consumers:\n"
+                for proc in top_cpu_procs:
+                    report += f"  • {proc.name} (PID {proc.pid}): {proc.cpu_percent:.1f}% CPU\n"
+                report += "\n"
+
+                # Top memory processes
+                report += "Top Memory Consumers:\n"
+                for proc in top_mem_procs:
+                    report += f"  • {proc.name} (PID {proc.pid}): {proc.memory_mb:.0f} MB ({proc.memory_percent:.1f}%)\n"
+                report += "\n"
+
+                # Bottlenecks
+                if bottlenecks:
+                    report += f"Detected Bottlenecks ({len(bottlenecks)}):\n"
+                    for bottleneck in bottlenecks:
+                        severity = bottleneck['severity'].upper()
+                        component = bottleneck['component']
+                        description = bottleneck['description']
+                        recommendation = bottleneck['recommendation']
+                        report += f"  [{severity}] {component}\n"
+                        report += f"    Issue: {description}\n"
+                        report += f"    Action: {recommendation}\n\n"
+                else:
+                    report += "✓ No performance bottlenecks detected\n"
+
+                # Show report in a new window
+                def show_report():
+                    report_window = ctk.CTkToplevel(self.parent)
+                    report_window.title("Performance Profile Report")
+                    report_window.geometry("800x600")
+
+                    # Report text
+                    text_widget = ctk.CTkTextbox(report_window)
+                    text_widget.pack(fill="both", expand=True, padx=10, pady=10)
+                    text_widget.insert("1.0", report)
+                    text_widget.configure(state="disabled")
+
+                    # Close button
+                    ctk.CTkButton(
+                        report_window,
+                        text="Close",
+                        command=report_window.destroy,
+                        width=100
+                    ).pack(pady=10)
+
+                self.parent.after(0, show_report)
+                logger.info("Performance profile completed successfully")
+
+            except Exception as e:
+                logger.error(f"Performance profiling failed: {e}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    f"Performance profiling failed:\n{str(e)}"
+                ))
+
+        threading.Thread(target=task, daemon=True).start()
