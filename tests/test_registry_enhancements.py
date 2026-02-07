@@ -80,6 +80,58 @@ def test_is_tweak_applied():
     print("✓ is_tweak_applied returns False for non-existent tweak")
 
 
+def test_backup_nonexistent_key():
+    """Test backing up a non-existent registry key (should skip gracefully)."""
+    import subprocess
+    from unittest.mock import patch, Mock
+    
+    rm = RegistryManager()
+    
+    # Mock subprocess to simulate non-existent key
+    with patch('subprocess.run') as mock_run:
+        # First call: reg query fails (key doesn't exist)
+        mock_run.return_value = Mock(returncode=1, stdout="", stderr="Key not found")
+        
+        # Should not raise an error, but return a backup_id
+        backup_id = rm.backup_registry(
+            description="Test backup",
+            registry_keys=["HKEY_CURRENT_USER\\Software\\NonExistent\\Key"]
+        )
+        
+        assert backup_id is not None
+        assert backup_id.startswith("reg_backup_")
+        
+        # Check metadata was saved
+        assert backup_id in rm.metadata
+        metadata = rm.metadata[backup_id]
+        assert "backup skipped" in metadata.description.lower()
+        
+        print(f"✓ backup_registry handles non-existent key gracefully: {backup_id}")
+
+
+def test_restore_skipped_backup():
+    """Test restoring a skipped backup (should not error)."""
+    from unittest.mock import patch, Mock
+    
+    rm = RegistryManager()
+    
+    # First, create a skipped backup
+    with patch('subprocess.run') as mock_run:
+        mock_run.return_value = Mock(returncode=1, stdout="", stderr="Key not found")
+        
+        backup_id = rm.backup_registry(
+            description="Test backup",
+            registry_keys=["HKEY_CURRENT_USER\\Software\\NonExistent\\Key"]
+        )
+    
+    # Now try to restore it
+    result = rm.restore_registry(backup_id)
+    
+    # Should return True (success) even though nothing was restored
+    assert result is True
+    print(f"✓ restore_registry handles skipped backup gracefully")
+
+
 if __name__ == "__main__":
     print("Testing Registry Manager Enhancements...\n")
     
@@ -90,6 +142,8 @@ if __name__ == "__main__":
         test_is_tweak_applied_exists()
         test_get_tweak_by_id()
         test_is_tweak_applied()
+        test_backup_nonexistent_key()
+        test_restore_skipped_backup()
         
         print("\n✅ All tests passed!")
     except AssertionError as e:

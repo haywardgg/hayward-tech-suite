@@ -165,6 +165,7 @@ MyShare      D:\\Shared                       My shared folder
     @patch('src.core.security_scanner.SystemOperations')
     def test_check_smbv1_enabled(self, mock_sys_ops, scanner):
         """Test SMBv1 check when enabled."""
+        scanner.system_ops.is_admin = Mock(return_value=True)
         scanner.system_ops.execute_command = Mock(return_value=(True, "Enabled", ""))
         
         vuln = scanner._check_smbv1()
@@ -177,10 +178,21 @@ MyShare      D:\\Shared                       My shared folder
     @patch('src.core.security_scanner.SystemOperations')
     def test_check_smbv1_disabled(self, mock_sys_ops, scanner):
         """Test SMBv1 check when disabled."""
+        scanner.system_ops.is_admin = Mock(return_value=True)
         scanner.system_ops.execute_command = Mock(return_value=(True, "Disabled", ""))
         
         vuln = scanner._check_smbv1()
         
+        assert vuln is None
+    
+    @patch('src.core.security_scanner.SystemOperations')
+    def test_check_smbv1_no_admin(self, mock_sys_ops, scanner):
+        """Test SMBv1 check when not admin - should skip."""
+        scanner.system_ops.is_admin = Mock(return_value=False)
+        
+        vuln = scanner._check_smbv1()
+        
+        # Should return None because check is skipped without admin
         assert vuln is None
     
     @patch.object(SecurityScanner, '_check_windows_defender')
@@ -200,6 +212,9 @@ MyShare      D:\\Shared                       My shared folder
         scanner
     ):
         """Test comprehensive vulnerability scan."""
+        # Mock admin check to avoid elevation prompt
+        scanner.system_ops.is_admin = Mock(return_value=True)
+        
         # Mock some vulnerabilities
         mock_defender.return_value = Vulnerability(
             name="Test Defender Issue",
