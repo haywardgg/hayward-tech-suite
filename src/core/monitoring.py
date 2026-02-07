@@ -5,6 +5,7 @@ Provides real-time monitoring of system resources including CPU, RAM, disk, batt
 """
 
 import psutil
+import subprocess
 import threading
 import time
 from typing import Optional, Dict, Any, Callable
@@ -15,6 +16,10 @@ from src.utils.config import get_config
 
 logger = get_logger("monitoring")
 config = get_config()
+
+# Get CREATE_NO_WINDOW flag for Windows to prevent console flickering
+# On Windows, this prevents subprocess from creating a visible console window
+CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 
 
 class MonitoringService:
@@ -345,9 +350,9 @@ class MonitoringService:
             except (ImportError, Exception):
                 # Fallback: try to parse route output on Windows
                 try:
-                    import subprocess
                     result = subprocess.run(['route', 'print', '0.0.0.0'], 
-                                          capture_output=True, text=True, timeout=2)
+                                          capture_output=True, text=True, timeout=2,
+                                          creationflags=CREATE_NO_WINDOW)
                     for line in result.stdout.split('\n'):
                         if '0.0.0.0' in line and 'On-link' not in line:
                             parts = line.split()
@@ -360,9 +365,9 @@ class MonitoringService:
             # Get DNS servers (Windows-specific)
             dns_servers = []
             try:
-                import subprocess
                 result = subprocess.run(['ipconfig', '/all'], 
-                                      capture_output=True, text=True, timeout=5)
+                                      capture_output=True, text=True, timeout=5,
+                                      creationflags=CREATE_NO_WINDOW)
                 for line in result.stdout.split('\n'):
                     if 'DNS Servers' in line or 'DNS-Server' in line:
                         # Extract DNS server IP
@@ -403,9 +408,9 @@ class MonitoringService:
             
             # Try to detect DHCP (Windows-specific)
             try:
-                import subprocess
                 result = subprocess.run(['ipconfig', '/all'], 
-                                      capture_output=True, text=True, timeout=5)
+                                      capture_output=True, text=True, timeout=5,
+                                      creationflags=CREATE_NO_WINDOW)
                 if 'DHCP Enabled' in result.stdout:
                     for line in result.stdout.split('\n'):
                         if 'DHCP Enabled' in line:

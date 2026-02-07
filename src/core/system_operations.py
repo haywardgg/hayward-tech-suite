@@ -22,6 +22,10 @@ audit_logger = get_audit_logger()
 config = get_config()
 validators = Validators()
 
+# Get CREATE_NO_WINDOW flag for Windows to prevent console flickering
+# On Windows, this prevents subprocess from creating a visible console window
+CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+
 
 class SystemOperationError(Exception):
     """Custom exception for system operation errors."""
@@ -186,6 +190,7 @@ class SystemOperations:
                 timeout=timeout,
                 shell=shell,
                 check=False,
+                creationflags=CREATE_NO_WINDOW,
             )
 
             success = result.returncode == 0
@@ -350,7 +355,7 @@ class SystemOperations:
         
         try:
             # Open hosts file with notepad
-            subprocess.Popen(["notepad.exe", hosts_path])
+            subprocess.Popen(["notepad.exe", hosts_path], creationflags=CREATE_NO_WINDOW)
             logger.info("Hosts file opened successfully")
             return True
         except Exception as e:

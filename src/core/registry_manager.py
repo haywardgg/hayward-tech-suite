@@ -23,6 +23,10 @@ audit_logger = get_audit_logger()
 config = get_config()
 validators = Validators()
 
+# Get CREATE_NO_WINDOW flag for Windows to prevent console flickering
+# On Windows, this prevents subprocess from creating a visible console window
+CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+
 
 @dataclass
 class RegistryTweak:
@@ -284,7 +288,8 @@ class RegistryManager:
                 ["reg", "query", tweak.registry_key, "/v", tweak.value_name],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
+                creationflags=CREATE_NO_WINDOW
             )
             
             if result.returncode == 0:
@@ -326,7 +331,8 @@ class RegistryManager:
             # Build command: use /ve for default value (empty string), /v <name> for named values
             cmd = ["reg", "query", registry_key] + (["/ve"] if value_name == "" else ["/v", value_name])
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5,
+                                  creationflags=CREATE_NO_WINDOW)
             
             if result.returncode != 0:
                 return None
@@ -418,7 +424,8 @@ class RegistryManager:
                     ["reg", "query", key_to_backup],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=5,
+                    creationflags=CREATE_NO_WINDOW
                 )
                 
                 if check_result.returncode != 0:
@@ -447,7 +454,8 @@ class RegistryManager:
                     ["reg", "export", key_to_backup, str(backup_path), "/y"],
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=30,
+                    creationflags=CREATE_NO_WINDOW
                 )
                 
                 if result.returncode != 0:
@@ -465,7 +473,8 @@ class RegistryManager:
                     ["reg", "export", "HKEY_CURRENT_USER", str(backup_path), "/y"],
                     capture_output=True,
                     text=True,
-                    timeout=60
+                    timeout=60,
+                    creationflags=CREATE_NO_WINDOW
                 )
                 
                 if result.returncode != 0:
@@ -539,7 +548,8 @@ class RegistryManager:
                 ["reg", "import", str(backup_path)],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
+                creationflags=CREATE_NO_WINDOW
             )
             
             if result.returncode != 0:
@@ -598,7 +608,8 @@ class RegistryManager:
                     ["reg", "add", tweak.registry_key, "/f"],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
+                    creationflags=CREATE_NO_WINDOW
                 )
             
             # Set the value
@@ -612,7 +623,8 @@ class RegistryManager:
                 ],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
+                creationflags=CREATE_NO_WINDOW
             )
             
             if result.returncode != 0:
@@ -661,14 +673,16 @@ class RegistryManager:
                     ["reg", "delete", tweak.registry_key, "/v", tweak.value_name, "/f"],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
+                    creationflags=CREATE_NO_WINDOW
                 )
             else:
                 result = subprocess.run(
                     ["reg", "delete", tweak.registry_key, "/f"],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
+                    creationflags=CREATE_NO_WINDOW
                 )
             
             # Return code 0 means success, 1 might mean the value/key didn't exist (which is fine)

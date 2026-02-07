@@ -7,12 +7,17 @@ Provides access to system cleanup, DNS flush, restore points, and other maintena
 import customtkinter as ctk
 from tkinter import messagebox
 import threading
+import subprocess
 
 from src.utils.logger import get_logger
 from src.utils.admin_state import AdminState
 from src.core.system_operations import SystemOperations, SystemOperationError, PrivilegeError
 
 logger = get_logger("maintenance_tab")
+
+# Get CREATE_NO_WINDOW flag for Windows to prevent console flickering
+# On Windows, this prevents subprocess from creating a visible console window
+CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 
 
 class MaintenanceTab:
@@ -389,7 +394,8 @@ class MaintenanceTab:
                             ["ipconfig", "/flushdns"],
                             capture_output=True,
                             text=True,
-                            timeout=30
+                            timeout=30,
+                            creationflags=CREATE_NO_WINDOW
                         )
                         output_dialog.after(0, lambda: append_output(result.stdout + "\n"))
                         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -415,7 +421,8 @@ class MaintenanceTab:
                             stderr=subprocess.PIPE,
                             text=True,
                             bufsize=1,
-                            universal_newlines=True
+                            universal_newlines=True,
+                            creationflags=CREATE_NO_WINDOW
                         )
                         
                         # Read output line by line
@@ -455,7 +462,8 @@ class MaintenanceTab:
                             stderr=subprocess.PIPE,
                             text=True,
                             bufsize=1,
-                            universal_newlines=True
+                            universal_newlines=True,
+                            creationflags=CREATE_NO_WINDOW
                         )
                         
                         # Read output line by line
