@@ -321,8 +321,11 @@ class SecurityScanner:
             if 'MSYSTEM' in os.environ:
                 is_unix_shell = True
             elif 'SHELL' in os.environ:
-                shell_name = os.path.basename(os.environ['SHELL']).lower()
-                is_unix_shell = any(sh in shell_name for sh in ['bash', 'sh', 'zsh'])
+                # Handle both Unix and Windows path separators
+                shell_path = os.environ['SHELL']
+                shell_name = shell_path.split('/')[-1].split('\\')[-1].lower()
+                # Use exact matching to avoid false positives (e.g., 'shimulator', 'flasher')
+                is_unix_shell = shell_name in ['bash', 'sh', 'zsh', 'bash.exe', 'sh.exe', 'zsh.exe']
             count_cmd = "grep -c" if is_unix_shell else "find /c"
 
             # Get rule counts

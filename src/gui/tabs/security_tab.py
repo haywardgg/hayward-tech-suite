@@ -104,11 +104,12 @@ class SecurityTab:
 
         # Check defender status and create dynamic button
         # Wrap in try/except to prevent startup failures
+        # Default to False (disabled state) to show enable option when status is uncertain
         try:
             defender_enabled = self._check_defender_status()
         except Exception as e:
             logger.warning(f"Failed to check initial defender status: {e}")
-            defender_enabled = False  # Default to "Enable Defender" button text
+            defender_enabled = False
         
         defender_text = "Disable Defender" if defender_enabled else "Enable Defender"
         self.defender_button = ctk.CTkButton(
@@ -118,11 +119,12 @@ class SecurityTab:
 
         # Check firewall status and create dynamic button
         # Wrap in try/except to prevent startup failures
+        # Default to False (disabled state) to show enable option when status is uncertain
         try:
             firewall_enabled = self._check_firewall_enabled()
         except Exception as e:
             logger.warning(f"Failed to check initial firewall status: {e}")
-            firewall_enabled = False  # Default to "Enable Firewall" button text
+            firewall_enabled = False
         
         firewall_text = "Disable Firewall" if firewall_enabled else "Enable Firewall"
         self.firewall_button = ctk.CTkButton(
