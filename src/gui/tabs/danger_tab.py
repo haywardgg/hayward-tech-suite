@@ -260,10 +260,11 @@ class DangerTab:
 
             except RegistryError as e:
                 logger.error(f"Registry backup failed: {e}")
+                error_msg = str(e)
                 self.parent.after(
                     0,
                     lambda: messagebox.showerror(
-                        "Error", f"Failed to backup registry:\n{e}"
+                        "Error", f"Failed to backup registry:\n{error_msg}"
                     ),
                 )
 
@@ -348,10 +349,11 @@ class DangerTab:
 
             except RegistryError as e:
                 logger.error(f"Registry restore failed: {e}")
+                error_msg = str(e)
                 self.parent.after(
                     0,
                     lambda: messagebox.showerror(
-                        "Error", f"Failed to restore registry:\n{e}"
+                        "Error", f"Failed to restore registry:\n{error_msg}"
                     ),
                 )
 
@@ -384,10 +386,11 @@ class DangerTab:
 
             except RegistryError as e:
                 logger.error(f"Undo failed: {e}")
+                error_msg = str(e)
                 self.parent.after(
                     0,
                     lambda: messagebox.showerror(
-                        "Error", f"Failed to undo last change:\n{e}"
+                        "Error", f"Failed to undo last change:\n{error_msg}"
                     ),
                 )
 
@@ -441,10 +444,11 @@ class DangerTab:
 
             except RegistryError as e:
                 logger.error(f"Failed to apply tweak: {e}")
+                error_msg = str(e)
                 self.parent.after(
                     0,
                     lambda: messagebox.showerror(
-                        "Error", f"Failed to apply tweak:\n{e}"
+                        "Error", f"Failed to apply tweak:\n{error_msg}"
                     ),
                 )
 

@@ -176,14 +176,13 @@ Performance Profile Report (Popup):
 
 ## Complete Tab Structure
 
-The application now has **6 main tabs**:
+The application now has **5 main tabs**:
 
 1. **Monitoring** - Real-time system resource monitoring + Performance Profiler
 2. **Diagnostics** - Network diagnostics (Ping, DNS, Traceroute) ✨ NEW
 3. **Maintenance** - System maintenance operations
-4. **Backup & Restore** - Backup management
-5. **Security** - Vulnerability scanning + Automated Remediation ✨ ENHANCED
-6. **Settings** - Application configuration
+4. **Security** - Vulnerability scanning + Automated Remediation ✨ ENHANCED
+5. **Settings** - Application configuration
 
 ---
 
@@ -199,9 +198,8 @@ All core modules are now integrated:
 | `automated_remediation.py` | ✅ **NEW** | Security tab |
 | `security_scanner.py` | ✅ Integrated | Security tab |
 | `system_operations.py` | ✅ Integrated | Maintenance tab |
-| `backup_manager.py` | ✅ Integrated | Backup & Restore tab |
 
-**Status: All 7 core modules are now integrated into the UI!**
+**Status: All 6 core modules are now integrated into the UI!**
 
 ---
 

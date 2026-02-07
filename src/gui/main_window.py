@@ -13,7 +13,6 @@ from src.utils.config import get_config
 from src.gui.tabs.monitoring_tab import MonitoringTab
 from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
-from src.gui.tabs.backup_tab import BackupTab
 from src.gui.tabs.security_tab import SecurityTab
 from src.gui.tabs.danger_tab import DangerTab
 from src.gui.tabs.settings_tab import SettingsTab
@@ -113,7 +112,6 @@ class MainWindow(ctk.CTk):
         self.monitoring_tab = None
         self.diagnostics_tab = None
         self.maintenance_tab = None
-        self.backup_tab = None
         self.security_tab = None
         self.danger_tab = None
         self.settings_tab = None
@@ -149,16 +147,6 @@ class MainWindow(ctk.CTk):
             logger.error(f"Failed to create Maintenance tab: {e}")
 
         try:
-            # Backup tab
-            self.tabview.add("Backup & Restore")
-            tab_frame = self.tabview.tab("Backup & Restore")
-            self.backup_tab = BackupTab(tab_frame)
-            logger.info("Backup tab created")
-
-        except Exception as e:
-            logger.error(f"Failed to create Backup tab: {e}")
-
-        try:
             # Security tab
             self.tabview.add("Security")
             tab_frame = self.tabview.tab("Security")
@@ -169,14 +157,16 @@ class MainWindow(ctk.CTk):
             logger.error(f"Failed to create Security tab: {e}")
 
         try:
-            # DANGER tab
-            self.tabview.add("DANGER")
-            tab_frame = self.tabview.tab("DANGER")
+            # DANGER ZONE tab
+            self.tabview.add("DANGER ZONE")
+            tab_frame = self.tabview.tab("DANGER ZONE")
+            # Set the tab background to red
+            tab_frame.configure(fg_color="#8B0000")  # Dark red background
             self.danger_tab = DangerTab(tab_frame)
-            logger.info("DANGER tab created")
+            logger.info("DANGER ZONE tab created")
 
         except Exception as e:
-            logger.error(f"Failed to create DANGER tab: {e}")
+            logger.error(f"Failed to create DANGER ZONE tab: {e}")
 
         try:
             # Settings tab

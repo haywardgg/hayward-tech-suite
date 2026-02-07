@@ -31,14 +31,7 @@ A comprehensive, secure, and modern system maintenance suite for Windows, comple
 - Safe command execution with validation
 - Audit logging for all operations
 
-### 💾 **Backup & Restore**
-- File and folder backup with compression
-- **User-selectable backup destination**
-- Backup metadata tracking
-- Checksum verification
-- Automated old backup cleanup
-
-### ⚠️ **DANGER Zone - Registry Tweaks**
+### ⚠️ **DANGER ZONE - Registry Tweaks**
 - **12 common Windows 11 registry tweaks**
 - **Automatic backup before every change**
 - **One-click undo functionality**
@@ -97,19 +90,17 @@ src/
 ├── main.py                     # Entry point
 ├── core/                       # Core modules
 │   ├── system_operations.py
-│   ├── backup_manager.py
 │   ├── security_scanner.py
 │   ├── monitoring.py
-│   └── registry_manager.py    # NEW: Registry operations
+│   └── registry_manager.py    # Registry operations
 ├── gui/                        # User interface
 │   ├── main_window.py
 │   └── tabs/
 │       ├── monitoring_tab.py
 │       ├── diagnostics_tab.py
 │       ├── maintenance_tab.py
-│       ├── backup_tab.py
 │       ├── security_tab.py
-│       ├── danger_tab.py      # NEW: DANGER zone
+│       ├── danger_tab.py      # DANGER ZONE
 │       └── settings_tab.py
 └── utils/                      # Utilities
     ├── logger.py
@@ -119,9 +110,9 @@ src/
 
 ---
 
-## ⚠️ DANGER Zone Warning
+## ⚠️ DANGER ZONE Warning
 
-**The DANGER tab contains advanced registry tweaks that can modify Windows system behavior.**
+**The DANGER ZONE tab contains advanced registry tweaks that can modify Windows system behavior.**
 
 **Important Safety Information:**
 - 🔴 **HIGH risk tweaks** can cause system instability
@@ -160,10 +151,10 @@ GNU General Public License v3.0 - See [LICENSE](LICENSE)
 #### Added ✨
 - Modern tabbed interface
 - Security scanner
-- Backup manager
 - Real-time monitoring
 - Configuration system
 - Audit logging
+- Registry tweaks with safety features
 
 #### Removed ❌
 - Mini games
