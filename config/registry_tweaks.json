@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "tweaks": [
+    {
+      "id": "example_custom_tweak",
+      "name": "Example Custom Tweak",
+      "description": "This is an example of a custom tweak that can be added via JSON. Replace this with your own custom tweaks or remove it.",
+      "category": "Custom",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Example",
+        "value_name": "ExampleValue",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Example",
+        "value_name": "ExampleValue",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    }
+  ]
+}

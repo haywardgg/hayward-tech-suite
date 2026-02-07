@@ -34,107 +34,108 @@ class DiagnosticsTab:
         """Create content area."""
         content_frame = ctk.CTkScrollableFrame(self.parent)
         content_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        content_frame.grid_columnconfigure(0, weight=1)
+        content_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        content_frame.grid_rowconfigure(1, weight=1)
 
-        # Ping test section
-        self._create_ping_section(content_frame)
+        # Three diagnostic sections in columns on row 0
+        self._create_ping_section(content_frame, row=0, column=0)
+        self._create_dns_section(content_frame, row=0, column=1)
+        self._create_traceroute_section(content_frame, row=0, column=2)
 
-        # DNS lookup section
-        self._create_dns_section(content_frame)
-
-        # Traceroute section
-        self._create_traceroute_section(content_frame)
-
-        # Results section
+        # Results section spans full width on row 1
         self._create_results_section(content_frame)
 
-    def _create_ping_section(self, parent: ctk.CTkFrame) -> None:
+    def _create_ping_section(self, parent: ctk.CTkFrame, row: int = 0, column: int = 0) -> None:
         """Create ping test section."""
         ping_frame = ctk.CTkFrame(parent)
-        ping_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+        ping_frame.grid(row=row, column=column, sticky="nsew", padx=5, pady=5)
+        ping_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
             ping_frame, text="🌐 Ping Test", font=ctk.CTkFont(size=14, weight="bold")
         )
-        title.grid(row=0, column=0, columnspan=4, padx=10, pady=10, sticky="w")
+        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
 
         # Host input
         ctk.CTkLabel(ping_frame, text="Host:", font=ctk.CTkFont(size=11)).grid(
             row=1, column=0, padx=10, pady=5, sticky="w"
         )
-        self.ping_host_entry = ctk.CTkEntry(ping_frame, width=200, placeholder_text="8.8.8.8")
-        self.ping_host_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+        self.ping_host_entry = ctk.CTkEntry(ping_frame, placeholder_text="8.8.8.8")
+        self.ping_host_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
         self.ping_host_entry.insert(0, "8.8.8.8")
 
         # Count input
         ctk.CTkLabel(ping_frame, text="Count:", font=ctk.CTkFont(size=11)).grid(
-            row=1, column=2, padx=(20, 5), pady=5, sticky="w"
+            row=3, column=0, padx=10, pady=5, sticky="w"
         )
-        self.ping_count_entry = ctk.CTkEntry(ping_frame, width=60, placeholder_text="10")
-        self.ping_count_entry.grid(row=1, column=3, padx=5, pady=5, sticky="w")
+        self.ping_count_entry = ctk.CTkEntry(ping_frame, placeholder_text="10")
+        self.ping_count_entry.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
         self.ping_count_entry.insert(0, "10")
 
         # Ping button
-        ctk.CTkButton(
-            ping_frame, text="Run Ping Test", command=self._run_ping_test, width=150
-        ).grid(row=2, column=0, columnspan=4, padx=10, pady=10, sticky="w")
+        self.ping_button = ctk.CTkButton(
+            ping_frame, text="Run Ping Test", command=self._run_ping_test
+        )
+        self.ping_button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
 
-    def _create_dns_section(self, parent: ctk.CTkFrame) -> None:
+    def _create_dns_section(self, parent: ctk.CTkFrame, row: int = 0, column: int = 0) -> None:
         """Create DNS lookup section."""
         dns_frame = ctk.CTkFrame(parent)
-        dns_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        dns_frame.grid_columnconfigure(1, weight=1)
+        dns_frame.grid(row=row, column=column, sticky="nsew", padx=5, pady=5)
+        dns_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
             dns_frame, text="🔍 DNS Lookup", font=ctk.CTkFont(size=14, weight="bold")
         )
-        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # Hostname input
         ctk.CTkLabel(dns_frame, text="Hostname:", font=ctk.CTkFont(size=11)).grid(
             row=1, column=0, padx=10, pady=5, sticky="w"
         )
         self.dns_hostname_entry = ctk.CTkEntry(
-            dns_frame, width=300, placeholder_text="www.google.com"
+            dns_frame, placeholder_text="www.google.com"
         )
-        self.dns_hostname_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+        self.dns_hostname_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
         self.dns_hostname_entry.insert(0, "www.google.com")
 
         # DNS button
-        ctk.CTkButton(
-            dns_frame, text="DNS Lookup", command=self._run_dns_lookup, width=150
-        ).grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        self.dns_button = ctk.CTkButton(
+            dns_frame, text="DNS Lookup", command=self._run_dns_lookup
+        )
+        self.dns_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
-    def _create_traceroute_section(self, parent: ctk.CTkFrame) -> None:
+    def _create_traceroute_section(self, parent: ctk.CTkFrame, row: int = 0, column: int = 0) -> None:
         """Create traceroute section."""
         trace_frame = ctk.CTkFrame(parent)
-        trace_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
-        trace_frame.grid_columnconfigure(1, weight=1)
+        trace_frame.grid(row=row, column=column, sticky="nsew", padx=5, pady=5)
+        trace_frame.grid_columnconfigure(0, weight=1)
 
         title = ctk.CTkLabel(
             trace_frame, text="🛣️ Traceroute", font=ctk.CTkFont(size=14, weight="bold")
         )
-        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # Host input
         ctk.CTkLabel(trace_frame, text="Host:", font=ctk.CTkFont(size=11)).grid(
             row=1, column=0, padx=10, pady=5, sticky="w"
         )
         self.trace_host_entry = ctk.CTkEntry(
-            trace_frame, width=300, placeholder_text="8.8.8.8"
+            trace_frame, placeholder_text="8.8.8.8"
         )
-        self.trace_host_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+        self.trace_host_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
         self.trace_host_entry.insert(0, "8.8.8.8")
 
         # Traceroute button
-        ctk.CTkButton(
-            trace_frame, text="Run Traceroute", command=self._run_traceroute, width=150
-        ).grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        self.traceroute_button = ctk.CTkButton(
+            trace_frame, text="Run Traceroute", command=self._run_traceroute
+        )
+        self.traceroute_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
     def _create_results_section(self, parent: ctk.CTkFrame) -> None:
         """Create results display section."""
         results_frame = ctk.CTkFrame(parent)
-        results_frame.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
+        results_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
         results_frame.grid_columnconfigure(0, weight=1)
         results_frame.grid_rowconfigure(1, weight=1)
 
@@ -146,10 +147,9 @@ class DiagnosticsTab:
         # Results display
         self.results_text = ctk.CTkTextbox(results_frame, height=300)
         self.results_text.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
+        self.results_text.configure(state="normal")
+        self.results_text.insert("1.0", "No test results yet. Run a diagnostic test to see results here.")
         self.results_text.configure(state="disabled")
-        self.results_text.insert(
-            "1.0", "No test results yet. Run a diagnostic test to see results here."
-        )
 
     def _run_ping_test(self) -> None:
         """Run ping test."""
@@ -168,6 +168,9 @@ class DiagnosticsTab:
             return
 
         logger.info(f"User initiated ping test to {host}")
+
+        # Disable button
+        self.ping_button.configure(state="disabled", text="Running...")
 
         def task():
             try:
@@ -206,6 +209,9 @@ class DiagnosticsTab:
             except Exception as e:
                 logger.error(f"Unexpected error during ping test: {e}")
                 self._update_results(f"Unexpected error: {e}")
+            finally:
+                # Re-enable button
+                self.parent.after(0, lambda: self.ping_button.configure(state="normal", text="Run Ping Test"))
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -217,6 +223,9 @@ class DiagnosticsTab:
             return
 
         logger.info(f"User initiated DNS lookup for {hostname}")
+
+        # Disable button
+        self.dns_button.configure(state="disabled", text="Looking up...")
 
         def task():
             try:
@@ -247,6 +256,9 @@ class DiagnosticsTab:
             except Exception as e:
                 logger.error(f"Unexpected error during DNS lookup: {e}")
                 self._update_results(f"Unexpected error: {e}")
+            finally:
+                # Re-enable button
+                self.parent.after(0, lambda: self.dns_button.configure(state="normal", text="DNS Lookup"))
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -258,6 +270,9 @@ class DiagnosticsTab:
             return
 
         logger.info(f"User initiated traceroute to {host}")
+
+        # Disable button
+        self.traceroute_button.configure(state="disabled", text="Tracing...")
 
         def task():
             try:
@@ -296,6 +311,9 @@ class DiagnosticsTab:
             except Exception as e:
                 logger.error(f"Unexpected error during traceroute: {e}")
                 self._update_results(f"Unexpected error: {e}")
+            finally:
+                # Re-enable button
+                self.parent.after(0, lambda: self.traceroute_button.configure(state="normal", text="Run Traceroute"))
 
         threading.Thread(target=task, daemon=True).start()
 

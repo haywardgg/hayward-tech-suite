@@ -16,6 +16,8 @@ if __name__ == "__main__":
 
 from src.utils.logger import get_logger, Logger
 from src.utils.config import get_config
+from src.utils.admin_state import AdminState
+from src.core.system_operations import SystemOperations
 from src.gui.main_window import MainWindow
 
 logger = get_logger("main")
@@ -96,6 +98,63 @@ Starting application...
     logger.info(f"{app_name} v{app_version} starting")
 
 
+def check_admin_privileges() -> bool:
+    """
+    Check admin privileges and prompt user if not admin.
+    
+    Returns:
+        True if app should continue, False if user wants to exit
+    """
+    is_admin = SystemOperations.is_admin()
+    
+    if is_admin:
+        logger.info("Running with administrator privileges")
+        AdminState.set_admin_mode(is_admin=True, declined=False)
+        return True
+    
+    # Not admin - show dialog
+    logger.warning("Not running as administrator")
+    
+    # Import tkinter for messagebox
+    import tkinter as tk
+    from tkinter import messagebox
+    
+    # Create hidden root window for dialog
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    # Show dialog
+    result = messagebox.askyesno(
+        "Administrator Privileges Required",
+        "Administrator privileges are required for advanced features:\n\n"
+        "• Some tweaks and maintenance operations require admin rights\n"
+        "• Registry modifications need elevated permissions\n"
+        "• System maintenance tools (SFC, DISM) require admin access\n\n"
+        "Run without admin? (Limited functionality)\n\n"
+        "YES = Continue with limited features\n"
+        "NO = Request admin elevation and restart",
+        icon='warning'
+    )
+    
+    root.destroy()
+    
+    if result:  # User chose YES - continue without admin
+        logger.info("User chose to continue without admin privileges")
+        AdminState.set_admin_mode(is_admin=False, declined=True)
+        return True
+    else:  # User chose NO - request elevation
+        logger.info("User requested admin elevation")
+        try:
+            SystemOperations.request_admin_elevation()
+            # If we reach here, elevation failed
+            logger.error("Admin elevation failed or was cancelled")
+            return False
+        except Exception as e:
+            logger.error(f"Failed to request admin elevation: {e}")
+            return False
+
+
 def main() -> int:
     """
     Main entry point for the application.
@@ -114,6 +173,11 @@ def main() -> int:
         if not check_requirements():
             logger.error("Requirements check failed")
             return 1
+
+        # Check admin privileges
+        if not check_admin_privileges():
+            logger.info("Application startup cancelled by user")
+            return 0
 
         # Load configuration
         config = get_config()

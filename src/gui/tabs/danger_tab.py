@@ -202,24 +202,24 @@ class DangerTab:
 
         # Check if tweak is already applied
         is_applied = self.registry_manager.is_tweak_applied(tweak.id)
-        button_text = "✓ APPLIED" if is_applied else "APPLY"
-        button_state = "disabled" if is_applied else "normal"
-        fg_color = "gray" if is_applied else "green"
+        button_text = "RESTORE" if is_applied else "APPLY"
+        button_state = "normal"  # Always enabled
+        fg_color = "orange" if is_applied else "green"
 
-        # Apply button
-        apply_btn = ctk.CTkButton(
+        # Apply/Restore button
+        action_btn = ctk.CTkButton(
             tweak_frame,
             text=button_text,
-            command=lambda t=tweak: self._apply_tweak(t),
+            command=lambda t=tweak: self._toggle_tweak(t),
             width=100,
             height=35,
             state=button_state,
             fg_color=fg_color,
         )
-        apply_btn.grid(row=0, column=2, padx=5, pady=5)
+        action_btn.grid(row=0, column=2, padx=5, pady=5)
         
         # Store button reference for later updates
-        self.tweak_buttons[tweak.id] = apply_btn
+        self.tweak_buttons[tweak.id] = action_btn
 
     def _create_history_section(self, parent: ctk.CTkFrame) -> None:
         """Create backup history section."""
@@ -409,6 +409,71 @@ class DangerTab:
 
         threading.Thread(target=task, daemon=True).start()
 
+    def _toggle_tweak(self, tweak) -> None:
+        """Toggle a registry tweak (apply if not applied, restore if applied)."""
+        is_applied = self.registry_manager.is_tweak_applied(tweak.id)
+        
+        if is_applied:
+            self._restore_tweak(tweak)
+        else:
+            self._apply_tweak(tweak)
+
+    def _restore_tweak(self, tweak) -> None:
+        """Restore a registry tweak to Windows default."""
+        if not messagebox.askyesno(
+            f"Restore: {tweak.name}",
+            f"This will restore the registry setting to Windows default.\n\n"
+            f"Tweak: {tweak.name}\n"
+            f"Description: {tweak.description}\n\n"
+            f"Do you want to continue?",
+        ):
+            return
+
+        logger.info(f"Restoring registry tweak to default: {tweak.name}")
+
+        def task():
+            try:
+                # Create backup before restoring
+                backup_id = self.registry_manager.backup_registry(
+                    keys=[tweak.registry_key],
+                    description=f"Before restoring {tweak.name}"
+                )
+
+                # Restore to default - delete the registry value/key
+                success = self.registry_manager.restore_tweak_to_default(tweak.id)
+
+                restart_msg = (
+                    "\n\nℹ️ A system restart may be required for this change to take effect."
+                    if tweak.requires_restart
+                    else ""
+                )
+
+                self.parent.after(
+                    0,
+                    lambda: messagebox.showinfo(
+                        "Success",
+                        f"Tweak restored to default successfully!\n\n"
+                        f"Backup ID: {backup_id}"
+                        f"{restart_msg}",
+                    ),
+                )
+                self.parent.after(0, self._refresh_history)
+                # Update button state
+                tweak_id_to_update = tweak.id
+                self.parent.after(0, lambda tid=tweak_id_to_update: self._update_tweak_button_state(tid))
+
+            except RegistryError as e:
+                logger.error(f"Failed to restore tweak: {e}")
+                error_msg = str(e)
+                self.parent.after(
+                    0,
+                    lambda: messagebox.showerror(
+                        "Error", f"Failed to restore tweak:\n{error_msg}"
+                    ),
+                )
+
+        threading.Thread(target=task, daemon=True).start()
+
     def _apply_tweak(self, tweak) -> None:
         """Apply a registry tweak."""
         # Show confirmation dialog with risk level
@@ -477,9 +542,9 @@ class DangerTab:
             button = self.tweak_buttons[tweak_id]
             is_applied = self.registry_manager.is_tweak_applied(tweak_id)
             
-            button_text = "✓ APPLIED" if is_applied else "APPLY"
-            button_state = "disabled" if is_applied else "normal"
-            fg_color = "gray" if is_applied else "green"
+            button_text = "RESTORE" if is_applied else "APPLY"
+            button_state = "normal"  # Always enabled
+            fg_color = "orange" if is_applied else "green"
             
             button.configure(
                 text=button_text,

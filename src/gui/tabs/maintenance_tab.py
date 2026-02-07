@@ -43,13 +43,13 @@ class MaintenanceTab:
         content_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         content_frame.grid_columnconfigure((0, 1, 2), weight=1)
 
-        # System Restore at top (row 0, full width)
-        self._create_restore_point_section(content_frame, row=0)
+        # Row 0: System Restore (full width)
+        self._create_restore_point_section(content_frame, row=0, column=0)
 
-        # DNS, System Maintenance, and Disk Health in same row (row 1, columns 0, 1, 2)
-        self._create_dns_section(content_frame, row=1, column=0)
-        self._create_system_maintenance_section(content_frame, row=1, column=1)
-        self._create_disk_section(content_frame, row=1, column=2)
+        # Row 1: Disk Health, DNS Operations, System Maintenance
+        self._create_disk_section(content_frame, row=1, column=0)
+        self._create_dns_section(content_frame, row=1, column=1)
+        self._create_system_maintenance_section(content_frame, row=1, column=2)
 
     def _create_dns_section(self, parent: ctk.CTkFrame, row: int, column: int = 0) -> None:
         """Create DNS operations section."""
@@ -63,12 +63,39 @@ class MaintenanceTab:
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         info = ctk.CTkLabel(
-            dns_frame, text="Clear DNS cache to resolve network issues", font=ctk.CTkFont(size=11)
+            dns_frame, text="DNS cache and configuration", font=ctk.CTkFont(size=11)
         )
         info.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 
-        btn = ctk.CTkButton(dns_frame, text="Flush DNS Cache", command=self._flush_dns, width=200)
-        btn.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        # Flush DNS button
+        ctk.CTkButton(
+            dns_frame, text="Flush DNS Cache", command=self._flush_dns
+        ).grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+
+        # Edit hosts file button
+        ctk.CTkButton(
+            dns_frame, text="Edit Hosts File", command=self._edit_hosts_file
+        ).grid(row=3, column=0, padx=10, pady=5, sticky="ew")
+
+        # Reset DNS to Google button
+        ctk.CTkButton(
+            dns_frame, text="DNS → Google (8.8.8.8)", command=self._reset_dns_google
+        ).grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+
+        # Reset DNS to Cloudflare button
+        ctk.CTkButton(
+            dns_frame, text="DNS → Cloudflare (1.1.1.1)", command=self._reset_dns_cloudflare
+        ).grid(row=5, column=0, padx=10, pady=5, sticky="ew")
+
+        # Reset DNS to Auto button
+        ctk.CTkButton(
+            dns_frame, text="DNS → Auto (DHCP)", command=self._reset_dns_auto
+        ).grid(row=6, column=0, padx=10, pady=5, sticky="ew")
+
+        # View DNS cache button
+        ctk.CTkButton(
+            dns_frame, text="View DNS Cache", command=self._view_dns_cache
+        ).grid(row=7, column=0, padx=10, pady=5, sticky="ew")
 
     def _create_restore_point_section(self, parent: ctk.CTkFrame, row: int, column: int = 0) -> None:
         """Create restore point section."""
@@ -285,3 +312,196 @@ class MaintenanceTab:
                 ))
 
         threading.Thread(target=task, daemon=True).start()
+
+    def _edit_hosts_file(self) -> None:
+        """Open hosts file for editing."""
+        logger.info("User initiated hosts file edit")
+
+        def task():
+            try:
+                if not self.system_ops.is_admin():
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Admin Required",
+                        "Administrator privileges are required to edit the hosts file.\n\n"
+                        "Please restart the application as administrator."
+                    ))
+                    return
+
+                self.system_ops.edit_hosts_file()
+                self.parent.after(0, lambda: messagebox.showinfo(
+                    "Success", "Hosts file opened in Notepad."
+                ))
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"Failed to edit hosts file: {error_msg}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error", f"Failed to open hosts file:\n{error_msg}"
+                ))
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def _reset_dns_google(self) -> None:
+        """Reset DNS to Google DNS."""
+        logger.info("User initiated DNS reset to Google")
+
+        def task():
+            try:
+                if not self.system_ops.is_admin():
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Admin Required",
+                        "Administrator privileges are required to change DNS settings.\n\n"
+                        "Please restart the application as administrator."
+                    ))
+                    return
+
+                # Get network adapters
+                adapters = self.system_ops.get_network_adapters()
+                if not adapters:
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Error", "No network adapters found."
+                    ))
+                    return
+
+                # Use first active adapter
+                adapter = adapters[0]
+                self.system_ops.set_dns_servers(adapter, "8.8.8.8", "8.8.4.4")
+                
+                self.parent.after(0, lambda: messagebox.showinfo(
+                    "Success", f"DNS set to Google DNS (8.8.8.8, 8.8.4.4) for adapter '{adapter}'"
+                ))
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"Failed to set Google DNS: {error_msg}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error", f"Failed to set Google DNS:\n{error_msg}"
+                ))
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def _reset_dns_cloudflare(self) -> None:
+        """Reset DNS to Cloudflare DNS."""
+        logger.info("User initiated DNS reset to Cloudflare")
+
+        def task():
+            try:
+                if not self.system_ops.is_admin():
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Admin Required",
+                        "Administrator privileges are required to change DNS settings.\n\n"
+                        "Please restart the application as administrator."
+                    ))
+                    return
+
+                # Get network adapters
+                adapters = self.system_ops.get_network_adapters()
+                if not adapters:
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Error", "No network adapters found."
+                    ))
+                    return
+
+                # Use first active adapter
+                adapter = adapters[0]
+                self.system_ops.set_dns_servers(adapter, "1.1.1.1", "1.0.0.1")
+                
+                self.parent.after(0, lambda: messagebox.showinfo(
+                    "Success", f"DNS set to Cloudflare DNS (1.1.1.1, 1.0.0.1) for adapter '{adapter}'"
+                ))
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"Failed to set Cloudflare DNS: {error_msg}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error", f"Failed to set Cloudflare DNS:\n{error_msg}"
+                ))
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def _reset_dns_auto(self) -> None:
+        """Reset DNS to automatic (DHCP)."""
+        logger.info("User initiated DNS reset to auto")
+
+        def task():
+            try:
+                if not self.system_ops.is_admin():
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Admin Required",
+                        "Administrator privileges are required to change DNS settings.\n\n"
+                        "Please restart the application as administrator."
+                    ))
+                    return
+
+                # Get network adapters
+                adapters = self.system_ops.get_network_adapters()
+                if not adapters:
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Error", "No network adapters found."
+                    ))
+                    return
+
+                # Use first active adapter
+                adapter = adapters[0]
+                self.system_ops.reset_dns_to_auto(adapter)
+                
+                self.parent.after(0, lambda: messagebox.showinfo(
+                    "Success", f"DNS reset to automatic (DHCP) for adapter '{adapter}'"
+                ))
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"Failed to reset DNS to auto: {error_msg}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error", f"Failed to reset DNS to auto:\n{error_msg}"
+                ))
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def _view_dns_cache(self) -> None:
+        """View DNS cache."""
+        logger.info("User initiated DNS cache view")
+
+        def task():
+            try:
+                cache_output = self.system_ops.view_dns_cache()
+                
+                # Create a dialog to show DNS cache
+                self.parent.after(0, lambda: self._show_dns_cache_dialog(cache_output))
+                
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"Failed to view DNS cache: {error_msg}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error", f"Failed to view DNS cache:\n{error_msg}"
+                ))
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def _show_dns_cache_dialog(self, cache_output: str) -> None:
+        """Show DNS cache in a dialog."""
+        dialog = ctk.CTkToplevel(self.parent)
+        dialog.title("DNS Cache")
+        dialog.geometry("800x600")
+        
+        # Make dialog modal
+        dialog.transient(self.parent)
+        dialog.grab_set()
+        
+        # Title
+        title = ctk.CTkLabel(
+            dialog, 
+            text="DNS Cache Contents", 
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        title.pack(padx=10, pady=10)
+        
+        # Textbox for cache output
+        text_box = ctk.CTkTextbox(dialog, wrap="word")
+        text_box.pack(padx=10, pady=10, fill="both", expand=True)
+        text_box.insert("1.0", cache_output)
+        text_box.configure(state="disabled")
+        
+        # Close button
+        ctk.CTkButton(
+            dialog, 
+            text="Close", 
+            command=dialog.destroy,
+            width=100
+        ).pack(padx=10, pady=10)

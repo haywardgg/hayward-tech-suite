@@ -4,9 +4,13 @@ Settings tab for application configuration.
 
 import customtkinter as ctk
 from tkinter import messagebox
+import threading
+import shutil
+from pathlib import Path
 
 from src.utils.logger import get_logger
 from src.utils.config import get_config
+from src.utils.admin_state import AdminState
 
 logger = get_logger("settings_tab")
 
@@ -103,11 +107,15 @@ class SettingsTab:
         title = ctk.CTkLabel(about_frame, text="About", font=ctk.CTkFont(size=14, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        app_name = self.config.get("app.name", "Ghosty Toolz Evolved")
-        app_version = self.config.get("app.version", "2.0.0")
-        description = self.config.get("app.description", "Professional Windows System Maintenance Tool")
-
-        info_text = f"{app_name}\nVersion {app_version}\n\n{description}\n\nLicense: GPL-3.0-or-later"
+        # Updated about information as per requirements
+        info_text = (
+            "Ghosty Toolz Evolved\n"
+            "Version 2.0.0\n\n"
+            "Original concept by Ghostshadow\n"
+            "By HaywardGG\n\n"
+            "Professional Windows System Maintenance Tool\n\n"
+            "License: GPL-3.0-or-later"
+        )
         info_label = ctk.CTkLabel(
             about_frame, text=info_text, font=ctk.CTkFont(size=11), justify="left"
         )
@@ -121,6 +129,29 @@ class SettingsTab:
             width=150,
             fg_color="green",
         ).grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+        # RESET button - admin required
+        self.reset_button = ctk.CTkButton(
+            about_frame,
+            text="🔄 RESET TO DEFAULTS",
+            command=self._reset_to_defaults,
+            width=200,
+            height=35,
+            fg_color="#dc3545",
+            hover_color="#c82333",
+        )
+        self.reset_button.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        
+        # Disable reset button if not admin
+        if not AdminState.is_admin():
+            self.reset_button.configure(state="disabled")
+            # Add tooltip-like label
+            ctk.CTkLabel(
+                about_frame,
+                text="⚠️ Requires Administrator - Restart app as admin",
+                font=ctk.CTkFont(size=9),
+                text_color="gray"
+            ).grid(row=4, column=0, padx=10, pady=(0, 10), sticky="w")
 
     def _change_theme(self, choice: str) -> None:
         """Change application theme."""
@@ -148,3 +179,107 @@ class SettingsTab:
         except Exception as e:
             logger.error(f"Failed to save settings: {e}")
             messagebox.showerror("Error", f"Failed to save settings: {e}")
+
+    def _reset_to_defaults(self) -> None:
+        """Reset all application settings and registry changes to defaults."""
+        if not AdminState.is_admin():
+            messagebox.showerror(
+                "Admin Required",
+                "Administrator privileges are required to reset the application.\n\n"
+                "Please restart the application as administrator."
+            )
+            return
+
+        # Show confirmation dialog
+        result = messagebox.askyesno(
+            "Reset to Defaults",
+            "⚠️ WARNING: This will:\n\n"
+            "• Delete all registry backups from temp folder\n"
+            "• Reset application settings to defaults\n"
+            "• Clear all logs\n\n"
+            "Note: Registry tweaks will NOT be automatically restored.\n"
+            "Use the RESTORE button in DANGER ZONE to undo individual tweaks.\n\n"
+            "This action cannot be undone!\n\n"
+            "Are you sure you want to continue?",
+            icon='warning'
+        )
+
+        if not result:
+            return
+
+        # Disable button during operation
+        self.reset_button.configure(state="disabled", text="Resetting...")
+
+        def reset_task():
+            try:
+                # Import here to avoid circular dependencies
+                from src.core.registry_manager import RegistryManager
+                import tempfile
+
+                registry_manager = RegistryManager()
+
+                # Restore all registry changes to defaults
+                logger.info("Restoring all registry changes to defaults...")
+                try:
+                    # TODO: Implement restore_all_to_defaults() in RegistryManager
+                    # This would iterate through all applied tweaks and restore them to Windows defaults
+                    # For now, RESET only clears backups, config, and logs
+                    if hasattr(registry_manager, 'restore_all_to_defaults'):
+                        registry_manager.restore_all_to_defaults()
+                    else:
+                        logger.info("Registry restore not yet implemented - only clearing backups and config")
+                except Exception as e:
+                    logger.warning(f"Failed to restore registry defaults: {e}")
+
+                # Delete registry backup directory
+                logger.info("Deleting registry backup directory...")
+                backup_dir = Path(tempfile.gettempdir()) / "ghosty_toolz_registry_backups"
+                if backup_dir.exists():
+                    try:
+                        shutil.rmtree(backup_dir)
+                        logger.info("Registry backups deleted")
+                    except Exception as e:
+                        logger.warning(f"Failed to delete registry backups: {e}")
+
+                # Reset config to defaults
+                logger.info("Resetting configuration to defaults...")
+                try:
+                    self.config.reset_to_defaults()
+                except Exception as e:
+                    logger.warning(f"Failed to reset config: {e}")
+
+                # Clear log files
+                logger.info("Clearing log files...")
+                try:
+                    log_dir = Path("logs")
+                    if log_dir.exists():
+                        for log_file in log_dir.glob("*.log"):
+                            try:
+                                log_file.unlink()
+                            except Exception:
+                                pass
+                except Exception as e:
+                    logger.warning(f"Failed to clear logs: {e}")
+
+                # Re-enable button and show success
+                self.parent.after(0, lambda: self.reset_button.configure(
+                    state="normal", text="🔄 RESET TO DEFAULTS"
+                ))
+                self.parent.after(0, lambda: messagebox.showinfo(
+                    "Reset Complete",
+                    "Application has been reset to defaults!\n\n"
+                    "Please restart the application for changes to take full effect."
+                ))
+
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"Failed to reset application: {error_msg}")
+                self.parent.after(0, lambda: self.reset_button.configure(
+                    state="normal", text="🔄 RESET TO DEFAULTS"
+                ))
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Reset Failed",
+                    f"Failed to reset application:\n{error_msg}"
+                ))
+
+        threading.Thread(target=reset_task, daemon=True).start()
