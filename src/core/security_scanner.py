@@ -7,6 +7,8 @@ firewall monitoring, and port checking.
 
 import subprocess
 import socket
+import platform
+import os
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
@@ -312,10 +314,21 @@ class SecurityScanner:
             enabled = "OFF" not in stdout.upper()
             profile = "All Profiles"
 
+            # Detect which command to use for counting
+            # Check if we're in a Unix-like shell (Git Bash, WSL, etc.)
+            # MSYSTEM indicates Git Bash/MSYS2, SHELL with bash/sh/zsh indicates Unix-like shell
+            is_unix_shell = 'MSYSTEM' in os.environ or (
+                'SHELL' in os.environ and 
+                os.environ['SHELL'] and  # Ensure SHELL is not empty
+                os.path.basename(os.environ['SHELL']).lower() in 
+                ['bash', 'sh', 'zsh', 'bash.exe', 'sh.exe', 'zsh.exe']
+            )
+            count_cmd = "grep -c" if is_unix_shell else "find /c"
+
             # Get rule counts
             try:
                 success_in, stdout_in, _ = self.system_ops.execute_command(
-                    "netsh advfirewall firewall show rule name=all dir=in | find /c \"Rule Name\"",
+                    f"netsh advfirewall firewall show rule name=all dir=in | {count_cmd} \"Rule Name\"",
                     shell=True,
                     audit=False,
                 )
@@ -325,7 +338,7 @@ class SecurityScanner:
 
             try:
                 success_out, stdout_out, _ = self.system_ops.execute_command(
-                    "netsh advfirewall firewall show rule name=all dir=out | find /c \"Rule Name\"",
+                    f"netsh advfirewall firewall show rule name=all dir=out | {count_cmd} \"Rule Name\"",
                     shell=True,
                     audit=False,
                 )

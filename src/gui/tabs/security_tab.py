@@ -103,7 +103,14 @@ class SecurityTab:
         ).grid(row=0, column=0, padx=5)
 
         # Check defender status and create dynamic button
-        defender_enabled = self._check_defender_status()
+        # Wrap in try/except to prevent startup failures
+        # Default to False (disabled state) to show enable option when status is uncertain
+        try:
+            defender_enabled = self._check_defender_status()
+        except Exception as e:
+            logger.warning(f"Failed to check initial defender status: {e}")
+            defender_enabled = False
+        
         defender_text = "Disable Defender" if defender_enabled else "Enable Defender"
         self.defender_button = ctk.CTkButton(
             btn_frame, text=defender_text, command=self._toggle_defender, width=150
@@ -111,7 +118,14 @@ class SecurityTab:
         self.defender_button.grid(row=0, column=1, padx=5)
 
         # Check firewall status and create dynamic button
-        firewall_enabled = self._check_firewall_enabled()
+        # Wrap in try/except to prevent startup failures
+        # Default to False (disabled state) to show enable option when status is uncertain
+        try:
+            firewall_enabled = self._check_firewall_enabled()
+        except Exception as e:
+            logger.warning(f"Failed to check initial firewall status: {e}")
+            firewall_enabled = False
+        
         firewall_text = "Disable Firewall" if firewall_enabled else "Enable Firewall"
         self.firewall_button = ctk.CTkButton(
             btn_frame, text=firewall_text, command=self._toggle_firewall, width=150
