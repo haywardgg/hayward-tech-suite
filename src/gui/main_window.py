@@ -10,6 +10,7 @@ from pathlib import Path
 
 from src.utils.logger import get_logger
 from src.utils.config import get_config
+from src.utils.resource_path import resource_path
 from src.gui.tabs.monitoring_tab import MonitoringTab
 from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
@@ -51,7 +52,7 @@ class MainWindow(ctk.CTk):
         ctk.set_default_color_theme("blue")  # Can be customized further
 
         # Set icon if available
-        icon_path = Path("images/ghosty icon.ico")
+        icon_path = Path(resource_path("images/ghosty icon.ico"))
         if icon_path.exists():
             try:
                 self.iconbitmap(str(icon_path))
