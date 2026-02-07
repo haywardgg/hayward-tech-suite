@@ -32,7 +32,6 @@ class MaintenanceTab:
         self.parent.grid_columnconfigure(0, weight=1)
 
         # Create UI
-        self._create_header()
         self._create_operations()
 
         logger.info("Maintenance tab initialized")
