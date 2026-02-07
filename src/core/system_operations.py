@@ -1,5 +1,5 @@
 """
-System operations module for Ghost Toolz Evolved.
+System operations module for Ghosty Toolz Evolved.
 
 Provides safe, audited system operations with proper privilege management,
 input validation, and error handling.
@@ -54,6 +54,8 @@ class SystemOperations:
         "powershell",
         "cmd",
         "net",
+        "ping",
+        "tracert",
     ]
 
     def __init__(self) -> None:

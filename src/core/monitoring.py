@@ -1,5 +1,5 @@
 """
-System monitoring module for Ghost Toolz Evolved.
+System monitoring module for Ghosty Toolz Evolved.
 
 Provides real-time monitoring of system resources including CPU, RAM, disk, battery, and network.
 """
