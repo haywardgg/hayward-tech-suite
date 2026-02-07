@@ -11,6 +11,7 @@ import yaml
 from dotenv import load_dotenv
 
 from src.utils.logger import get_logger
+from src.utils.resource_path import resource_path
 
 logger = get_logger("config")
 
@@ -37,7 +38,7 @@ class Config:
         if not self._initialized:
             self._initialized = True
             self._config: Dict[str, Any] = {}
-            self._config_path = Path(config_path or "config/config.yaml")
+            self._config_path = Path(config_path or resource_path("config/config.yaml"))
             self._load_config()
 
     def _load_config(self) -> None:

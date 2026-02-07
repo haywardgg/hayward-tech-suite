@@ -16,6 +16,7 @@ import json
 from src.utils.logger import get_logger, get_audit_logger
 from src.utils.config import get_config
 from src.utils.validators import Validators, ValidationError
+from src.utils.resource_path import resource_path
 
 logger = get_logger("registry_manager")
 audit_logger = get_audit_logger()
@@ -143,7 +144,7 @@ class RegistryManager:
         json_files = []
         
         # Load from config directory
-        config_file = Path("config") / "registry_tweaks.json"
+        config_file = Path(resource_path("config/registry_tweaks.json"))
         if config_file.exists():
             json_files.append(config_file)
         
