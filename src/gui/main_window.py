@@ -137,14 +137,6 @@ class MainWindow(ctk.CTk):
             self.tabview.add("DANGER ZONE")
             tab_frame = self.tabview.tab("DANGER ZONE")
             self.danger_tab = DangerTab(tab_frame)
-            # Set the DANGER ZONE tab button to red
-            try:
-                self.tabview._segmented_button.configure(
-                    selected_color="#8B0000",  # Dark red for selected button
-                    selected_hover_color="#A52A2A"  # Slightly lighter red on hover
-                )
-            except Exception as e:
-                logger.warning(f"Could not customize DANGER ZONE tab button color: {e}")
             logger.info("DANGER ZONE tab created")
 
         except Exception as e:
@@ -162,6 +154,37 @@ class MainWindow(ctk.CTk):
 
         # Set default tab
         self.tabview.set("Monitoring")
+        
+        # Customize DANGER ZONE tab button color
+        # This must be done after all tabs are created
+        try:
+            # Access the segmented button and configure colors for when DANGER ZONE is selected
+            segmented_button = self.tabview._segmented_button
+            # Store original colors
+            self._original_selected_color = segmented_button.cget("selected_color")
+            self._original_selected_hover = segmented_button.cget("selected_hover_color")
+            
+            # Override the set method to change colors dynamically
+            original_set = self.tabview.set
+            
+            def custom_set(value):
+                if value == "DANGER ZONE":
+                    segmented_button.configure(
+                        selected_color="#8B0000",  # Dark red
+                        selected_hover_color="#A52A2A"  # Brown red
+                    )
+                else:
+                    segmented_button.configure(
+                        selected_color=self._original_selected_color,
+                        selected_hover_color=self._original_selected_hover
+                    )
+                return original_set(value)
+            
+            self.tabview.set = custom_set
+            
+            logger.info("DANGER ZONE tab button styling configured")
+        except Exception as e:
+            logger.warning(f"Could not customize DANGER ZONE tab button color: {e}")
 
     def _create_status_bar(self) -> None:
         """Create status bar at bottom."""
