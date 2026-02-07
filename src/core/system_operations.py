@@ -53,6 +53,7 @@ class SystemOperations:
         "wbadmin",
         "powershell",
         "cmd",
+        "net",
     ]
 
     def __init__(self) -> None:
@@ -141,7 +142,7 @@ class SystemOperations:
         """
         # Validate command
         try:
-            validators.validate_command(command, self.ALLOWED_COMMANDS)
+            validators.validate_command(command, self.ALLOWED_COMMANDS, allow_shell=shell)
         except ValidationError as e:
             logger.error(f"Command validation failed: {e}")
             if audit:
