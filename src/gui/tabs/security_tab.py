@@ -154,21 +154,107 @@ class SecurityTab:
         self.results_text.insert("1.0", "No scan results yet. Click 'Run Vulnerability Scan' to start.")
 
     def _run_scan(self) -> None:
-        """Run vulnerability scan."""
+        """Run vulnerability scan with real-time output."""
         logger.info("User initiated vulnerability scan")
 
         def task():
             try:
-                self._update_results("Scanning for vulnerabilities...\n\n")
+                result_text = "Scanning for vulnerabilities...\n"
+                result_text += "=" * 50 + "\n\n"
+                self._update_results(result_text)
 
-                vulnerabilities = self.security_scanner.scan_vulnerabilities()
+                # Check Windows Defender
+                result_text += f"{self._format_timestamp()} Checking Windows Defender status...\n"
+                self._update_results(result_text)
+                
+                defender_vuln = self.security_scanner._check_windows_defender()
+                if defender_vuln:
+                    result_text += f"{self._format_timestamp()} ⚠️ Windows Defender: ISSUE DETECTED\n\n"
+                else:
+                    result_text += f"{self._format_timestamp()} ✓ Windows Defender: ENABLED\n\n"
+                self._update_results(result_text)
+
+                # Check Windows Firewall
+                result_text += f"{self._format_timestamp()} Checking Windows Firewall...\n"
+                self._update_results(result_text)
+                
+                firewall_vuln = self.security_scanner._check_firewall_basic()
+                if firewall_vuln:
+                    result_text += f"{self._format_timestamp()} ⚠️ Firewall: DISABLED\n\n"
+                else:
+                    result_text += f"{self._format_timestamp()} ✓ Firewall: ENABLED\n\n"
+                self._update_results(result_text)
+
+                # Check for pending Windows updates
+                result_text += f"{self._format_timestamp()} Checking for pending Windows updates...\n"
+                self._update_results(result_text)
+                
+                update_vuln = self.security_scanner._check_windows_updates()
+                if update_vuln:
+                    update_count = update_vuln.details.get('pending_count', 0)
+                    result_text += f"{self._format_timestamp()} ⚠️ Found {update_count} pending update(s)\n\n"
+                else:
+                    result_text += f"{self._format_timestamp()} ✓ Windows Updates: UP TO DATE\n\n"
+                self._update_results(result_text)
+
+                # Check UAC status
+                result_text += f"{self._format_timestamp()} Checking UAC status...\n"
+                self._update_results(result_text)
+                
+                uac_vuln = self.security_scanner._check_uac()
+                if uac_vuln:
+                    result_text += f"{self._format_timestamp()} ⚠️ UAC: DISABLED\n\n"
+                else:
+                    result_text += f"{self._format_timestamp()} ✓ UAC: ENABLED\n\n"
+                self._update_results(result_text)
+
+                # Check SMBv1 status
+                result_text += f"{self._format_timestamp()} Checking SMBv1 status...\n"
+                self._update_results(result_text)
+                
+                smb_vuln = self.security_scanner._check_smbv1()
+                if smb_vuln:
+                    result_text += f"{self._format_timestamp()} ⚠️ SMBv1: ENABLED (Security Risk)\n\n"
+                else:
+                    result_text += f"{self._format_timestamp()} ✓ SMBv1: DISABLED\n\n"
+                self._update_results(result_text)
+
+                # Check network shares
+                result_text += f"{self._format_timestamp()} Checking network shares...\n"
+                self._update_results(result_text)
+                
+                shares_vuln = self.security_scanner._check_network_shares()
+                if shares_vuln:
+                    result_text += f"{self._format_timestamp()} ⚠️ Network Shares: DETECTED\n\n"
+                else:
+                    result_text += f"{self._format_timestamp()} ✓ Network Shares: NONE\n\n"
+                self._update_results(result_text)
+
+                # Collect all vulnerabilities
+                vulnerabilities = []
+                if defender_vuln:
+                    vulnerabilities.append(defender_vuln)
+                if firewall_vuln:
+                    vulnerabilities.append(firewall_vuln)
+                if update_vuln:
+                    vulnerabilities.append(update_vuln)
+                if uac_vuln:
+                    vulnerabilities.append(uac_vuln)
+                if smb_vuln:
+                    vulnerabilities.append(smb_vuln)
+                if shares_vuln:
+                    vulnerabilities.append(shares_vuln)
+                    
                 self.last_vulnerabilities = vulnerabilities
 
+                # Summary
+                result_text += "=" * 50 + "\n"
+                result_text += f"SCAN COMPLETE: Found {len(vulnerabilities)} potential issue(s)\n"
+                
                 if not vulnerabilities:
-                    result_text = "✓ No vulnerabilities detected!\n\nYour system appears to be secure."
+                    result_text += "\n✓ No vulnerabilities detected!\nYour system appears to be secure.\n"
                 else:
-                    result_text = f"Found {len(vulnerabilities)} potential issue(s):\n\n"
-
+                    result_text += "\n"
                     for i, vuln in enumerate(vulnerabilities, 1):
                         result_text += f"{i}. [{vuln.severity.value.upper()}] {vuln.name}\n"
                         result_text += f"   {vuln.description}\n"
@@ -177,7 +263,7 @@ class SecurityTab:
                     # Show remediation suggestions
                     available_actions = self.remediation.get_available_actions(vulnerabilities)
                     if available_actions:
-                        result_text += f"\n{len(available_actions)} automated fix(es) available\n"
+                        result_text += f"✓ {len(available_actions)} automated fix(es) available\n"
                         result_text += "Click 'Run Available Fixes' to automatically apply all fixes.\n"
 
                 self._update_results(result_text)
@@ -362,25 +448,25 @@ class SecurityTab:
             self.firewall_button.configure(text=firewall_text)
 
     def _run_all_fixes(self) -> None:
-        """Run all available automated fixes."""
+        """Run all available automated fixes with enhanced real-time output."""
         logger.info("User requested to run all available fixes")
         
         def task():
             try:
-                from datetime import datetime
-                
-                self._update_results("Running all available fixes...\n\n")
+                result_text = "Running all available fixes...\n"
+                result_text += "=" * 50 + "\n\n"
+                self._update_results(result_text)
                 
                 # Get available actions based on last scan
                 available_actions = self.remediation.get_available_actions(self.last_vulnerabilities)
                 
                 if not available_actions:
-                    result_text = "No fixes available. Run a vulnerability scan first.\n"
+                    result_text += "No fixes available. Run a vulnerability scan first.\n"
                     self._update_results(result_text)
                     return
                 
-                result_text = f"Found {len(available_actions)} fix(es) to apply\n"
-                result_text += "=" * 60 + "\n\n"
+                result_text += f"Found {len(available_actions)} fix(es) to apply\n\n"
+                self._update_results(result_text)
                 
                 success_count = 0
                 fail_count = 0
@@ -389,19 +475,26 @@ class SecurityTab:
                     # Extract the action ID from the RemediationAction object
                     action_id = action.id
                     
-                    timestamp = datetime.now().strftime("%H:%M:%S")
-                    result_text += f"[{timestamp}] Running: {action.name}\n"
+                    result_text += f"{self._format_timestamp()} Running: {action.name}\n"
+                    result_text += f"{self._format_timestamp()} Executing: {action.command}\n"
                     self._update_results(result_text)
                     
                     try:
                         result = self.remediation.execute_remediation(action_id, dry_run=False)
                         
+                        # Show command output if available
+                        if result.output and result.output.strip():
+                            result_text += f"{self._format_timestamp()} Output:\n"
+                            # Indent output for readability
+                            for line in result.output.strip().split('\n'):
+                                result_text += f"  {line}\n"
+                        
                         if result.status == RemediationStatus.SUCCESS:
-                            result_text += f"[{timestamp}] ✓ SUCCESS: {action.name}\n"
+                            result_text += f"{self._format_timestamp()} ✓ SUCCESS: {action.name}\n"
                             result_text += f"  {result.message}\n"
                             success_count += 1
                         else:
-                            result_text += f"[{timestamp}] ❌ FAILED: {action.name}\n"
+                            result_text += f"{self._format_timestamp()} ❌ FAILED: {action.name}\n"
                             result_text += f"  {result.message}\n"
                             if result.error:
                                 result_text += f"  Error: {result.error}\n"
@@ -411,13 +504,13 @@ class SecurityTab:
                         self._update_results(result_text)
                         
                     except Exception as e:
-                        result_text += f"[{timestamp}] ❌ ERROR: {action.name}\n"
+                        result_text += f"{self._format_timestamp()} ❌ ERROR: {action.name}\n"
                         result_text += f"  {str(e)}\n\n"
                         fail_count += 1
                         self._update_results(result_text)
                 
                 # Summary
-                result_text += "=" * 60 + "\n"
+                result_text += "=" * 50 + "\n"
                 result_text += f"SUMMARY: {success_count} succeeded, {fail_count} failed\n"
                 self._update_results(result_text)
                 
@@ -444,3 +537,8 @@ class SecurityTab:
             self.results_text.configure(state="disabled")
 
         self.parent.after(0, update)
+
+    def _format_timestamp(self) -> str:
+        """Format current time as [HH:MM:SS]."""
+        from datetime import datetime
+        return datetime.now().strftime("[%H:%M:%S]")

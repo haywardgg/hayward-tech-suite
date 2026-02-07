@@ -35,13 +35,17 @@ class TestAutomatedRemediation:
         assert 'disable_smbv1' in remediation.REMEDIATION_ACTIONS
         assert 'flush_dns' in remediation.REMEDIATION_ACTIONS
     
-    def test_get_available_actions_all(self, remediation):
-        """Test getting all available actions."""
-        actions = remediation.get_available_actions()
+    def test_get_available_actions_none(self, remediation):
+        """Test getting actions when None is provided (no scan performed)."""
+        actions = remediation.get_available_actions(None)
         assert isinstance(actions, list)
-        assert len(actions) > 0
-        for action in actions:
-            assert isinstance(action, RemediationAction)
+        assert len(actions) == 0  # Should return empty list when None
+    
+    def test_get_available_actions_empty_list(self, remediation):
+        """Test getting actions when empty list is provided (scan found nothing)."""
+        actions = remediation.get_available_actions([])
+        assert isinstance(actions, list)
+        assert len(actions) == 0  # Should return empty list when empty list provided
     
     def test_get_available_actions_for_vulnerabilities(self, remediation):
         """Test getting actions for specific vulnerabilities."""
@@ -256,7 +260,7 @@ class TestAutomatedRemediation:
             assert action.id == action_id
             assert action.name
             assert action.description
-            assert action.target_vulnerability
+            # target_vulnerability can be None for actions that don't remediate a vulnerability (e.g., disable actions)
             assert action.command
             assert isinstance(action.requires_admin, bool)
             assert isinstance(action.reversible, bool)

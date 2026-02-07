@@ -173,13 +173,18 @@ class AutomatedRemediation:
         Get available remediation actions for detected vulnerabilities.
         
         Args:
-            vulnerabilities: List of detected vulnerabilities
+            vulnerabilities: List of detected vulnerabilities (None = no scan, [] = no vulnerabilities)
         
         Returns:
             List of applicable remediation actions
         """
+        # If None provided, return empty list (no scan performed yet)
+        if vulnerabilities is None:
+            return []
+        
+        # If empty list provided (scan found nothing), return empty list
         if not vulnerabilities:
-            return list(self.REMEDIATION_ACTIONS.values())
+            return []
         
         available_actions = []
         vuln_names = [v.name for v in vulnerabilities]
@@ -189,6 +194,9 @@ class AutomatedRemediation:
                 available_actions.append(action)
         
         logger.info(f"Found {len(available_actions)} applicable remediation actions")
+        logger.debug(f"Vulnerability names: {vuln_names}")
+        logger.debug(f"Matched actions: {[a.name for a in available_actions]}")
+        
         return available_actions
     
     def execute_remediation(

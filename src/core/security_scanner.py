@@ -166,7 +166,7 @@ class SecurityScanner:
                 '$UpdateSearcher = $UpdateSession.CreateUpdateSearcher(); '
                 '$SearchResult = $UpdateSearcher.Search(\'IsInstalled=0 and IsHidden=0\'); '
                 '$SearchResult.Updates.Count"',
-                timeout=60,
+                timeout=180,
                 shell=True,
                 audit=False,
             )
