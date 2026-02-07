@@ -21,7 +21,7 @@ class SecurityTab:
         self.parent = parent
         self.security_scanner = SecurityScanner()
         self.remediation = AutomatedRemediation()
-        self.last_vulnerabilities = []
+        self.last_vulnerabilities = None  # None = no scan yet, [] = scan found nothing
         
         # Button references for dynamic state updates
         self.defender_button = None
@@ -245,7 +245,10 @@ class SecurityTab:
                 if shares_vuln:
                     vulnerabilities.append(shares_vuln)
                     
+                # Store vulnerabilities for remediation
                 self.last_vulnerabilities = vulnerabilities
+                logger.info(f"Stored {len(vulnerabilities)} vulnerabilities for remediation")
+                logger.debug(f"Vulnerability names: {[v.name for v in vulnerabilities]}")
 
                 # Summary
                 result_text += "=" * 50 + "\n"
@@ -457,12 +460,33 @@ class SecurityTab:
                 result_text += "=" * 50 + "\n\n"
                 self._update_results(result_text)
                 
+                # Debug logging to track vulnerability state
+                logger.debug(f"last_vulnerabilities state: {self.last_vulnerabilities}")
+                logger.debug(f"Number of vulnerabilities: {len(self.last_vulnerabilities) if self.last_vulnerabilities is not None else 'None'}")
+                
                 # Get available actions based on last scan
                 available_actions = self.remediation.get_available_actions(self.last_vulnerabilities)
                 
-                if not available_actions:
-                    result_text += "No fixes available. Run a vulnerability scan first.\n"
+                logger.debug(f"Available actions: {len(available_actions)}")
+                
+                # Enhanced state validation with distinct error messages
+                if self.last_vulnerabilities is None:
+                    result_text += "No scan has been run yet.\n"
+                    result_text += "Please run a vulnerability scan first.\n"
                     self._update_results(result_text)
+                    logger.info("No fixes available: No scan performed yet")
+                    return
+                elif not self.last_vulnerabilities:
+                    result_text += "Last scan found no vulnerabilities.\n"
+                    result_text += "Nothing to fix - your system appears secure!\n"
+                    self._update_results(result_text)
+                    logger.info("No fixes available: No vulnerabilities detected in last scan")
+                    return
+                elif not available_actions:
+                    result_text += "No automated fixes are available for the detected vulnerabilities.\n"
+                    result_text += "The issues may require manual intervention.\n"
+                    self._update_results(result_text)
+                    logger.info(f"No fixes available: {len(self.last_vulnerabilities)} vulnerabilities detected but no automated fixes")
                     return
                 
                 result_text += f"Found {len(available_actions)} fix(es) to apply\n\n"
