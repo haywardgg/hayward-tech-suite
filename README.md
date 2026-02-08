@@ -417,6 +417,8 @@ GNU General Public License v3.0 - See [LICENSE](LICENSE)
 
 **Complete Rewrite**
 
+This has been a complete rewrite of the original code hosted on Ghostshadows Github. 
+
 #### Added ✨
 - Modern tabbed interface
 - Security scanner
@@ -424,6 +426,8 @@ GNU General Public License v3.0 - See [LICENSE](LICENSE)
 - Configuration system
 - Audit logging
 - Registry tweaks with safety features
+- System Specs on settings page
+- and more...
 
 #### Removed ❌
 - Mini games
