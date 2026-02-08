@@ -83,8 +83,8 @@ def show_welcome_message() -> None:
     welcome_msg = f"""
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║                     {app_name}                  ║
-║                       Version {app_version}                       ║
+║                  {app_name}                       ║
+║                    Version {app_version}                          ║
 ║                                                           ║
 ║      Professional Windows System Maintenance Tool         ║
 ║                                                           ║
