@@ -22,6 +22,10 @@ from src.core.system_tools_installer import (
 
 logger = get_logger("system_tools_tab")
 
+# UI Layout Constants
+EXPAND_BUTTON_PADDING = 35  # Left padding for category label to appear next to arrow
+STATUS_COLUMN = 99  # High column number for status label to ensure right-alignment
+
 
 class SystemToolsTab:
     """System Tools Installation tab for installing developer tools."""
@@ -38,6 +42,7 @@ class SystemToolsTab:
         self.tool_install_buttons: Dict[str, ctk.CTkButton] = {}
         self.category_frames: Dict[str, ctk.CTkFrame] = {}
         self.category_expanded: Dict[str, bool] = {}
+        self.expand_buttons: Dict[str, ctk.CTkButton] = {}
         self.is_installing = False
         
         # UI element references
@@ -91,7 +96,7 @@ class SystemToolsTab:
         # Title
         title_label = ctk.CTkLabel(
             info_frame,
-            text="🛠️  SYSTEM TOOLS INSTALLATION  🛠️",
+            text="SYSTEM TOOLS INSTALLATION",
             font=ctk.CTkFont(size=18, weight="bold"),
             text_color="white"
         )
@@ -225,33 +230,40 @@ class SystemToolsTab:
         # Category header frame
         category_header = ctk.CTkFrame(parent, fg_color="transparent")
         category_header.grid(row=row, column=0, sticky="ew", padx=10, pady=(10, 0))
-        category_header.grid_columnconfigure(1, weight=1)
+        category_header.grid_columnconfigure(1, weight=1)  # Make middle column expand
         
         # Expand/collapse button
-        self.category_expanded[category.value] = True
+        self.category_expanded[category.value] = False  # Start collapsed
         expand_button = ctk.CTkButton(
             category_header,
-            text="▼",
+            text="▶",
             width=30,
             height=30,
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=14),
             command=lambda c=category: self._toggle_category(c)
         )
-        expand_button.grid(row=0, column=0, padx=(0, 5))
+        expand_button.grid(row=0, column=0, padx=(0, 5), pady=5, sticky="w")
         
-        # Category label
+        # Store reference to expand button
+        self.expand_buttons[category.value] = expand_button
+        
+        # Category label (positioned with padding to appear next to arrow)
         tools_count = len(self.installer.get_tools_by_category(category))
         category_label = ctk.CTkLabel(
             category_header,
             text=f"{category.value} ({tools_count} tools)",
-            font=ctk.CTkFont(size=13, weight="bold")
+            font=ctk.CTkFont(size=14, weight="bold"),
+            anchor="w"
         )
-        category_label.grid(row=0, column=1, sticky="w")
+        category_label.grid(row=0, column=0, padx=(EXPAND_BUTTON_PADDING, 5), pady=5, sticky="w")
         
         # Tools container
         tools_container = ctk.CTkFrame(parent, fg_color="transparent")
+        tools_container.grid_columnconfigure(0, weight=1)
+        
+        # Grid the container but hide it since categories start collapsed
         tools_container.grid(row=row + 1, column=0, sticky="ew", padx=20, pady=(5, 5))
-        tools_container.grid_columnconfigure(1, weight=1)
+        tools_container.grid_remove()  # Hide by default (collapsed state)
         
         self.category_frames[category.value] = tools_container
         
@@ -265,37 +277,68 @@ class SystemToolsTab:
         # Tool frame
         tool_frame = ctk.CTkFrame(parent, corner_radius=5, fg_color="#2b2b2b")
         tool_frame.grid(row=row, column=0, sticky="ew", pady=2)
-        tool_frame.grid_columnconfigure(1, weight=1)
+        tool_frame.grid_columnconfigure(0, weight=1)
         
-        # Tool name and description
+        # Top row: Tool name with badges
+        top_frame = ctk.CTkFrame(tool_frame, fg_color="transparent")
+        top_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(5, 0))
+        top_frame.grid_columnconfigure(0, weight=1)  # Tool name expands
+        
+        # Tool name
         name_label = ctk.CTkLabel(
-            tool_frame,
+            top_frame,
             text=tool.name,
             font=ctk.CTkFont(size=12, weight="bold")
         )
-        name_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
+        name_label.grid(row=0, column=0, padx=0, pady=0, sticky="w")
         
+        # Badge column tracker
+        badge_col = 1
+        
+        # Admin badge if required (inline with name)
+        if tool.requires_admin:
+            admin_badge = ctk.CTkLabel(
+                top_frame,
+                text="[Requires Admin]",
+                font=ctk.CTkFont(size=11),
+                text_color="orange"
+            )
+            admin_badge.grid(row=0, column=badge_col, padx=(10, 0), pady=0, sticky="w")
+            badge_col += 1
+        
+        # Restart badge if required (inline with name)
+        if tool.requires_restart:
+            restart_badge = ctk.CTkLabel(
+                top_frame,
+                text="[May Require Restart]",
+                font=ctk.CTkFont(size=11),
+                text_color="orange"
+            )
+            restart_badge.grid(row=0, column=badge_col, padx=(10, 0), pady=0, sticky="w")
+        
+        # Status label (right side of top row - uses high column number for right-alignment)
+        status_label = ctk.CTkLabel(
+            top_frame,
+            text="Checking...",
+            font=ctk.CTkFont(size=11),
+            text_color="gray"
+        )
+        status_label.grid(row=0, column=STATUS_COLUMN, padx=(10, 0), pady=0, sticky="e")
+        self.tool_status_labels[tool.id] = status_label
+        
+        # Bottom row: Description
         desc_label = ctk.CTkLabel(
             tool_frame,
             text=tool.description,
             font=ctk.CTkFont(size=10),
             text_color="gray",
-            wraplength=500,
-            justify="left"
+            wraplength=600,
+            justify="left",
+            anchor="w"
         )
-        desc_label.grid(row=1, column=0, padx=10, pady=(0, 5), sticky="w")
+        desc_label.grid(row=1, column=0, padx=10, pady=(2, 0), sticky="w")
         
-        # Status label
-        status_label = ctk.CTkLabel(
-            tool_frame,
-            text="Checking...",
-            font=ctk.CTkFont(size=10),
-            text_color="gray"
-        )
-        status_label.grid(row=0, column=1, padx=10, pady=5, sticky="e")
-        self.tool_status_labels[tool.id] = status_label
-        
-        # Install button
+        # Bottom row: Install button (below everything)
         install_button = ctk.CTkButton(
             tool_frame,
             text="Install",
@@ -303,40 +346,24 @@ class SystemToolsTab:
             height=28,
             command=lambda t=tool: self._install_single_tool(t)
         )
-        install_button.grid(row=1, column=1, padx=10, pady=5, sticky="e")
+        install_button.grid(row=2, column=0, padx=10, pady=(5, 8), sticky="e")
         self.tool_install_buttons[tool.id] = install_button
-        
-        # Admin badge if required
-        if tool.requires_admin:
-            admin_badge = ctk.CTkLabel(
-                tool_frame,
-                text="👤 Admin",
-                font=ctk.CTkFont(size=9),
-                text_color="orange"
-            )
-            admin_badge.grid(row=0, column=2, padx=(0, 10), pady=5, sticky="e")
-        
-        # Restart badge if required
-        if tool.requires_restart:
-            restart_badge = ctk.CTkLabel(
-                tool_frame,
-                text="🔄 Restart",
-                font=ctk.CTkFont(size=9),
-                text_color="orange"
-            )
-            restart_badge.grid(row=1, column=2, padx=(0, 10), pady=5, sticky="e")
     
     def _toggle_category(self, category: ToolCategory) -> None:
         """Toggle category expansion."""
         category_name = category.value
-        self.category_expanded[category_name] = not self.category_expanded.get(category_name, True)
+        is_expanded = self.category_expanded.get(category_name, False)
         
-        if category_name in self.category_frames:
-            frame = self.category_frames[category_name]
-            if self.category_expanded[category_name]:
-                frame.grid()
-            else:
-                frame.grid_remove()
+        if is_expanded:
+            # Collapse
+            self.category_frames[category_name].grid_remove()
+            self.expand_buttons[category_name].configure(text="▶")
+            self.category_expanded[category_name] = False
+        else:
+            # Expand
+            self.category_frames[category_name].grid()
+            self.expand_buttons[category_name].configure(text="▼")
+            self.category_expanded[category_name] = True
     
     def _create_terminal_section(self, parent: ctk.CTkFrame, start_row: int) -> int:
         """Create terminal output section."""
@@ -379,7 +406,7 @@ class SystemToolsTab:
         # Refresh status button
         self.refresh_button = ctk.CTkButton(
             button_frame,
-            text="🔄 Refresh Status",
+            text="Refresh Status",
             height=40,
             font=ctk.CTkFont(size=13, weight="bold"),
             command=self._check_all_tool_status
@@ -389,7 +416,7 @@ class SystemToolsTab:
         # Clear log button
         clear_button = ctk.CTkButton(
             button_frame,
-            text="🗑️ Clear Log",
+            text="Clear Log",
             height=40,
             font=ctk.CTkFont(size=13, weight="bold"),
             command=self._clear_terminal
@@ -399,7 +426,7 @@ class SystemToolsTab:
         # Open Tools folder button
         open_folder_button = ctk.CTkButton(
             button_frame,
-            text="📁 Open Programs",
+            text="Open Programs",
             height=40,
             font=ctk.CTkFont(size=13, weight="bold"),
             command=self._open_programs_folder
