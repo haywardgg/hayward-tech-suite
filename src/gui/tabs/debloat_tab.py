@@ -801,9 +801,7 @@ class DebloatTab:
         # Confirm
         confirm = messagebox.askyesno(
             "Confirm Removal",
-            f"Are you sure you want to remove {len(self.selected_items)} selected items?\n\n"
-            "This operation cannot be easily undone without a restore point.\n"
-            "Make sure you have created a restore point!"
+            f"Are you sure you want to remove {len(self.selected_items)} selected items?"     
         )
         
         if not confirm:
