@@ -48,7 +48,7 @@ A comprehensive, secure, and modern system maintenance suite for Windows, comple
 - **Undo functionality** via system restore
 - **Detailed documentation** for each item
 
-### ⚠️ **DANGER ZONE - Registry Tweaks**
+### ⚠️ **Registry Hacks**
 - **12 common Windows 11 registry tweaks**
 - **Automatic backup before every change**
 - **One-click undo functionality**
@@ -126,7 +126,7 @@ src/
 │       ├── diagnostics_tab.py
 │       ├── maintenance_tab.py
 │       ├── security_tab.py
-│       ├── danger_tab.py      # DANGER ZONE
+│       ├── registry_hacks_tab.py  # Registry Hacks
 │       └── settings_tab.py
 └── utils/                      # Utilities
     ├── logger.py
@@ -220,7 +220,7 @@ Each registry tweak in the JSON file has the following structure:
 ```
 
 3. Save the file and restart the application
-4. The new tweak will appear in the DANGER ZONE tab
+4. The new tweak will appear in the Registry Hacks tab
 
 #### Removing Tweaks
 
@@ -245,7 +245,7 @@ To remove a tweak:
 
 #### How Tweaks Are Applied
 
-1. User clicks APPLY button in DANGER ZONE tab
+1. User clicks APPLY button in Registry Hacks tab
 2. Application creates automatic backup of current registry value
 3. Registry value is changed according to `apply` settings
 4. Backup is saved with timestamp for later restoration
@@ -355,7 +355,7 @@ If you downloaded a pre-built release from the `dist/` folder:
 ✅ **Yes, it's portable!**
 
 - No installation required
-- No registry entries (except when using DANGER ZONE features)
+- No registry entries (except when using Registry Hacks features)
 - Can run from USB drive or any folder
 - Settings stored in application directory
 - Logs saved to `logs/` subfolder
@@ -397,17 +397,17 @@ To update to a new version:
 
 ---
 
-## ⚠️ DANGER ZONE Warning
+## ⚠️ Registry Hacks Warning
 
-**The DANGER ZONE tab contains advanced registry tweaks that can modify Windows system behavior.**
+**The Registry Hacks tab contains advanced registry tweaks that can modify Windows system behavior.**
 
 **Important Safety Information:**
-- 🔴 **HIGH risk tweaks** can cause system instability
-- 📦 **Automatic backups** are created before every change
-- ↩️ **Undo functionality** available for recent changes
-- 💾 **Registry backups** stored in temp folder: `/tmp/ghosty_toolz_registry_backups/`
-- ⚠️ **Some tweaks require system restart** to take effect
-- 🛡️ **Always test on non-production systems first**
+- HIGH risk tweaks can cause system instability
+- Automatic backups are created before every change
+- Undo functionality available for recent changes
+- Registry backups stored in temp folder: `/tmp/ghosty_toolz_registry_backups/`
+- Some tweaks require system restart to take effect
+- Always test on non-production systems first
 
 **Use at your own risk!** The application provides safety features, but registry modifications can potentially break Windows functionality if misused.
 
