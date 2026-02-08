@@ -131,7 +131,6 @@ class SettingsTab:
             "Hayward Tech Suite\n"
             "Version 1.0.0\n"
             "By HaywardGG\n\n"
-            "Professional Windows System Maintenance Tool\n\n"
             "License: GPL-3.0-or-later"
         )
         info_label = ctk.CTkLabel(
