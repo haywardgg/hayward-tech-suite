@@ -15,6 +15,7 @@ from src.gui.tabs.monitoring_tab import MonitoringTab
 from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
 from src.gui.tabs.debloat_tab import DebloatTab
+from src.gui.tabs.system_tools_tab import SystemToolsTab
 from src.gui.tabs.security_tab import SecurityTab
 from src.gui.tabs.registry_hacks_tab import RegistryHacksTab
 from src.gui.tabs.settings_tab import SettingsTab
@@ -93,6 +94,7 @@ class MainWindow(ctk.CTk):
         self.security_tab = None
         self.registry_hacks_tab = None
         self.debloat_tab = None
+        self.system_tools_tab = None
         self.settings_tab = None
 
         try:
@@ -154,6 +156,16 @@ class MainWindow(ctk.CTk):
 
         except Exception as e:
             logger.error(f"Failed to create Debloat Windows tab: {e}")
+
+        try:
+            # System Tools tab
+            self.tabview.add("System Tools")
+            tab_frame = self.tabview.tab("System Tools")
+            self.system_tools_tab = SystemToolsTab(tab_frame)
+            logger.info("System Tools tab created")
+
+        except Exception as e:
+            logger.error(f"Failed to create System Tools tab: {e}")
 
         try:
             # Settings tab

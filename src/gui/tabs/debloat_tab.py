@@ -177,8 +177,8 @@ class DebloatTab:
         )
         self.restore_point_info_label.grid(row=2, column=1, padx=10, pady=5, sticky="w")
         
-        # Refresh restore points info on load
-        self._refresh_restore_point_info()
+        # Refresh restore points info on load - delay to ensure main loop is running
+        self.parent.after(100, self._refresh_restore_point_info)
         
         return start_row + 1
     
