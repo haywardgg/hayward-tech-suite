@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Complete Rewrite
 
-This version represents a complete architectural redesign of Hayward Tech Suite, transforming it from a monolithic script into a professional, modular application.
+This version represents a complete architectural redesign of Ghosty Tools Pro, transforming it from a monolithic script into a professional, modular application.
 
 ### Added ✨
 
