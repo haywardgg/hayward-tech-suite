@@ -134,7 +134,7 @@ class DebloatTab:
             font=ctk.CTkFont(size=13, weight="bold"),
             text_color="white",
             command=self._on_agreement_changed,
-            fg_color="white",
+         #   fg_color="white",
             hover_color="#CCCCCC"
         )
         self.agreement_checkbox.grid(row=2, column=0, padx=20, pady=(5, 15), sticky="w")
