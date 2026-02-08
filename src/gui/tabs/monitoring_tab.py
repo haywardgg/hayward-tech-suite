@@ -170,7 +170,7 @@ class MonitoringTab:
         disk_frame.grid_columnconfigure(0, weight=1)
 
         # Title with proper spacing
-        title = ctk.CTkLabel(disk_frame, text="💿  Disk", font=ctk.CTkFont(size=16, weight="bold"))
+        title = ctk.CTkLabel(disk_frame, text="Disk", font=ctk.CTkFont(size=16, weight="bold"))
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # Disk info text
@@ -187,7 +187,7 @@ class MonitoringTab:
 
         # Title with proper spacing
         title = ctk.CTkLabel(
-            battery_frame, text="🔋  Battery", font=ctk.CTkFont(size=16, weight="bold")
+            battery_frame, text="Battery", font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
