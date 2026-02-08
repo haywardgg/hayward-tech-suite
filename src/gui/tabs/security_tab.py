@@ -16,9 +16,10 @@ logger = get_logger("security_tab")
 class SecurityTab:
     """Security scanning and monitoring tab."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """Initialize security tab."""
         self.parent = parent
+        self.main_window = main_window
         self.security_scanner = SecurityScanner()
         self.remediation = AutomatedRemediation()
         self.last_vulnerabilities = None  # None = no scan yet, [] = scan found nothing
@@ -31,6 +32,10 @@ class SecurityTab:
         self.parent.grid_columnconfigure(0, weight=1)
 
         self._create_content()
+        
+        # Set initial status
+        if self.main_window:
+            self.main_window.update_status("Ready")
 
         logger.info("Security tab initialized")
 

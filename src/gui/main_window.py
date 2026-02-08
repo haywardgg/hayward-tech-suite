@@ -101,7 +101,7 @@ class MainWindow(ctk.CTk):
             # Monitoring tab
             self.tabview.add("Monitoring")
             tab_frame = self.tabview.tab("Monitoring")
-            self.monitoring_tab = MonitoringTab(tab_frame)
+            self.monitoring_tab = MonitoringTab(tab_frame, main_window=self)
             logger.info("Monitoring tab created")
 
         except Exception as e:
@@ -111,7 +111,7 @@ class MainWindow(ctk.CTk):
             # Diagnostics tab (Network Diagnostics)
             self.tabview.add("Diagnostics")
             tab_frame = self.tabview.tab("Diagnostics")
-            self.diagnostics_tab = DiagnosticsTab(tab_frame)
+            self.diagnostics_tab = DiagnosticsTab(tab_frame, main_window=self)
             logger.info("Diagnostics tab created")
 
         except Exception as e:
@@ -121,7 +121,7 @@ class MainWindow(ctk.CTk):
             # Maintenance tab
             self.tabview.add("Maintenance")
             tab_frame = self.tabview.tab("Maintenance")
-            self.maintenance_tab = MaintenanceTab(tab_frame)
+            self.maintenance_tab = MaintenanceTab(tab_frame, main_window=self)
             logger.info("Maintenance tab created")
 
         except Exception as e:
@@ -131,7 +131,7 @@ class MainWindow(ctk.CTk):
             # Security tab
             self.tabview.add("Security")
             tab_frame = self.tabview.tab("Security")
-            self.security_tab = SecurityTab(tab_frame)
+            self.security_tab = SecurityTab(tab_frame, main_window=self)
             logger.info("Security tab created")
 
         except Exception as e:
@@ -141,7 +141,7 @@ class MainWindow(ctk.CTk):
             # Registry Hacks tab
             self.tabview.add("Registry Hacks")
             tab_frame = self.tabview.tab("Registry Hacks")
-            self.registry_hacks_tab = RegistryHacksTab(tab_frame)
+            self.registry_hacks_tab = RegistryHacksTab(tab_frame, main_window=self)
             logger.info("Registry Hacks tab created")
 
         except Exception as e:
@@ -151,7 +151,7 @@ class MainWindow(ctk.CTk):
             # Debloat Windows tab
             self.tabview.add("Debloat Windows")
             tab_frame = self.tabview.tab("Debloat Windows")
-            self.debloat_tab = DebloatTab(tab_frame)
+            self.debloat_tab = DebloatTab(tab_frame, main_window=self)
             logger.info("Debloat Windows tab created")
 
         except Exception as e:
@@ -161,7 +161,7 @@ class MainWindow(ctk.CTk):
             # System Tools tab
             self.tabview.add("System Tools")
             tab_frame = self.tabview.tab("System Tools")
-            self.system_tools_tab = SystemToolsTab(tab_frame)
+            self.system_tools_tab = SystemToolsTab(tab_frame, main_window=self)
             logger.info("System Tools tab created")
 
         except Exception as e:

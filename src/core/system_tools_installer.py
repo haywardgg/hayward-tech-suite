@@ -8,6 +8,7 @@ and PowerShell commands with status checking and progress tracking.
 import subprocess
 import json
 import threading
+import re
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple, Callable, Any
 from datetime import datetime
@@ -21,6 +22,38 @@ logger = get_logger("system_tools_installer")
 
 # Get CREATE_NO_WINDOW flag for Windows to prevent console flickering
 CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+
+def clean_ansi_codes(text: str) -> str:
+    """
+    Remove ANSI escape codes and spinner characters from text.
+    
+    Args:
+        text: Text potentially containing ANSI codes and spinner chars
+        
+    Returns:
+        Cleaned text
+    """
+    # Remove ANSI escape sequences
+    ansi_escape = re.compile(r'\x1b\[[0-9;]*[mGKHJABCDEFSTfu]')
+    text = ansi_escape.sub('', text)
+    
+    # Remove carriage returns and backspaces that cause overwriting
+    text = text.replace('\r', '\n').replace('\b', '')
+    
+    # Remove spinner characters (various unicode spinners)
+    spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏',
+                     '|', '/', '-', '\\', '█', '▒', '░', '▓', '▄', '▀']
+    for char in spinner_chars:
+        text = text.replace(char, '')
+    
+    # Remove excessive blank lines (more than 2 consecutive)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    # Remove lines with only whitespace
+    lines = [line for line in text.split('\n') if line.strip()]
+    
+    return '\n'.join(lines)
 
 
 class ToolCategory(Enum):
@@ -204,6 +237,10 @@ class SystemToolsInstaller:
             success = result.returncode == 0
             stdout = result.stdout.strip() if result.stdout else ""
             stderr = result.stderr.strip() if result.stderr else ""
+            
+            # Clean ANSI codes and spinner characters from output
+            stdout = clean_ansi_codes(stdout)
+            stderr = clean_ansi_codes(stderr)
 
             if success:
                 logger.debug(f"PowerShell command succeeded")
@@ -300,9 +337,11 @@ class SystemToolsInstaller:
 
                 if progress_callback:
                     if stdout:
-                        progress_callback(stdout)
+                        # Clean output before passing to callback
+                        progress_callback(clean_ansi_codes(stdout))
                     if stderr:
-                        progress_callback(f"Warning: {stderr}")
+                        # Clean error output before passing to callback
+                        progress_callback(f"Warning: {clean_ansi_codes(stderr)}")
 
                 if not success:
                     error_msg = f"Installation failed at command {i+1}: {stderr or 'Unknown error'}"

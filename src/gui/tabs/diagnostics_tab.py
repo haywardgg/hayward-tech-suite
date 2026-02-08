@@ -18,15 +18,20 @@ logger = get_logger("diagnostics_tab")
 class DiagnosticsTab:
     """Network diagnostics and testing tab."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """Initialize diagnostics tab."""
         self.parent = parent
+        self.main_window = main_window
         self.network_diag = NetworkDiagnostics()
 
         self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
 
         self._create_content()
+        
+        # Set initial status
+        if self.main_window:
+            self.main_window.update_status("Ready")
 
         logger.info("Diagnostics tab initialized")
 

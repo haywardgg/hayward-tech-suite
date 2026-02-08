@@ -20,14 +20,10 @@ BYTES_TO_MB = 1024**2
 class MonitoringTab:
     """System monitoring tab with real-time resource display."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
-        """
-        Initialize monitoring tab.
-
-        Args:
-            parent: Parent frame
-        """
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
+        """Initialize monitoring tab."""
         self.parent = parent
+        self.main_window = main_window
         self.monitoring_service = MonitoringService()
         self.performance_profiler = PerformanceProfiler()
         self.is_monitoring = False
@@ -42,6 +38,10 @@ class MonitoringTab:
 
         # Start monitoring automatically
         self.start_monitoring()
+        
+        # Set initial status
+        if self.main_window:
+            self.main_window.update_status("Ready")
 
         logger.info("Monitoring tab initialized")
 
@@ -250,6 +250,10 @@ class MonitoringTab:
         self.monitoring_service.start()
         self.is_monitoring = True
         self.toggle_button.configure(text="Stop Monitoring")
+        
+        # Update status
+        if self.main_window:
+            self.main_window.update_status("Monitoring active")
 
     def stop_monitoring(self) -> None:
         """Stop monitoring service."""
@@ -260,6 +264,10 @@ class MonitoringTab:
         self.monitoring_service.stop()
         self.is_monitoring = False
         self.toggle_button.configure(text="Start Monitoring")
+        
+        # Update status
+        if self.main_window:
+            self.main_window.update_status("Monitoring stopped")
 
     def toggle_monitoring(self) -> None:
         """Toggle monitoring on/off."""

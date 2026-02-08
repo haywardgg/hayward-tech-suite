@@ -23,7 +23,7 @@ CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 class MaintenanceTab:
     """System maintenance operations tab."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """
         Initialize maintenance tab.
 
@@ -31,6 +31,7 @@ class MaintenanceTab:
             parent: Parent frame
         """
         self.parent = parent
+        self.main_window = main_window
         self.system_ops = SystemOperations()
         
         # Thread-safe cancellation flag
@@ -42,6 +43,10 @@ class MaintenanceTab:
 
         # Create UI
         self._create_operations()
+        
+        # Set initial status
+        if self.main_window:
+            self.main_window.update_status("Ready")
 
         logger.info("Maintenance tab initialized")
 
