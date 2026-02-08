@@ -10,7 +10,7 @@ import time
 import statistics
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 
 from src.utils.logger import get_logger

@@ -15,7 +15,7 @@ import json
 
 from src.utils.logger import get_logger, get_audit_logger
 from src.utils.config import get_config
-from src.utils.validators import Validators, ValidationError
+from src.utils.validators import Validators
 from src.utils.resource_path import resource_path
 
 logger = get_logger("registry_manager")

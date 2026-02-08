@@ -5,7 +5,6 @@ This module initializes the application and starts the main GUI.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add src to path if running from repository root

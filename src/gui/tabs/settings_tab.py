@@ -7,6 +7,8 @@ from tkinter import messagebox
 import threading
 import shutil
 from pathlib import Path
+import platform
+import psutil
 
 from src.utils.logger import get_logger
 from src.utils.config import get_config
@@ -23,6 +25,7 @@ class SettingsTab:
         self.parent = parent
         self.main_window = main_window
         self.config = get_config()
+        self.system_info = None  # Will be loaded in background
 
         self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
@@ -32,19 +35,35 @@ class SettingsTab:
         logger.info("Settings tab initialized")
 
     def _create_content(self) -> None:
-        """Create content area."""
+        """Create content area with two-column layout."""
         content_frame = ctk.CTkScrollableFrame(self.parent)
         content_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        content_frame.grid_columnconfigure(0, weight=1)
+        
+        # Configure two-column layout
+        content_frame.grid_columnconfigure(0, weight=1)  # Left column
+        content_frame.grid_columnconfigure(1, weight=1)  # Right column
+
+        # LEFT COLUMN - Existing sections
+        left_column = ctk.CTkFrame(content_frame, fg_color="transparent")
+        left_column.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        left_column.grid_columnconfigure(0, weight=1)
 
         # Appearance settings
-        self._create_appearance_section(content_frame)
+        self._create_appearance_section(left_column)
 
         # Monitoring settings
-        self._create_monitoring_section(content_frame)
+        self._create_monitoring_section(left_column)
 
         # About section
-        self._create_about_section(content_frame)
+        self._create_about_section(left_column)
+
+        # RIGHT COLUMN - PC Specs
+        right_column = ctk.CTkFrame(content_frame, fg_color="transparent")
+        right_column.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
+        right_column.grid_columnconfigure(0, weight=1)
+
+        # PC Specs section
+        self._create_pc_specs_section(right_column)
 
     def _create_appearance_section(self, parent: ctk.CTkFrame) -> None:
         """Create appearance settings section."""
@@ -295,3 +314,320 @@ class SettingsTab:
                 ))
 
         threading.Thread(target=reset_task, daemon=True).start()
+
+    def _create_pc_specs_section(self, parent: ctk.CTkFrame) -> None:
+        """Create PC specifications section."""
+        specs_frame = ctk.CTkFrame(parent)
+        specs_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        specs_frame.grid_columnconfigure(0, weight=1)
+
+        title = ctk.CTkLabel(
+            specs_frame, text="PC Specs", font=ctk.CTkFont(size=14, weight="bold")
+        )
+        title.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        # Loading label
+        self.specs_loading_label = ctk.CTkLabel(
+            specs_frame,
+            text="Loading system information...",
+            font=ctk.CTkFont(size=11),
+        )
+        self.specs_loading_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
+        # Specs text area (will be populated)
+        self.specs_text = ctk.CTkTextbox(
+            specs_frame,
+            width=400,
+            height=500,
+            font=ctk.CTkFont(family="Courier New", size=11),
+        )
+        self.specs_text.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        self.specs_text.configure(state="disabled")
+
+        # Copy button
+        self.copy_button = ctk.CTkButton(
+            specs_frame,
+            text="📋 Copy to Clipboard",
+            command=self._copy_specs_to_clipboard,
+            width=200,
+            fg_color="#0078d4",
+            hover_color="#005a9e",
+            state="disabled",
+        )
+        self.copy_button.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+
+        # Start gathering system info in background
+        threading.Thread(target=self._gather_system_info, daemon=True).start()
+
+    def _gather_system_info(self) -> None:
+        """Gather system information in background thread."""
+        try:
+            info_lines = []
+
+            # Header
+            info_lines.append("=" * 50)
+            info_lines.append("SYSTEM INFORMATION")
+            info_lines.append("=" * 50)
+            info_lines.append("")
+
+            # Operating System
+            info_lines.append("━━━ OPERATING SYSTEM ━━━")
+            try:
+                os_name = platform.system()
+                os_version = platform.version()
+                os_release = platform.release()
+                os_machine = platform.machine()
+                
+                info_lines.append(f"OS: {os_name} {os_release}")
+                info_lines.append(f"Version: {os_version}")
+                info_lines.append(f"Architecture: {os_machine}")
+                
+                # Try to get Windows edition
+                try:
+                    import winreg
+                    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
+                                        r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
+                    product_name = winreg.QueryValueEx(key, "ProductName")[0]
+                    build_number = winreg.QueryValueEx(key, "CurrentBuild")[0]
+                    info_lines.append(f"Edition: {product_name}")
+                    info_lines.append(f"Build: {build_number}")
+                    winreg.CloseKey(key)
+                except Exception:
+                    pass
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+            # CPU Information
+            info_lines.append("━━━ PROCESSOR (CPU) ━━━")
+            try:
+                processor = platform.processor()
+                cpu_count_physical = psutil.cpu_count(logical=False)
+                cpu_count_logical = psutil.cpu_count(logical=True)
+                cpu_freq = psutil.cpu_freq()
+                
+                info_lines.append(f"Model: {processor}")
+                info_lines.append(f"Physical Cores: {cpu_count_physical}")
+                info_lines.append(f"Logical Cores (Threads): {cpu_count_logical}")
+                if cpu_freq:
+                    info_lines.append(f"Base Frequency: {cpu_freq.current:.2f} MHz")
+                    if cpu_freq.max > 0:
+                        info_lines.append(f"Max Frequency: {cpu_freq.max:.2f} MHz")
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+            # Memory Information
+            info_lines.append("━━━ MEMORY (RAM) ━━━")
+            try:
+                mem = psutil.virtual_memory()
+                total_gb = mem.total / (1024 ** 3)
+                available_gb = mem.available / (1024 ** 3)
+                used_gb = mem.used / (1024 ** 3)
+                
+                info_lines.append(f"Total: {total_gb:.2f} GB")
+                info_lines.append(f"Available: {available_gb:.2f} GB")
+                info_lines.append(f"Used: {used_gb:.2f} GB")
+                info_lines.append(f"Usage: {mem.percent}%")
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+            # Storage Information
+            info_lines.append("━━━ STORAGE (DISKS) ━━━")
+            try:
+                partitions = psutil.disk_partitions()
+                for partition in partitions:
+                    try:
+                        usage = psutil.disk_usage(partition.mountpoint)
+                        total_gb = usage.total / (1024 ** 3)
+                        used_gb = usage.used / (1024 ** 3)
+                        free_gb = usage.free / (1024 ** 3)
+                        
+                        # Determine drive type
+                        drive_type = "Unknown"
+                        if "cdrom" in partition.opts or partition.fstype == "":
+                            drive_type = "CD/DVD"
+                        elif "removable" in partition.opts:
+                            drive_type = "Removable"
+                        else:
+                            drive_type = "HDD/SSD"
+                        
+                        info_lines.append(f"Drive {partition.device}")
+                        info_lines.append(f"  Type: {drive_type}")
+                        info_lines.append(f"  Filesystem: {partition.fstype}")
+                        info_lines.append(f"  Total: {total_gb:.2f} GB")
+                        info_lines.append(f"  Used: {used_gb:.2f} GB")
+                        info_lines.append(f"  Free: {free_gb:.2f} GB")
+                        info_lines.append(f"  Usage: {usage.percent}%")
+                        info_lines.append("")
+                    except PermissionError:
+                        continue
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+                info_lines.append("")
+
+            # Graphics Card Information (Windows only)
+            info_lines.append("━━━ GRAPHICS CARD (GPU) ━━━")
+            try:
+                if platform.system() == "Windows":
+                    import winreg
+                    gpu_list = []
+                    
+                    try:
+                        # Try to read from registry
+                        key_path = r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path)
+                        
+                        i = 0
+                        while True:
+                            try:
+                                subkey_name = winreg.EnumKey(key, i)
+                                subkey = winreg.OpenKey(key, subkey_name)
+                                
+                                try:
+                                    desc = winreg.QueryValueEx(subkey, "DriverDesc")[0]
+                                    if desc and desc not in gpu_list:
+                                        gpu_list.append(desc)
+                                        
+                                        # Try to get VRAM
+                                        try:
+                                            vram = winreg.QueryValueEx(subkey, "HardwareInformation.qwMemorySize")[0]
+                                            vram_gb = vram / (1024 ** 3)
+                                            info_lines.append(f"GPU: {desc}")
+                                            info_lines.append(f"  VRAM: {vram_gb:.2f} GB")
+                                        except Exception:
+                                            info_lines.append(f"GPU: {desc}")
+                                            info_lines.append(f"  VRAM: N/A")
+                                except Exception:
+                                    pass
+                                
+                                winreg.CloseKey(subkey)
+                                i += 1
+                            except OSError:
+                                break
+                        
+                        winreg.CloseKey(key)
+                    except Exception:
+                        pass
+                    
+                    if not gpu_list:
+                        info_lines.append("Unable to detect GPU information")
+                else:
+                    info_lines.append("GPU detection only available on Windows")
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+            # Motherboard Information (Windows only)
+            info_lines.append("━━━ MOTHERBOARD ━━━")
+            try:
+                if platform.system() == "Windows":
+                    import subprocess
+                    
+                    try:
+                        # Get manufacturer
+                        manufacturer = subprocess.check_output(
+                            ["wmic", "baseboard", "get", "manufacturer"],
+                            text=True, creationflags=0x08000000
+                        ).strip().split("\n")[-1].strip()
+                        
+                        # Get product name
+                        product = subprocess.check_output(
+                            ["wmic", "baseboard", "get", "product"],
+                            text=True, creationflags=0x08000000
+                        ).strip().split("\n")[-1].strip()
+                        
+                        info_lines.append(f"Manufacturer: {manufacturer}")
+                        info_lines.append(f"Model: {product}")
+                    except Exception:
+                        info_lines.append("Unable to detect motherboard information")
+                else:
+                    info_lines.append("Motherboard detection only available on Windows")
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+            # Network Information
+            info_lines.append("━━━ NETWORK ━━━")
+            try:
+                hostname = platform.node()
+                info_lines.append(f"Computer Name: {hostname}")
+                
+                # Network interfaces
+                net_if_addrs = psutil.net_if_addrs()
+                for interface_name, interface_addresses in net_if_addrs.items():
+                    for address in interface_addresses:
+                        if str(address.family) == 'AddressFamily.AF_INET':
+                            info_lines.append(f"{interface_name}:")
+                            info_lines.append(f"  IP Address: {address.address}")
+                            info_lines.append(f"  Netmask: {address.netmask}")
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+            # Additional System Info
+            info_lines.append("━━━ ADDITIONAL INFO ━━━")
+            try:
+                boot_time = psutil.boot_time()
+                import datetime
+                boot_time_str = datetime.datetime.fromtimestamp(boot_time).strftime("%Y-%m-%d %H:%M:%S")
+                info_lines.append(f"Boot Time: {boot_time_str}")
+                info_lines.append(f"Python Version: {platform.python_version()}")
+            except Exception as e:
+                info_lines.append(f"Error: {e}")
+
+            info_lines.append("")
+            info_lines.append("=" * 50)
+            info_lines.append("End of System Information")
+            info_lines.append("=" * 50)
+
+            # Store the info
+            self.system_info = "\n".join(info_lines)
+
+            # Update UI on main thread
+            self.parent.after(0, self._update_specs_display)
+
+        except Exception as e:
+            logger.error(f"Failed to gather system info: {e}")
+            self.parent.after(0, lambda: self._update_specs_display(error=str(e)))
+
+    def _update_specs_display(self, error: str = None) -> None:
+        """Update the specs display in UI thread."""
+        try:
+            # Hide loading label
+            self.specs_loading_label.grid_remove()
+
+            # Update text area
+            self.specs_text.configure(state="normal")
+            
+            if error:
+                self.specs_text.delete("1.0", "end")
+                self.specs_text.insert("1.0", f"Error gathering system information:\n{error}")
+            elif self.system_info:
+                self.specs_text.delete("1.0", "end")
+                self.specs_text.insert("1.0", self.system_info)
+                # Enable copy button
+                self.copy_button.configure(state="normal")
+            
+            self.specs_text.configure(state="disabled")
+
+        except Exception as e:
+            logger.error(f"Failed to update specs display: {e}")
+
+    def _copy_specs_to_clipboard(self) -> None:
+        """Copy system specs to clipboard."""
+        try:
+            if self.system_info:
+                self.parent.clipboard_clear()
+                self.parent.clipboard_append(self.system_info)
+                messagebox.showinfo(
+                    "Copied",
+                    "System specifications copied to clipboard!\n\n"
+                    "You can now paste this information in support forums or tickets."
+                )
+                logger.info("System specs copied to clipboard")
+        except Exception as e:
+            logger.error(f"Failed to copy to clipboard: {e}")
+            messagebox.showerror("Error", f"Failed to copy to clipboard: {e}")
+

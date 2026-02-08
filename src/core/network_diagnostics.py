@@ -7,7 +7,6 @@ bandwidth analysis, connection quality assessment, and DNS diagnostics.
 
 import socket
 import time
-import subprocess
 import statistics
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass

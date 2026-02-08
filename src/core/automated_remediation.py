@@ -5,7 +5,7 @@ Provides automated fixes for common security issues and system problems
 with user approval and rollback capabilities.
 """
 
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
