@@ -71,11 +71,11 @@ class MainWindow(ctk.CTk):
         self.main_container.grid_rowconfigure(0, weight=1)
         self.main_container.grid_columnconfigure(0, weight=1)
 
+        # Create status bar first (tabs may need to access it during initialization)
+        self._create_status_bar()
+
         # Create tabview
         self._create_tabview()
-
-        # Create status bar
-        self._create_status_bar()
 
         # Bind close event
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
