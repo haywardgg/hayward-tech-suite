@@ -14,7 +14,7 @@
 - ✅ Automatic backup before every registry change
 - ✅ Undo functionality (restore most recent backup)
 - ✅ Manual backup/restore capabilities
-- ✅ Registry backups stored in temp folder: `/tmp/ghosty_toolz_registry_backups/`
+- ✅ Registry backups stored in temp folder: `/tmp/hayward_techsuite_registry_backups/`
 - ✅ JSON metadata tracking for all backups
 - ✅ Risk level assessment (low/medium/high)
 - ✅ Restart requirement tracking
@@ -131,7 +131,7 @@
 ### Code Review Results
 - ✅ 5 issues identified and fixed:
   1. Registry backup file overwrite issue → Fixed with temp file approach
-  2. Folder naming specificity → Changed to `ghosty_toolz_registry_backups`
+  2. Folder naming specificity → Changed to `hayward_techsuite_registry_backups`
   3. File handle management → Fixed to prevent corruption
   4. Comment accuracy → Corrected
   5. Error handling → Improved

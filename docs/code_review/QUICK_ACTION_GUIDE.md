@@ -9,7 +9,7 @@ This guide shows you EXACTLY what to do to fix the high-priority issues found in
 **These directories are NEVER imported anywhere:**
 
 ```bash
-cd /home/runner/work/ghosty-toolz-evolved/ghosty-toolz-evolved
+cd /home/runner/work/hayward-tech-suite/hayward-tech-suite
 
 # Delete entire services directory (3 orphaned files)
 rm -rf src/services/

@@ -45,7 +45,7 @@ def setup_logging() -> None:
 
     # Configure main logger
     main_logger = logger_instance.get_logger(
-        "ghosty_tools", log_file="ghosty_tools.log", level=level
+        "hayward_techsuite", log_file="hayward_techsuite.log", level=level
     )
 
     logger.info("Logging initialized")

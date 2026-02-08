@@ -131,7 +131,7 @@ After Completion:
 
 ### BEFORE
 ```
-%TEMP%\ghosty_toolz_registry_backups\
+%TEMP%\hayward_techsuite_registry_backups\
 ├── reg_backup_20260101_120000.reg  (5 MB)
 ├── reg_backup_20260102_130000.reg  (5 MB)
 ├── reg_backup_20260103_140000.reg  (5 MB)
@@ -144,7 +144,7 @@ Total: 250+ MB accumulated over time
 
 ### AFTER
 ```
-%TEMP%\ghosty_toolz_registry_backups\
+%TEMP%\hayward_techsuite_registry_backups\
 ├── reg_backup_20260207_100000.reg  (5 MB)  ← Newest
 ├── reg_backup_20260206_150000.reg  (5 MB)
 ├── reg_backup_20260205_140000.reg  (5 MB)

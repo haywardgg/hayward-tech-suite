@@ -174,8 +174,8 @@ Example tweak structure included:
 **Output Structure Documented**:
 ```
 dist/
-└── GhostyToolzEvolved/
-    ├── GhostyToolzEvolved.exe  ← Main executable
+└── HaywardTechSuite/
+    ├── HaywardTechSuite.exe  ← Main executable
     ├── images/                  ← Bundled images
     ├── config/                  ← Configuration files
     └── [various DLL files]      ← Required libraries
@@ -301,7 +301,7 @@ python src/main.py
 ```bash
 python build.py
 ```
-Output: `dist/GhostyToolzEvolved/GhostyToolzEvolved.exe`
+Output: `dist/HaywardTechSuite/HaywardTechSuite.exe`
 
 ### 5. Review Documentation
 - Read the updated `README.md`

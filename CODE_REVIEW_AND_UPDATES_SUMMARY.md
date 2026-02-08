@@ -143,7 +143,7 @@ Comprehensively updated `README.md` with three major new sections:
 
 **Key information**:
 - Command: `python build.py`
-- Output: `dist/GhostyToolzEvolved/`
+- Output: `dist/HaywardTechSuite/`
 - Options: `--onedir`, `--windowed`, `--uac-admin`
 - Build time: 1-3 minutes
 
@@ -314,7 +314,7 @@ Hayward Tech Suite/
 
 1. **Use Pre-built Executable**
    - Download from `dist/` folder
-   - Run `GhostyToolzEvolved.exe`
+   - Run `HaywardTechSuite.exe`
    - Check new PC Specs in Settings tab
 
 2. **Read Documentation**

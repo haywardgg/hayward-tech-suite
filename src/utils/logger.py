@@ -113,7 +113,7 @@ class Logger:
 _logger_instance = Logger()
 
 
-def get_logger(name: str = "ghosty_tools") -> logging.Logger:
+def get_logger(name: str = "hayward_techsuite") -> logging.Logger:
     """
     Get a logger instance (convenience function).
 
@@ -123,7 +123,7 @@ def get_logger(name: str = "ghosty_tools") -> logging.Logger:
     Returns:
         Logger instance
     """
-    return _logger_instance.get_logger(name, log_file="ghosty_tools.log")
+    return _logger_instance.get_logger(name, log_file="hayward_techsuite.log")
 
 
 def get_audit_logger() -> logging.Logger:

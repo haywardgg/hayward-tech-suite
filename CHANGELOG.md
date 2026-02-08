@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Complete Rewrite
 
-This version represents a complete architectural redesign of Ghosty Tools, transforming it from a monolithic script into a professional, modular application.
+This version represents a complete architectural redesign of Hayward Tech Suite, transforming it from a monolithic script into a professional, modular application.
 
 ### Added ✨
 
@@ -158,7 +158,7 @@ reportlab==4.0.9          # Report generation
 2. **Import Changes**:
    ```python
    # Old (v1.x)
-   from ghosty_tools import *
+   from hayward_techsuite import *
    
    # New (v2.0)
    from src.core.system_operations import SystemOperations
@@ -228,6 +228,6 @@ Version 1.x is no longer maintained. All users should upgrade to 2.0.0 for:
 
 ## Links
 
-- [GitHub Repository](https://github.com/haywardgg/ghosty-toolz-evolved)
-- [Issue Tracker](https://github.com/haywardgg/ghosty-toolz-evolved/issues)
+- [GitHub Repository](https://github.com/haywardgg/hayward-tech-suite)
+- [Issue Tracker](https://github.com/haywardgg/hayward-tech-suite/issues)
 - [License](LICENSE)

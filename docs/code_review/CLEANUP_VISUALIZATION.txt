@@ -1,6 +1,6 @@
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                                                                           ║
-║     GHOSTY TOOLZ EVOLVED - CODE CLEANUP VISUALIZATION                    ║
+║     HAYWARD TECH SUITE - CODE CLEANUP VISUALIZATION                    ║
 ║     Analysis of 31 Python Files (9,178 LOC)                              ║
 ║                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════╝

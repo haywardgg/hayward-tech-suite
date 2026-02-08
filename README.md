@@ -97,8 +97,8 @@ A comprehensive, secure, and modern system maintenance suite for Windows, comple
 
 1. Clone and install:
    ```bash
-   git clone https://github.com/haywardgg/ghosty-toolz-evolved.git
-   cd ghosty-toolz-evolved
+   git clone https://github.com/haywardgg/hayward-tech-suite.git
+   cd hayward-tech-suite
    pip install -r requirements.txt
    ```
 
@@ -241,7 +241,7 @@ To remove a tweak:
 - Some tweaks may cause Windows features to stop working
 - Incorrect registry values can make Windows unstable or unbootable
 - Use the RESTORE button to undo applied tweaks
-- Registry backups are stored in: `%TEMP%\ghosty_toolz_registry_backups\`
+- Registry backups are stored in: `%TEMP%\hayward_techsuite_registry_backups\`
 
 #### How Tweaks Are Applied
 
@@ -300,11 +300,11 @@ After building (takes 1-3 minutes), you'll find:
 
 ```
 dist/
-└── GhostyToolzEvolved/
-    ├── GhostyToolzEvolved.exe  ← Main executable
-    ├── images/                  ← Bundled images
-    ├── config/                  ← Configuration files
-    └── [various DLL files]      ← Required libraries
+└── HaywardTechSuite/
+    ├── HaywardTechSuite.exe  ← Main executable
+    ├── images/               ← Bundled images
+    ├── config/               ← Configuration files
+    └── [various DLL files]   ← Required libraries
 ```
 
 #### Build Options

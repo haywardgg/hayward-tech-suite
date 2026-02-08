@@ -38,4 +38,4 @@ print(f"Arguments: {args}")
 
 PyInstaller.__main__.run(args)
 
-print("\n✅ Build complete! Check the 'dist' folder for GhostyToolzEvolved.exe")
+print("\n✅ Build complete! Check the 'dist' folder for HaywardTechSuite.exe")

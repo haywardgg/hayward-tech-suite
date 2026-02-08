@@ -3,8 +3,8 @@
 ## Backup Storage Location
 
 All registry backups are stored in:
-- **Windows**: `C:\Users\<Username>\AppData\Local\Temp\ghosty_toolz_registry_backups\`
-- **Direct Path**: `%TEMP%\ghosty_toolz_registry_backups\`
+- **Windows**: `C:\Users\<Username>\AppData\Local\Temp\hayward_techsuite_registry_backups\`
+- **Direct Path**: `%TEMP%\hayward_techsuite_registry_backups\`
 
 ## Automatic Cleanup
 
@@ -25,7 +25,7 @@ Backup metadata is stored in `registry_metadata.json` in the same directory.
 ## Manual Cleanup Instructions
 
 To manually delete old backups:
-1. Navigate to `%TEMP%\ghosty_toolz_registry_backups\`
+1. Navigate to `%TEMP%\hayward_techsuite_registry_backups\`
 2. Delete `.reg` files you no longer need
 3. Optionally delete `registry_metadata.json` to clear all metadata
 

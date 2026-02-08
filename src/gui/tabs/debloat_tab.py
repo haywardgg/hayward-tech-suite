@@ -618,10 +618,11 @@ class DebloatTab:
     def _update_status(self) -> None:
         """Update status label."""
         count = len(self.selected_items)
-        if count == 0:
-            self.status_label.configure(text="No items selected. Select bloatware to remove.")
-        else:
-            self.status_label.configure(text=f"{count} items selected for removal.")
+        if self.main_window:
+            if count == 0:
+                self.main_window.update_status("No items selected. Select bloatware to remove.")
+            else:
+                self.main_window.update_status(f"{count} items selected for removal.")
     
     def _write_terminal(self, message: str, level: str = "info") -> None:
         """

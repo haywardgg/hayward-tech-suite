@@ -27,7 +27,7 @@ ui:
 logging:
   level: "INFO"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  file: "logs/ghosty_tools.log"
+  file: "logs/hayward_techsuite.log"
   max_bytes: 10485760  # 10MB
   backup_count: 5
   console_output: true

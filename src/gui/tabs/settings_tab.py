@@ -131,8 +131,7 @@ class SettingsTab:
             "Hayward Tech Suite\n"
             "Version 1.0.0\n"
             "By HaywardGG\n\n"
-            "Professional Windows System Maintenance Tool\n"
-            "Forked from Ghostshadow's Ghosty Tools Pro\n\n"
+            "Professional Windows System Maintenance Tool\n\n"
             "License: GPL-3.0-or-later"
         )
         info_label = ctk.CTkLabel(
@@ -253,7 +252,7 @@ class SettingsTab:
 
                 # Delete registry backup directory
                 logger.info("Deleting registry backup directory...")
-                backup_dir = Path(tempfile.gettempdir()) / "ghosty_toolz_registry_backups"
+                backup_dir = Path(tempfile.gettempdir()) / "hayward_techsuite_registry_backups"
                 if backup_dir.exists():
                     try:
                         shutil.rmtree(backup_dir)

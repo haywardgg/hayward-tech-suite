@@ -3,14 +3,14 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ghosty-tools-pro"
+name = "hayward-tech-suite"
 version = "1.0.0"
 description = "Professional Windows System Maintenance Tool"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "GPL-3.0-or-later"}
 authors = [
-    {name = "Ghosty", email = "ghosty@example.com"}
+    {name = "Hayward", email = "hayward@example.com"}
 ]
 keywords = ["windows", "system", "maintenance", "optimization", "tools"]
 classifiers = [
@@ -52,12 +52,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/haywardgg/ghosty-toolz-evolved"
-Repository = "https://github.com/haywardgg/ghosty-toolz-evolved"
-Issues = "https://github.com/haywardgg/ghosty-toolz-evolved/issues"
+Homepage = "https://github.com/haywardgg/hayward-tech-suite"
+Repository = "https://github.com/haywardgg/hayward-tech-suite"
+Issues = "https://github.com/haywardgg/hayward-tech-suite/issues"
 
 [project.scripts]
-ghosty-tools = "src.main:main"
+hayward-techsuite = "src.main:main"
 
 [tool.black]
 line-length = 100

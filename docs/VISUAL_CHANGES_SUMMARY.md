@@ -110,7 +110,7 @@ This document describes the visual changes made to the Hayward Tech Suite applic
   - Disk space is managed automatically
 
 **Location**: 
-- Storage: `%TEMP%\ghosty_toolz_registry_backups\`
+- Storage: `%TEMP%\hayward_techsuite_registry_backups\`
 - Documentation: `docs/REGISTRY_BACKUP_MANAGEMENT.md`
 
 ---

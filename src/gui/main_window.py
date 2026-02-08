@@ -54,7 +54,7 @@ class MainWindow(ctk.CTk):
         ctk.set_default_color_theme("blue")  # Can be customized further
 
         # Set icon if available
-        icon_path = Path(resource_path("images/ghosty icon.ico"))
+        icon_path = Path(resource_path("images/icon.ico"))
         if icon_path.exists():
             try:
                 self.iconbitmap(str(icon_path))

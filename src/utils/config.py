@@ -84,7 +84,7 @@ class Config:
             },
             "logging": {
                 "level": "INFO",
-                "file": "logs/ghosty_tools.log",
+                "file": "logs/hayward_techsuite.log",
             },
             "monitoring": {
                 "cpu_interval": 2,

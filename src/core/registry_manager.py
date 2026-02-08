@@ -70,7 +70,7 @@ class RegistryManager:
     
     def __init__(self) -> None:
         """Initialize registry manager."""
-        self.tmp_dir = Path(tempfile.gettempdir()) / "ghosty_toolz_registry_backups"
+        self.tmp_dir = Path(tempfile.gettempdir()) / "hayward_techsuite_registry_backups"
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
         
         self.metadata_file = self.tmp_dir / "registry_metadata.json"

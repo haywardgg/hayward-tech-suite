@@ -278,8 +278,8 @@ feat: enhance settings page with two-column layout and PC specs
 **Output Structure Documented:**
 ```
 dist/
-└── GhostyToolzEvolved/
-    ├── GhostyToolzEvolved.exe
+└── HaywardTechSuite/
+    ├── HaywardTechSuite.exe
     ├── images/
     ├── config/
     └── [DLL files]
@@ -607,7 +607,7 @@ chore: organize documentation and finalize Phase 4
 3. **Build Executable** (Optional)
    ```bash
    python build.py
-   # Output in dist/GhostyToolzEvolved/
+   # Output in dist/HaywardTechSuite/
    ```
 
 4. **Read Documentation**
@@ -622,7 +622,7 @@ chore: organize documentation and finalize Phase 4
    - Extract to desired location
 
 2. **Run Application**
-   - Launch `GhostyToolzEvolved.exe`
+   - Launch `HaywardTechSuite.exe`
    - Allow UAC elevation
 
 3. **Try New Features**

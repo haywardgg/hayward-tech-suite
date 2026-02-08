@@ -114,7 +114,7 @@ After:   [🔍 Run Performance Profile]  (enabled)
    - Technical details on direct export method
 
 **Backup Management**:
-- Location: `%TEMP%\ghosty_toolz_registry_backups\`
+- Location: `%TEMP%\hayward_techsuite_registry_backups\`
 - Max backups: 10 (configurable)
 - Automatic cleanup: Yes
 - Metadata: `registry_metadata.json`
