@@ -1,5 +1,5 @@
 """
-Configuration manager for Ghosty Toolz Evolved.
+Configuration manager for Hayward Tech Suite.
 
 Loads and manages application configuration from YAML files and environment variables.
 """
@@ -74,8 +74,8 @@ class Config:
         """
         return {
             "app": {
-                "name": "Ghosty Toolz Evolved",
-                "version": "2.0.0",
+                "name": "Hayward Tech Suite",
+                "version": "1.0.0",
                 "debug": False,
             },
             "ui": {

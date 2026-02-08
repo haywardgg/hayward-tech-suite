@@ -1,5 +1,5 @@
 """
-Interactive remediation dialog for Ghosty Toolz Evolved.
+Interactive remediation dialog for Hayward Tech Suite.
 
 Displays all available remediation actions in a modern card-based layout
 with individual Execute, Rollback, and Test Run buttons.

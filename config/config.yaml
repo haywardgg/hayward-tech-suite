@@ -1,9 +1,9 @@
-# Ghosty Toolz Evolved Configuration
+# Hayward Tech Suite Configuration
 # This file contains default configuration values
 
 app:
-  name: "Ghosty Toolz Evolved"
-  version: "2.0.0"
+  name: "Hayward Tech Suite"
+  version: "1.0.0"
   author: "HaywardGG"
   description: "Professional Windows System Maintenance Tool"
   

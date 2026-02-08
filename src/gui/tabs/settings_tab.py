@@ -128,8 +128,8 @@ class SettingsTab:
 
         # Updated about information as per requirements
         info_text = (
-            "Ghosty Toolz Evolved\n"
-            "Version 2.0.0\n"
+            "Hayward Tech Suite\n"
+            "Version 1.0.0\n"
             "By HaywardGG\n\n"
             "Professional Windows System Maintenance Tool\n"
             "Forked from Ghostshadow's Ghosty Tools Pro\n\n"

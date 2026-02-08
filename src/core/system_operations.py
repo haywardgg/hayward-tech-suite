@@ -1,5 +1,5 @@
 """
-System operations module for Ghosty Toolz Evolved.
+System operations module for Hayward Tech Suite.
 
 Provides safe, audited system operations with proper privilege management,
 input validation, and error handling.
@@ -257,7 +257,7 @@ class SystemOperations:
             SystemOperationError: If operation fails
         """
         if not description:
-            description = f"Created by Ghosty Toolz Evolved on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            description = f"Created by Hayward Tech Suite on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
         # Sanitize name
         safe_name = validators.sanitize_filename(name)

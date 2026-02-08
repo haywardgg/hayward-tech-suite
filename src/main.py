@@ -1,5 +1,5 @@
 """
-Main entry point for Ghosty Toolz Evolved.
+Main entry point for Hayward Tech Suite.
 
 This module initializes the application and starts the main GUI.
 """
@@ -77,8 +77,8 @@ def check_requirements() -> bool:
 def show_welcome_message() -> None:
     """Show welcome message in console."""
     config = get_config()
-    app_name = config.get("app.name", "Ghosty Toolz Evolved")
-    app_version = config.get("app.version", "2.0.0")
+    app_name = config.get("app.name", "Hayward Tech Suite")
+    app_version = config.get("app.version", "1.0.0")
 
     welcome_msg = f"""
 ╔═══════════════════════════════════════════════════════════╗

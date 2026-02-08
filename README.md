@@ -1,6 +1,6 @@
-# 🛠️ Ghosty Toolz Evolved
+# 🛠️ Hayward Tech Suite
 
-**Professional Windows System Maintenance Tool v2.0.0**
+**Professional Windows System Maintenance Tool v1.0.0**
 
 A comprehensive, secure, and modern system maintenance suite for Windows, completely redesigned with a focus on security, modularity, and user experience.
 
@@ -431,7 +431,7 @@ GNU General Public License v3.0 - See [LICENSE](LICENSE)
 
 ## 📊 Changelog
 
-### Version 2.0.0
+### Version 1.0.0
 
 **Complete Rewrite**
 

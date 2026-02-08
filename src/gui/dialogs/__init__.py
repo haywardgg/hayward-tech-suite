@@ -1,5 +1,5 @@
 """
-GUI dialogs for Ghosty Toolz Evolved.
+GUI dialogs for Hayward Tech Suite.
 """
 
 from src.gui.dialogs.remediation_dialog import RemediationDialog

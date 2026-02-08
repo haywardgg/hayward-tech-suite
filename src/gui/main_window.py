@@ -1,5 +1,5 @@
 """
-Main window for Ghosty Toolz Evolved.
+Main window for Hayward Tech Suite.
 
 Provides the main application window with tabbed interface for different functionality.
 """
@@ -31,8 +31,8 @@ class MainWindow(ctk.CTk):
         super().__init__()
 
         # Window configuration
-        app_name = config.get("app.name", "Ghosty Toolz Evolved")
-        app_version = config.get("app.version", "2.0.0")
+        app_name = config.get("app.name", "Hayward Tech Suite")
+        app_version = config.get("app.version", "1.0.0")
         self.title(f"{app_name} v{app_version}")
         
         # Get window dimensions from config
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     from src.utils.logger import get_logger
 
     logger = get_logger("main")
-    logger.info("Starting Ghosty Toolz Evolved")
+    logger.info("Starting Hayward Tech Suite")
 
     # Create and run main window
     app = MainWindow()

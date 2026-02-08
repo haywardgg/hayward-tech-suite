@@ -1,5 +1,5 @@
 """
-Input validation utilities for Ghosty Toolz Evolved.
+Input validation utilities for Hayward Tech Suite.
 
 Provides validation functions for user inputs, system paths, and command arguments.
 """

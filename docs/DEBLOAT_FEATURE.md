@@ -282,7 +282,7 @@ To add new bloatware items:
 
 ## License
 
-This feature is part of Ghosty Toolz Evolved and follows the same license terms.
+This feature is part of Hayward Tech Suite and follows the same license terms.
 
 ## Support
 

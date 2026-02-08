@@ -1,6 +1,6 @@
 # New Features Added
 
-This document describes the professional features added to Ghosty Toolz Evolved in this update.
+This document describes the professional features added to Hayward Tech Suite in this update.
 
 ## Bug Fixes
 

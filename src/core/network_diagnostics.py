@@ -1,5 +1,5 @@
 """
-Network diagnostics module for Ghosty Toolz Evolved.
+Network diagnostics module for Hayward Tech Suite.
 
 Provides advanced network diagnostics including latency testing,
 bandwidth analysis, connection quality assessment, and DNS diagnostics.

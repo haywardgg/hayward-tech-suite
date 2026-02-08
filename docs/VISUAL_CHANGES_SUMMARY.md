@@ -1,6 +1,6 @@
 # Visual Changes Summary
 
-This document describes the visual changes made to the Ghosty Toolz Evolved application.
+This document describes the visual changes made to the Hayward Tech Suite application.
 
 ## 1. DANGER ZONE Tab - Warning Disclaimer
 

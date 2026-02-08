@@ -1,5 +1,5 @@
 """
-System monitoring module for Ghosty Toolz Evolved.
+System monitoring module for Hayward Tech Suite.
 
 Provides real-time monitoring of system resources including CPU, RAM, disk, battery, and network.
 """
