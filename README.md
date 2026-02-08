@@ -340,8 +340,22 @@ args = [
 ---
 
 ### 📦 Using the Pre-built Application
+### How to Install HaywardTechSuite Safely
 
-If you downloaded a pre-built release from the `dist/` folder:
+This tool has been signed with a **self-signed certificate**, which means it might trigger warnings from your system. Here's how to verify and use the app safely:
+
+1. **Download and Save the File**:
+   - Go to the [Releases page](https://github.com/haywardgg/hayward-tech-suite/releases) and download the latest version of `HaywardTechSuite.exe`.
+
+2. **Verify the Signature**:
+   - Right-click `HaywardTechSuite.exe` and select **Properties**.
+   - Go to the **Digital Signatures** tab to confirm the file is signed. You should see:
+     - Name of Signer: **LeeHayward**
+     - Signing Time: [Timestamp]
+
+3. **Run the Application** (if prompted by your system about the unknown signer):
+   - When your operating system shows a security warning about running an unknown app, choose advanced options to bypass the warning.
+   - Alternatively, you can manually verify the public certificate or compile the application from source if you prefer.
 
 #### Quick Start
 
