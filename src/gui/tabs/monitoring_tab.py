@@ -531,7 +531,7 @@ class MonitoringTab:
                 # Show progress dialog
                 self.parent.after(0, lambda: messagebox.showinfo(
                     "Performance Profile",
-                    "Running performance analysis...\nThis will take about 5-10 seconds."
+                    "Running performance analysis...\nThis will take a minute or two."
                 ))
 
                 # Profile CPU
