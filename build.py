@@ -17,7 +17,7 @@ args = [
     'src/main.py',
     '--onedir',
     '--windowed',
-    '--name=GhostyToolzEvolved',
+    '--name=HaywardTechSuite',
     '--uac-admin',
     '--hidden-import=psutil',
     '--hidden-import=yaml',
