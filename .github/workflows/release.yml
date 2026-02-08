@@ -22,7 +22,7 @@ jobs:
       # Step 3: Build the executable
       - name: Build the executable
         run: |
-          buildonefile.py # Replace with your actual build command or script
+        python buildonefile.py # Replace with your actual build command or script
         shell: cmd
 
       # Step 4: Decode the certificate stored as a GitHub Secret
