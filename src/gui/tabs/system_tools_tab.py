@@ -255,9 +255,13 @@ class SystemToolsTab:
         
         # Tools container
         tools_container = ctk.CTkFrame(parent, fg_color="transparent")
-        tools_container.grid(row=row + 1, column=0, sticky="ew", padx=20, pady=(5, 5))
         tools_container.grid_columnconfigure(0, weight=1)
-        tools_container.grid_remove()  # Hide by default
+        
+        self.category_frames[category.value] = tools_container
+        
+        # Grid the container but hide it since categories start collapsed
+        tools_container.grid(row=row + 1, column=0, sticky="ew", padx=20, pady=(5, 5))
+        tools_container.grid_remove()  # Hide by default (collapsed state)
         
         self.category_frames[category.value] = tools_container
         
@@ -276,7 +280,7 @@ class SystemToolsTab:
         # Top row: Tool name with badges
         top_frame = ctk.CTkFrame(tool_frame, fg_color="transparent")
         top_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(5, 0))
-        top_frame.grid_columnconfigure(0, weight=1)
+        top_frame.grid_columnconfigure(0, weight=1)  # Tool name expands
         
         # Tool name
         name_label = ctk.CTkLabel(
@@ -286,6 +290,9 @@ class SystemToolsTab:
         )
         name_label.grid(row=0, column=0, padx=0, pady=0, sticky="w")
         
+        # Badge column tracker
+        badge_col = 1
+        
         # Admin badge if required (inline with name)
         if tool.requires_admin:
             admin_badge = ctk.CTkLabel(
@@ -294,7 +301,8 @@ class SystemToolsTab:
                 font=ctk.CTkFont(size=11),
                 text_color="orange"
             )
-            admin_badge.grid(row=0, column=1, padx=(10, 0), pady=0, sticky="w")
+            admin_badge.grid(row=0, column=badge_col, padx=(10, 0), pady=0, sticky="w")
+            badge_col += 1
         
         # Restart badge if required (inline with name)
         if tool.requires_restart:
@@ -304,17 +312,16 @@ class SystemToolsTab:
                 font=ctk.CTkFont(size=11),
                 text_color="orange"
             )
-            col = 2 if tool.requires_admin else 1
-            restart_badge.grid(row=0, column=col, padx=(10, 0), pady=0, sticky="w")
+            restart_badge.grid(row=0, column=badge_col, padx=(10, 0), pady=0, sticky="w")
         
-        # Status label (right side of top row)
+        # Status label (right side of top row - always in column 99 to stay right)
         status_label = ctk.CTkLabel(
             top_frame,
             text="Checking...",
             font=ctk.CTkFont(size=11),
             text_color="gray"
         )
-        status_label.grid(row=0, column=3, padx=(10, 0), pady=0, sticky="e")
+        status_label.grid(row=0, column=99, padx=(10, 0), pady=0, sticky="e")
         self.tool_status_labels[tool.id] = status_label
         
         # Bottom row: Description
