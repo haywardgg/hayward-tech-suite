@@ -14,6 +14,7 @@ from src.utils.resource_path import resource_path
 from src.gui.tabs.monitoring_tab import MonitoringTab
 from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
+from src.gui.tabs.debloat_tab import DebloatTab
 from src.gui.tabs.security_tab import SecurityTab
 from src.gui.tabs.danger_tab import DangerTab
 from src.gui.tabs.settings_tab import SettingsTab
@@ -89,6 +90,7 @@ class MainWindow(ctk.CTk):
         self.monitoring_tab = None
         self.diagnostics_tab = None
         self.maintenance_tab = None
+        self.debloat_tab = None
         self.security_tab = None
         self.danger_tab = None
         self.settings_tab = None
@@ -122,6 +124,16 @@ class MainWindow(ctk.CTk):
 
         except Exception as e:
             logger.error(f"Failed to create Maintenance tab: {e}")
+
+        try:
+            # Debloat Windows tab
+            self.tabview.add("Debloat Windows")
+            tab_frame = self.tabview.tab("Debloat Windows")
+            self.debloat_tab = DebloatTab(tab_frame)
+            logger.info("Debloat Windows tab created")
+
+        except Exception as e:
+            logger.error(f"Failed to create Debloat Windows tab: {e}")
 
         try:
             # Security tab

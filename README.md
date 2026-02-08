@@ -30,6 +30,24 @@ A comprehensive, secure, and modern system maintenance suite for Windows, comple
 - Safe command execution with validation
 - Audit logging for all operations
 
+### 🗑️ **Windows Debloat Tool**
+- **Comprehensive bloatware removal** (53 items across 7 categories)
+- **Safe, Moderate, and Risky classifications** with color coding
+- **Automatic restore point creation** before changes
+- **Categories:**
+  - Microsoft Store Apps (Xbox, Cortana, Bing apps, etc.)
+  - Windows Features (IE11, Media Player, legacy protocols)
+  - OneDrive complete removal
+  - Telemetry & Privacy settings
+  - OEM Bloatware (Dell, HP, Lenovo, Asus, etc.)
+  - Windows Services (diagnostic tracking, remote registry)
+  - Optional Components (Quick Assist, PowerShell ISE)
+- **System scanning** to detect installed bloatware
+- **Real-time terminal output** with color-coded logging
+- **Preset selection** for safe items only
+- **Undo functionality** via system restore
+- **Detailed documentation** for each item
+
 ### ⚠️ **DANGER ZONE - Registry Tweaks**
 - **12 common Windows 11 registry tweaks**
 - **Automatic backup before every change**
