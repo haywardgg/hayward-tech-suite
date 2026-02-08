@@ -151,7 +151,7 @@ class SettingsTab:
         # RESET button - admin required
         self.reset_button = ctk.CTkButton(
             about_frame,
-            text="↻  RESET TO DEFAULTS",  # Using larger unicode icon with spacing
+            text="RESET TO DEFAULTS",  # Using larger unicode icon with spacing
             command=self._reset_to_defaults,
             width=200,
             height=40,  # Increased height for better visibility
@@ -346,7 +346,7 @@ class SettingsTab:
         # Copy button
         self.copy_button = ctk.CTkButton(
             specs_frame,
-            text="📋 Copy to Clipboard",
+            text="Copy to Clipboard",
             command=self._copy_specs_to_clipboard,
             width=200,
             fg_color="#0078d4",
