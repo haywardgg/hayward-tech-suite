@@ -34,14 +34,16 @@ jobs:
         shell: powershell
 
       # Step 5: Sign the executable with the self-signed certificate
-      - name: Sign executable
-        run: |
-          & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign /f "$(pwd)\LeeHayward.pfx" `
-          /p "${{ secrets.CERTIFICATE_PASSWORD }}" `
-          /fd SHA256 `
-          /t http://timestamp.digicert.com `
-          "$(pwd)\dist\HaywardTechSuite.exe"
-        shell: powershell
+- name: Sign Executable
+  run: |
+    & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign `
+    /f "$(pwd)\LeeHayward.pfx" `
+    /p "${{ secrets.CERTIFICATE_PASSWORD }}" `
+    /fd SHA256 `
+    /tr http://timestamp.globalsign.com/tsa/r6advanced1 `
+    /td SHA256 `
+    "$(pwd)\dist\HaywardTechSuite.exe"
+  shell: powershell
 
       # Step 6: Create a GitHub Release and Upload Signed Executable
       - name: Create GitHub Release and Upload Files
