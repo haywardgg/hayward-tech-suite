@@ -18,9 +18,10 @@ logger = get_logger("diagnostics_tab")
 class DiagnosticsTab:
     """Network diagnostics and testing tab."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """Initialize diagnostics tab."""
         self.parent = parent
+        self.main_window = main_window
         self.network_diag = NetworkDiagnostics()
 
         self.parent.grid_rowconfigure(0, weight=1)

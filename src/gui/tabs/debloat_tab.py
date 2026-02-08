@@ -26,9 +26,10 @@ logger = get_logger("debloat_tab")
 class DebloatTab:
     """Debloat Windows tab for bloatware removal."""
     
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """Initialize debloat tab."""
         self.parent = parent
+        self.main_window = main_window
         self.bloat_remover = BloatRemover()
         
         # State tracking
@@ -56,6 +57,10 @@ class DebloatTab:
         self.parent.grid_columnconfigure(0, weight=1)
         
         self._create_content()
+        
+        # Set initial status
+        if self.main_window:
+            self.main_window.update_status("Ready")
         
         logger.info("Debloat tab initialized")
     
@@ -771,6 +776,10 @@ class DebloatTab:
         self._update_ui_state()
         self._write_terminal("Starting system scan...", "info")
         
+        # Update main window status
+        if self.main_window:
+            self.main_window.update_status("Scanning system for bloatware...")
+        
         def progress_callback(progress: int, message: str):
             self.parent.after(0, lambda: self.progress_bar.set(progress / 100))
             self.parent.after(0, lambda: self.progress_label.configure(text=message))
@@ -815,6 +824,10 @@ class DebloatTab:
             
             self.is_scanning = False
             self.parent.after(0, self._update_ui_state)
+            
+            # Update main window status
+            if self.main_window:
+                self.parent.after(0, lambda: self.main_window.update_status(f"Last task completed: Scan found {installed_count} bloatware items"))
         
         self.bloat_remover.scan_system_async(progress_callback, completion_callback)
     
@@ -858,6 +871,10 @@ class DebloatTab:
         self._update_ui_state()
         self._write_terminal(f"Starting removal of {len(self.selected_items)} items...", "info")
         
+        # Update main window status
+        if self.main_window:
+            self.main_window.update_status(f"Removing {len(self.selected_items)} bloatware items...")
+        
         def progress_callback(progress: int, message: str):
             self.parent.after(0, lambda: self.progress_bar.set(progress / 100))
             self.parent.after(0, lambda: self.progress_label.configure(text=message))
@@ -891,6 +908,10 @@ class DebloatTab:
             
             self.is_removing = False
             self.parent.after(0, self._update_ui_state)
+            
+            # Update main window status
+            if self.main_window:
+                self.parent.after(0, lambda: self.main_window.update_status(f"Last task completed: Removed {successful} bloatware items"))
         
         item_ids = list(self.selected_items)
         self.bloat_remover.remove_items_async(

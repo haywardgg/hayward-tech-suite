@@ -20,14 +20,10 @@ BYTES_TO_MB = 1024**2
 class MonitoringTab:
     """System monitoring tab with real-time resource display."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
-        """
-        Initialize monitoring tab.
-
-        Args:
-            parent: Parent frame
-        """
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
+        """Initialize monitoring tab."""
         self.parent = parent
+        self.main_window = main_window
         self.monitoring_service = MonitoringService()
         self.performance_profiler = PerformanceProfiler()
         self.is_monitoring = False

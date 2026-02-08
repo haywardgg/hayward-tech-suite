@@ -20,9 +20,10 @@ logger = get_logger("registry_hacks_tab")
 class RegistryHacksTab:
     """Registry Hacks tab for advanced registry tweaks."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """Initialize Registry Hacks tab."""
         self.parent = parent
+        self.main_window = main_window
         self.registry_manager = RegistryManager()
         
         # Dictionary to store tweak buttons for state updates

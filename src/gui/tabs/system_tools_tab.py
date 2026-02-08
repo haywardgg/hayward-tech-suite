@@ -32,9 +32,10 @@ STATUS_COLUMN = 99  # High column number for status label to ensure right-alignm
 class SystemToolsTab:
     """System Tools Installation tab for installing developer tools."""
 
-    def __init__(self, parent: ctk.CTkFrame) -> None:
+    def __init__(self, parent: ctk.CTkFrame, main_window=None) -> None:
         """Initialize system tools tab."""
         self.parent = parent
+        self.main_window = main_window
         self.installer = SystemToolsInstaller()
 
         # State tracking
@@ -51,7 +52,6 @@ class SystemToolsTab:
         self.terminal_text: Optional[ctk.CTkTextbox] = None
         self.progress_bar: Optional[ctk.CTkProgressBar] = None
         self.progress_label: Optional[ctk.CTkLabel] = None
-        self.status_label: Optional[ctk.CTkLabel] = None
 
         self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_columnconfigure(0, weight=1)
@@ -86,7 +86,8 @@ class SystemToolsTab:
         # Status section
         row = self._create_status_section(content_frame, row)
 
-        # Initial status check
+        # Initial status check and set initial status
+        self._update_status("Ready")
         self.parent.after(100, self._check_all_tool_status)
 
     def _create_info_section(self, parent: ctk.CTkFrame, start_row: int) -> int:
@@ -437,12 +438,6 @@ class SystemToolsTab:
         self.progress_label = ctk.CTkLabel(status_frame, text="", font=ctk.CTkFont(size=11))
         self.progress_label.grid(row=1, column=0, padx=10, pady=5)
 
-        # Status label
-        self.status_label = ctk.CTkLabel(
-            status_frame, text="Ready", font=ctk.CTkFont(size=12, weight="bold"), text_color="green"
-        )
-        self.status_label.grid(row=2, column=0, padx=10, pady=5)
-
         return start_row + 1
 
     def _check_all_tool_status(self) -> None:
@@ -451,7 +446,7 @@ class SystemToolsTab:
             return
 
         self._append_to_terminal("\n=== Checking tool status ===\n")
-        self._update_status("Checking tool status...", "blue")
+        self._update_status("Checking tool status...")
 
         def task():
             try:
@@ -489,12 +484,12 @@ class SystemToolsTab:
 
                 self.parent.after(0, lambda: self.progress_bar.set(0))
                 self._append_to_terminal("\n=== Status check complete ===\n\n")
-                self._update_status("Ready", "green")
+                self._update_status("Ready")
 
             except Exception as e:
                 logger.error(f"Failed to check tool status: {e}")
                 self._append_to_terminal(f"\nError checking status: {e}\n\n")
-                self._update_status("Status check failed", "red")
+                self._update_status("Status check failed")
 
         thread = threading.Thread(target=task, daemon=True)
         thread.start()
@@ -528,7 +523,7 @@ class SystemToolsTab:
 
         self.is_installing = True
         self._append_to_terminal(f"\n=== Installing {tool.name} ===\n")
-        self._update_status(f"Installing {tool.name}...", "blue")
+        self._update_status(f"Installing {tool.name}...")
 
         # Disable all install buttons
         for button in self.tool_install_buttons.values():
@@ -546,7 +541,7 @@ class SystemToolsTab:
 
                 if success:
                     self._append_to_terminal(f"\n✓ {message}\n")
-                    self._update_status(f"{tool.name} installed successfully", "green")
+                    self._update_status(f"Last task completed: {tool.name} installed successfully")
 
                     # Show post-install message
                     self.parent.after(
@@ -565,7 +560,7 @@ class SystemToolsTab:
                     )
                 else:
                     self._append_to_terminal(f"\n✗ Installation failed: {message}\n")
-                    self._update_status(f"Installation failed", "red")
+                    self._update_status(f"Installation of {tool.name} failed")
 
                     self.parent.after(
                         0,
@@ -577,7 +572,7 @@ class SystemToolsTab:
             except Exception as e:
                 logger.error(f"Installation error: {e}")
                 self._append_to_terminal(f"\n✗ Error: {e}\n")
-                self._update_status("Installation error", "red")
+                self._update_status("Installation error occurred")
 
             finally:
                 self.is_installing = False
@@ -624,9 +619,9 @@ class SystemToolsTab:
             self._append_to_terminal("Terminal cleared.\n\n")
 
     def _update_status(self, message: str, color: str = "white") -> None:
-        """Update status label."""
-        if self.status_label:
-            self.status_label.configure(text=message, text_color=color)
+        """Update main window status bar."""
+        if self.main_window:
+            self.main_window.update_status(message)
 
     def _open_programs_folder(self) -> None:
         """Open Windows Programs folder."""
