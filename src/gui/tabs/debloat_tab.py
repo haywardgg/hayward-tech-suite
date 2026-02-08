@@ -701,24 +701,33 @@ class DebloatTab:
         def task():
             try:
                 restore_points = self.bloat_remover.get_restore_points()
-                
+
                 if restore_points:
                     latest = restore_points[0]
                     creation_time = latest.get('CreationTime', 'Unknown')
                     description = latest.get('Description', 'No description')
-                    
+
                     message = f"Last restore point: {creation_time} - {description}"
                 else:
                     message = "No restore points found"
-                
-                self.parent.after(0, lambda: self.restore_point_info_label.configure(text=message))
-                
+
+                self.parent.after(0, lambda m=message: self.restore_point_info_label.configure(
+                    text=m
+                ))
+
             except Exception as e:
                 logger.error(f"Failed to refresh restore points: {e}")
-        
+                # Safely update UI with error message
+                try:
+                    self.parent.after(0, lambda: self.restore_point_info_label.configure(
+                        text="Failed to load restore points"
+                    ))
+                except Exception as ui_error:
+                    logger.error(f"Failed to update UI: {ui_error}")
+
         thread = threading.Thread(target=task, daemon=True)
         thread.start()
-    
+
     def _create_restore_point_manual(self) -> None:
         """Create a restore point manually."""
         if not AdminState.is_admin():
@@ -736,17 +745,23 @@ class DebloatTab:
                     self.parent.after(0, lambda: messagebox.showinfo("Success", "Restore point created successfully"))
                     self.parent.after(0, self._refresh_restore_point_info)
                 else:
-                    self.parent.after(0, lambda: self._write_terminal(f"Failed to create restore point: {message}", "error"))
-                    self.parent.after(0, lambda: messagebox.showerror("Error", f"Failed to create restore point:\n{message}"))
-                    
+                    self.parent.after(0, lambda: self._write_terminal(
+                        f"Failed to create restore point: {message}", "error"
+                    ))
+                    self.parent.after(0, lambda: messagebox.showerror(
+                        "Error", f"Failed to create restore point:\n{message}"
+                    ))
+
             except Exception as e:
                 logger.error(f"Restore point creation failed: {e}")
-                self.parent.after(0, lambda: self._write_terminal(f"Error: {e}", "error"))
-                self.parent.after(0, lambda: messagebox.showerror("Error", f"Restore point creation failed:\n{e}"))
-        
+                self.parent.after(0, lambda ex=e: self._write_terminal(f"Error: {ex}", "error"))
+                self.parent.after(0, lambda ex=e: messagebox.showerror(
+                    "Error", f"Restore point creation failed:\n{ex}"
+                ))
+
         thread = threading.Thread(target=task, daemon=True)
         thread.start()
-    
+
     def _scan_system(self) -> None:
         """Scan system for installed bloatware."""
         if not AdminState.is_admin():
