@@ -218,7 +218,7 @@ class SettingsTab:
             "• Reset application settings to defaults\n"
             "• Clear all logs\n\n"
             "Note: Registry tweaks will NOT be automatically restored.\n"
-            "Use the RESTORE button in DANGER ZONE to undo individual tweaks.\n\n"
+            "Use the RESTORE button in Registry Hacks to undo individual tweaks.\n\n"
             "This action cannot be undone!\n\n"
             "Are you sure you want to continue?",
             icon='warning'

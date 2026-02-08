@@ -1,5 +1,5 @@
 """
-DANGER tab for advanced registry tweaks with backup/restore functionality.
+Registry Hacks tab for advanced registry tweaks with backup/restore functionality.
 
 WARNING: This tab contains potentially dangerous operations that can break Windows.
 """
@@ -14,14 +14,14 @@ from src.utils.logger import get_logger
 from src.utils.admin_state import AdminState
 from src.core.registry_manager import RegistryManager, RegistryError, RegistryTweak
 
-logger = get_logger("danger_tab")
+logger = get_logger("registry_hacks_tab")
 
 
-class DangerTab:
-    """DANGER zone tab for advanced registry tweaks."""
+class RegistryHacksTab:
+    """Registry Hacks tab for advanced registry tweaks."""
 
     def __init__(self, parent: ctk.CTkFrame) -> None:
-        """Initialize danger tab."""
+        """Initialize Registry Hacks tab."""
         self.parent = parent
         self.registry_manager = RegistryManager()
         
@@ -33,7 +33,7 @@ class DangerTab:
 
         self._create_content()
 
-        logger.info("DANGER tab initialized")
+        logger.info("Registry Hacks tab initialized")
 
     def _create_content(self) -> None:
         """Create content area."""
@@ -96,7 +96,7 @@ class DangerTab:
         after_text = self._format_registry_value_text(after_value, after_default)
         
         return (
-            f"\n\n📋 Registry Changes:\n"
+            f"\n\nRegistry Changes:\n"
             f"Key: {tweak.registry_key}\n"
             f"Value: {tweak.value_name or '(Default)'}\n\n"
             f"Before: {before_text}\n"
@@ -145,7 +145,7 @@ class DangerTab:
 
         self.backup_button = ctk.CTkButton(
             btn_frame,
-            text="📦 Backup Registry Now",
+            text="Backup Registry Now",
             command=self._backup_registry,
             width=200,
             height=40,
@@ -157,7 +157,7 @@ class DangerTab:
 
         self.restore_button = ctk.CTkButton(
             btn_frame,
-            text="↩️ Restore Registry",
+            text="Restore Registry",
             command=self._restore_registry,
             width=200,
             height=40,
@@ -169,7 +169,7 @@ class DangerTab:
 
         self.undo_button = ctk.CTkButton(
             btn_frame,
-            text="⏪ Undo Last Change",
+            text="Undo Last Change",
             command=self._undo_last_change,
             width=200,
             height=40,
@@ -219,7 +219,7 @@ class DangerTab:
 
             category_label = ctk.CTkLabel(
                 category_frame,
-                text=f"📂 {category}",
+                text=category,
                 font=ctk.CTkFont(size=14, weight="bold"),
             )
             category_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
@@ -527,7 +527,7 @@ class DangerTab:
                 )
 
                 restart_msg = (
-                    "\n\nℹ️ A system restart may be required for this change to take effect."
+                    "\n\nA system restart may be required for this change to take effect."
                     if tweak.requires_restart
                     else ""
                 )
@@ -601,7 +601,7 @@ class DangerTab:
                 )
 
                 restart_msg = (
-                    "\n\nℹ️ A system restart is required for this change to take effect."
+                    "\n\nA system restart is required for this change to take effect."
                     if tweak.requires_restart
                     else ""
                 )
@@ -666,7 +666,7 @@ class DangerTab:
         else:
             for backup in backups:
                 info = (
-                    f"📦 {backup.backup_id}\n"
+                    f"Backup ID: {backup.backup_id}\n"
                     f"   Date: {backup.timestamp}\n"
                     f"   Description: {backup.description}\n"
                     f"   Keys: {', '.join(backup.registry_keys)}\n"

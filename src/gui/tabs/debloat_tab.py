@@ -195,14 +195,14 @@ class DebloatTab:
         
         title = ctk.CTkLabel(
             header_frame,
-            text="📦 Select Bloatware to Remove",
+            text="Select Bloatware to Remove",
             font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         
         preset_button = ctk.CTkButton(
             header_frame,
-            text="🎯 Select Safe Items Only",
+            text="Select Safe Items Only",
             command=self._select_safe_preset,
             width=180,
             fg_color="green"
@@ -240,7 +240,7 @@ class DebloatTab:
             height=30,
             font=ctk.CTkFont(size=14)
         )
-        expand_button.grid(row=0, column=0, padx=5, pady=5)
+        expand_button.grid(row=0, column=0, padx=(0, 5), pady=5, sticky="w")
         
         # Store reference to expand button
         if not hasattr(self, '_expand_buttons'):
@@ -249,11 +249,11 @@ class DebloatTab:
         
         category_label = ctk.CTkLabel(
             header_frame,
-            text=f"📂 {category.value}",
+            text=category.value,
             font=ctk.CTkFont(size=14, weight="bold"),
             anchor="w"
         )
-        category_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+        category_label.grid(row=0, column=1, padx=(0, 5), pady=5, sticky="w")
         
         # Select all / Deselect all buttons
         select_all_btn = ctk.CTkButton(
@@ -367,7 +367,7 @@ class DebloatTab:
         
         title = ctk.CTkLabel(
             header_frame,
-            text="📟 Output Log",
+            text="Output Log",
             font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -420,7 +420,7 @@ class DebloatTab:
         """Create action buttons section."""
         button_frame = ctk.CTkFrame(parent, fg_color="transparent")
         button_frame.grid(row=start_row, column=0, sticky="ew", padx=5, pady=5)
-        button_frame.grid_columnconfigure(0, weight=1)
+        # Remove weight from column 0 to allow left alignment
         
         # Progress bar
         self.progress_bar = ctk.CTkProgressBar(button_frame)
@@ -433,41 +433,41 @@ class DebloatTab:
             font=ctk.CTkFont(size=11),
             text_color="gray"
         )
-        self.progress_label.grid(row=1, column=0, columnspan=4, padx=10, pady=(0, 5))
+        self.progress_label.grid(row=1, column=0, columnspan=4, padx=10, pady=(0, 5), sticky="w")
         
         # Buttons
         self.scan_button = ctk.CTkButton(
             button_frame,
-            text="🔍 Scan System",
+            text="Scan System",
             command=self._scan_system,
             width=150,
             height=40,
             font=ctk.CTkFont(size=13, weight="bold"),
             fg_color="blue"
         )
-        self.scan_button.grid(row=2, column=0, padx=5, pady=5)
+        self.scan_button.grid(row=2, column=0, padx=(10, 5), pady=5, sticky="w")
         
         self.debloat_button = ctk.CTkButton(
             button_frame,
-            text="🗑️ Start Debloat",
+            text="Start Debloat",
             command=self._start_debloat,
             width=150,
             height=40,
             font=ctk.CTkFont(size=13, weight="bold"),
             fg_color="red"
         )
-        self.debloat_button.grid(row=2, column=1, padx=5, pady=5)
+        self.debloat_button.grid(row=2, column=1, padx=5, pady=5, sticky="w")
         
         self.undo_button = ctk.CTkButton(
             button_frame,
-            text="↶ Undo Changes",
+            text="Undo Changes",
             command=self._undo_changes,
             width=150,
             height=40,
             font=ctk.CTkFont(size=13, weight="bold"),
             fg_color="orange"
         )
-        self.undo_button.grid(row=2, column=2, padx=5, pady=5)
+        self.undo_button.grid(row=2, column=2, padx=5, pady=5, sticky="w")
         
         return start_row + 1
     
@@ -479,7 +479,7 @@ class DebloatTab:
         
         title = ctk.CTkLabel(
             status_frame,
-            text="📊 Status",
+            text="Status",
             font=ctk.CTkFont(size=16, weight="bold")
         )
         title.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
@@ -761,7 +761,34 @@ class DebloatTab:
             installed_count = sum(1 for v in results.values() if v)
             total_count = len(results)
             
-            self.parent.after(0, lambda: self._write_terminal(f"Scan complete: {installed_count}/{total_count} items found installed", "success"))
+            # Display detailed scan results
+            self.parent.after(0, lambda: self._write_terminal(f"\n{'='*70}", "info"))
+            self.parent.after(0, lambda: self._write_terminal(f"Scan Complete: Found {installed_count} out of {total_count} items installed", "success"))
+            self.parent.after(0, lambda: self._write_terminal(f"{'='*70}\n", "info"))
+            
+            # Group results by category and show installed items
+            installed_by_category = {}
+            for item_id, is_installed in results.items():
+                if is_installed and item_id in self.bloat_remover.items:
+                    item = self.bloat_remover.items[item_id]
+                    category = item.category.value
+                    if category not in installed_by_category:
+                        installed_by_category[category] = []
+                    installed_by_category[category].append(item.name)
+            
+            # Display installed items by category
+            if installed_by_category:
+                self.parent.after(0, lambda: self._write_terminal("Installed Items Found:", "info"))
+                for category in sorted(installed_by_category.keys()):
+                    items = installed_by_category[category]
+                    self.parent.after(0, lambda c=category: self._write_terminal(f"\n{c}:", "info"))
+                    for item_name in sorted(items):
+                        self.parent.after(0, lambda n=item_name: self._write_terminal(f"  • {n}", "info"))
+            else:
+                self.parent.after(0, lambda: self._write_terminal("No bloatware items found installed on this system.", "success"))
+            
+            self.parent.after(0, lambda: self._write_terminal(f"\n{'='*70}\n", "info"))
+            
             self.parent.after(0, lambda: self.progress_bar.set(0))
             self.parent.after(0, lambda: self.progress_label.configure(text=""))
             

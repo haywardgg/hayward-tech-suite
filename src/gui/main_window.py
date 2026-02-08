@@ -16,7 +16,7 @@ from src.gui.tabs.diagnostics_tab import DiagnosticsTab
 from src.gui.tabs.maintenance_tab import MaintenanceTab
 from src.gui.tabs.debloat_tab import DebloatTab
 from src.gui.tabs.security_tab import SecurityTab
-from src.gui.tabs.danger_tab import DangerTab
+from src.gui.tabs.registry_hacks_tab import RegistryHacksTab
 from src.gui.tabs.settings_tab import SettingsTab
 
 logger = get_logger("main_window")
@@ -90,9 +90,9 @@ class MainWindow(ctk.CTk):
         self.monitoring_tab = None
         self.diagnostics_tab = None
         self.maintenance_tab = None
-        self.debloat_tab = None
         self.security_tab = None
-        self.danger_tab = None
+        self.registry_hacks_tab = None
+        self.debloat_tab = None
         self.settings_tab = None
 
         try:
@@ -126,16 +126,6 @@ class MainWindow(ctk.CTk):
             logger.error(f"Failed to create Maintenance tab: {e}")
 
         try:
-            # Debloat Windows tab
-            self.tabview.add("Debloat Windows")
-            tab_frame = self.tabview.tab("Debloat Windows")
-            self.debloat_tab = DebloatTab(tab_frame)
-            logger.info("Debloat Windows tab created")
-
-        except Exception as e:
-            logger.error(f"Failed to create Debloat Windows tab: {e}")
-
-        try:
             # Security tab
             self.tabview.add("Security")
             tab_frame = self.tabview.tab("Security")
@@ -146,14 +136,24 @@ class MainWindow(ctk.CTk):
             logger.error(f"Failed to create Security tab: {e}")
 
         try:
-            # DANGER ZONE tab
-            self.tabview.add("DANGER ZONE")
-            tab_frame = self.tabview.tab("DANGER ZONE")
-            self.danger_tab = DangerTab(tab_frame)
-            logger.info("DANGER ZONE tab created")
+            # Registry Hacks tab
+            self.tabview.add("Registry Hacks")
+            tab_frame = self.tabview.tab("Registry Hacks")
+            self.registry_hacks_tab = RegistryHacksTab(tab_frame)
+            logger.info("Registry Hacks tab created")
 
         except Exception as e:
-            logger.error(f"Failed to create DANGER ZONE tab: {e}")
+            logger.error(f"Failed to create Registry Hacks tab: {e}")
+
+        try:
+            # Debloat Windows tab
+            self.tabview.add("Debloat Windows")
+            tab_frame = self.tabview.tab("Debloat Windows")
+            self.debloat_tab = DebloatTab(tab_frame)
+            logger.info("Debloat Windows tab created")
+
+        except Exception as e:
+            logger.error(f"Failed to create Debloat Windows tab: {e}")
 
         try:
             # Settings tab
@@ -168,13 +168,13 @@ class MainWindow(ctk.CTk):
         # Set default tab
         self.tabview.set("Monitoring")
         
-        # Customize DANGER ZONE tab button color
-        self._setup_danger_zone_styling()
+        # Customize Registry Hacks tab button color
+        self._setup_registry_hacks_styling()
 
-    def _setup_danger_zone_styling(self) -> None:
-        """Configure dynamic red styling for DANGER ZONE tab button."""
+    def _setup_registry_hacks_styling(self) -> None:
+        """Configure dynamic red styling for Registry Hacks tab button."""
         try:
-            # Access the segmented button and configure colors for when DANGER ZONE is selected
+            # Access the segmented button and configure colors for when Registry Hacks is selected
             segmented_button = self.tabview._segmented_button
             # Store original colors
             self._original_selected_color = segmented_button.cget("selected_color")
@@ -184,7 +184,7 @@ class MainWindow(ctk.CTk):
             original_set = self.tabview.set
             
             def custom_set(value):
-                if value == "DANGER ZONE":
+                if value == "Registry Hacks":
                     segmented_button.configure(
                         selected_color="#8B0000",  # Dark red
                         selected_hover_color="#A52A2A"  # Brown red
@@ -198,9 +198,9 @@ class MainWindow(ctk.CTk):
             
             self.tabview.set = custom_set
             
-            logger.info("DANGER ZONE tab button styling configured")
+            logger.info("Registry Hacks tab button styling configured")
         except Exception as e:
-            logger.warning(f"Could not customize DANGER ZONE tab button color: {e}")
+            logger.warning(f"Could not customize Registry Hacks tab button color: {e}")
 
     def _create_status_bar(self) -> None:
         """Create status bar at bottom."""
