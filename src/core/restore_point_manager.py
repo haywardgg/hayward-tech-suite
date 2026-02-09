@@ -200,8 +200,11 @@ class RestorePointManager:
             creation_time_str: Creation time in format "/Date(1707436800000)/"
             
         Returns:
-            Formatted date string like "2024-02-09 12:00:00"
+            Formatted date string like "2024-02-09 12:00:00" or "Unknown date" if parsing fails
         """
+        if not creation_time_str:
+            return "Unknown date"
+            
         try:
             if creation_time_str.startswith('/Date(') and creation_time_str.endswith(')/'):
                 timestamp_ms = int(creation_time_str[6:-2])
@@ -211,7 +214,8 @@ class RestorePointManager:
         except Exception as e:
             logger.warning(f"Failed to parse creation time: {e}")
         
-        return creation_time_str
+        # Return user-friendly default for invalid formats
+        return "Unknown date"
     
     def get_latest_restore_point_info(self) -> str:
         """

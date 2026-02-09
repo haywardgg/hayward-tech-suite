@@ -432,7 +432,8 @@ class MaintenanceTab:
         scroll_frame.pack(padx=10, pady=10, fill="both", expand=True)
         scroll_frame.grid_columnconfigure(0, weight=1)
         
-        selected_sequence = {"value": None}
+        # Use list for simpler mutable storage
+        selected_sequence = [None]
         # Shared radio button variable for proper grouping
         radio_var = ctk.StringVar(value="")
         
@@ -448,12 +449,15 @@ class MaintenanceTab:
             rp_frame.grid_columnconfigure(1, weight=1)
             
             # Radio button - all share the same variable
+            def select_restore_point(seq=sequence):
+                selected_sequence[0] = seq
+            
             radio = ctk.CTkRadioButton(
                 rp_frame,
                 text="",
                 variable=radio_var,
                 value=str(sequence),
-                command=lambda s=sequence: selected_sequence.update({"value": s})
+                command=select_restore_point
             )
             radio.grid(row=0, column=0, rowspan=2, padx=5, pady=5)
             
@@ -477,14 +481,14 @@ class MaintenanceTab:
             # Auto-select the first (most recent) one
             if i == 0:
                 radio.select()
-                selected_sequence["value"] = sequence
+                selected_sequence[0] = sequence
         
         # Button frame
         button_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         button_frame.pack(padx=10, pady=10)
         
         def perform_restore():
-            if selected_sequence["value"] is None:
+            if selected_sequence[0] is None:
                 messagebox.showwarning("No Selection", "Please select a restore point")
                 return
             
@@ -503,7 +507,7 @@ class MaintenanceTab:
             
             # Perform restore
             def restore_task():
-                success, message = self.restore_manager.restore_system(selected_sequence["value"])
+                success, message = self.restore_manager.restore_system(selected_sequence[0])
                 
                 if success:
                     self.parent.after(0, lambda: messagebox.showinfo(
