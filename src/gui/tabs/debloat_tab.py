@@ -19,6 +19,7 @@ from src.core.bloat_remover import (
     BloatRemover, BloatwareItem, BloatwareCategory,
     SafetyLevel, BloatRemoverError
 )
+from src.core.restore_point_manager import RestorePointManager
 
 logger = get_logger("debloat_tab")
 
@@ -31,6 +32,11 @@ class DebloatTab:
         self.parent = parent
         self.main_window = main_window
         self.bloat_remover = BloatRemover()
+        
+        # Initialize restore point manager with PowerShell executor from bloat_remover
+        self.restore_manager = RestorePointManager(
+            execute_powershell_func=self.bloat_remover.execute_powershell
+        )
         
         # State tracking
         self.selected_items: Set[str] = set()
@@ -696,16 +702,8 @@ class DebloatTab:
         """Refresh restore point information."""
         def task():
             try:
-                restore_points = self.bloat_remover.get_restore_points()
-
-                if restore_points:
-                    latest = restore_points[0]
-                    creation_time = latest.get('CreationTime', 'Unknown')
-                    description = latest.get('Description', 'No description')
-
-                    message = f"Last restore point: {creation_time} - {description}"
-                else:
-                    message = "No restore points found"
+                info = self.restore_manager.get_latest_restore_point_info()
+                message = f"Last restore point: {info}"
 
                 self.parent.after(0, lambda m=message: self.restore_point_info_label.configure(
                     text=m
@@ -776,8 +774,29 @@ class DebloatTab:
             self.parent.after(0, lambda: self.progress_bar.set(0))
             self.parent.after(0, lambda: self.progress_label.configure(text=""))
             
-            # Scan results are stored in bloat_remover.items[item_id].is_installed
-            # Visual indication could be added in future enhancement (e.g., gray out non-installed items)
+            # Update checkbox states: gray out and disable non-installed items
+            def update_checkboxes():
+                for item_id, is_installed in results.items():
+                    if item_id in self.bloat_remover.items:
+                        item = self.bloat_remover.items[item_id]
+                        category_name = item.category.name
+                        
+                        if category_name in self.category_checkboxes:
+                            if item_id in self.category_checkboxes[category_name]:
+                                checkbox = self.category_checkboxes[category_name][item_id]
+                                
+                                if not is_installed:
+                                    # Item is not installed - gray it out and disable
+                                    checkbox.configure(state="disabled", text_color="gray")
+                                    # Uncheck if it was checked
+                                    checkbox.deselect()
+                                    # Remove from selected items
+                                    self.selected_items.discard(item_id)
+                                else:
+                                    # Item is installed - ensure it's enabled
+                                    checkbox.configure(state="normal", text_color=("gray10", "gray90"))
+            
+            self.parent.after(0, update_checkboxes)
             
             self.is_scanning = False
             self.parent.after(0, self._update_ui_state)
@@ -810,9 +829,11 @@ class DebloatTab:
         # Create restore point if requested
         if self.restore_point_checkbox.get() == 1:
             self._write_terminal("Creating restore point before removal...", "info")
-            success, message = self.bloat_remover.create_restore_point("Before Debloat")
+            success, message = self.restore_manager.create_restore_point("Before Debloat")
             if success:
                 self._write_terminal("Restore point created", "success")
+                # Refresh restore point info
+                self.parent.after(100, self._refresh_restore_point_info)
             else:
                 self._write_terminal(f"Failed to create restore point: {message}", "warning")
                 retry = messagebox.askyesno(
@@ -883,7 +904,7 @@ class DebloatTab:
             return
         
         # Get available restore points
-        restore_points = self.bloat_remover.get_restore_points()
+        restore_points = self.restore_manager.get_restore_points()
         
         if not restore_points:
             messagebox.showwarning("No Restore Points", "No restore points available")
@@ -907,7 +928,7 @@ class DebloatTab:
         
         self._write_terminal(f"Initiating system restore to sequence {sequence_number}...", "info")
         
-        success, message = self.bloat_remover.restore_system(sequence_number)
+        success, message = self.restore_manager.restore_system(sequence_number)
         
         if success:
             self._write_terminal("System restore initiated. System will restart.", "success")
