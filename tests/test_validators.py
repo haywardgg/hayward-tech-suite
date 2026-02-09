@@ -115,3 +115,29 @@ class TestValidators:
             allow_shell=True
         ) is True
 
+    def test_validate_powershell_command_with_newlines(self):
+        """Test PowerShell command validation with newlines (multi-line commands)."""
+        validator = Validators()
+        # Multi-line PowerShell commands should pass with allow_shell=True
+        multiline_cmd = """
+        try {
+            Enable-ComputerRestore -Drive "$env:SystemDrive" -ErrorAction SilentlyContinue
+            Write-Output "System Restore enabled"
+        } catch {
+            Write-Output "System Restore may already be enabled or failed: $_"
+        }
+        """
+        assert validator.validate_command(
+            f'powershell -Command "{multiline_cmd}"',
+            allow_shell=True
+        ) is True
+
+    def test_validate_powershell_command_with_tabs(self):
+        """Test PowerShell command validation with tabs (indented commands)."""
+        validator = Validators()
+        # Indented PowerShell commands with tabs should pass with allow_shell=True
+        indented_cmd = "Get-ComputerRestorePoint | Select-Object\t-Property\tSequenceNumber,\tDescription"
+        assert validator.validate_command(
+            f'powershell -Command "{indented_cmd}"',
+            allow_shell=True
+        ) is True

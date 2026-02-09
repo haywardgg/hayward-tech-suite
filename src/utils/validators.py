@@ -27,10 +27,10 @@ class Validators:
     # Allowed characters for different input types
     SAFE_PATH_CHARS = set(string.ascii_letters + string.digits + r":\/-_. ()")
     SAFE_COMMAND_CHARS = set(string.ascii_letters + string.digits + r":\/-_. ")
-    
+
     # Safe characters for shell commands
     SAFE_SHELL_CHARS = {"|", ">", "<", '"', "'", "(", ")", "=", "-", ","}
-    SAFE_POWERSHELL_CHARS = SAFE_SHELL_CHARS | {"{", "}", "[", "]", "\\", "@", "$", ".", "?", ";", "`"}
+    SAFE_POWERSHELL_CHARS = SAFE_SHELL_CHARS | {"{", "}", "[", "]", "\\", "@", "$", ".", "?", ";", "`", "\n", "\t"}
 
     @staticmethod
     def validate_path(path: str, must_exist: bool = False, must_be_dir: bool = False) -> bool:
@@ -118,7 +118,7 @@ class Validators:
             # Block semicolons for non-PowerShell commands (command chaining)
             if not is_powershell and ';' in command:
                 raise ValidationError("Semicolon not allowed for non-PowerShell commands")
-            
+
             # Block backticks for command substitution
             if '`' in command and not is_powershell:
                 raise ValidationError("Backtick not allowed for non-PowerShell commands")
@@ -140,7 +140,7 @@ class Validators:
         else:
             # Basic safe characters plus minimal redirections
             safe_chars = Validators.SAFE_COMMAND_CHARS | {"|", ">", "<"}
-        
+
         unsafe_chars = set(command) - safe_chars
         if unsafe_chars:
             raise ValidationError(f"Command contains unsafe characters: {unsafe_chars}")
