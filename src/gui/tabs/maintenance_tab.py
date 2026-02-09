@@ -501,6 +501,10 @@ class MaintenanceTab:
         # Shared radio button variable for proper grouping
         radio_var = ctk.StringVar(value="")
         
+        # Helper function to update selected sequence
+        def update_selection(seq):
+            selected_sequence[0] = seq
+        
         # Create a radio button for each restore point
         for i, rp in enumerate(restore_points):
             sequence = rp.get('SequenceNumber', 0)
@@ -518,7 +522,7 @@ class MaintenanceTab:
                 text="",
                 variable=radio_var,
                 value=str(sequence),
-                command=lambda seq=sequence: selected_sequence.__setitem__(0, seq)
+                command=lambda seq=sequence: update_selection(seq)
             )
             radio.grid(row=0, column=0, padx=5, pady=5)
             
