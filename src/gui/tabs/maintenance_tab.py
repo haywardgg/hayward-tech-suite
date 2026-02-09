@@ -12,6 +12,7 @@ import subprocess
 from src.utils.logger import get_logger
 from src.utils.admin_state import AdminState
 from src.core.system_operations import SystemOperations, SystemOperationError, PrivilegeError
+from src.core.restore_point_manager import RestorePointManager
 
 logger = get_logger("maintenance_tab")
 
@@ -33,6 +34,17 @@ class MaintenanceTab:
         self.parent = parent
         self.main_window = main_window
         self.system_ops = SystemOperations()
+        
+        # Initialize restore point manager with PowerShell executor
+        self.restore_manager = RestorePointManager(
+            execute_powershell_func=lambda cmd, timeout: self.system_ops.execute_command(
+                f'powershell -Command "{cmd}"',
+                timeout=timeout,
+                shell=True,
+                require_admin=False,
+                audit=False
+            )
+        )
         
         # Thread-safe cancellation flag
         self.maintenance_cancelled = threading.Event()
@@ -162,24 +174,51 @@ class MaintenanceTab:
         )
         info.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 
-        self.restore_name_entry = ctk.CTkEntry(restore_frame, placeholder_text="Restore Point Name")
-        self.restore_name_entry.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        # Last restore point info label
+        self.restore_point_info_label = ctk.CTkLabel(
+            restore_frame,
+            text="Last restore point: Checking...",
+            font=ctk.CTkFont(size=11),
+            text_color="gray"
+        )
+        self.restore_point_info_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
         
         # Check admin status
         is_admin = AdminState.is_admin()
 
+        # Button frame for side-by-side buttons
+        button_frame = ctk.CTkFrame(restore_frame, fg_color="transparent")
+        button_frame.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        
         self.create_restore_btn = ctk.CTkButton(
-            restore_frame, 
+            button_frame, 
             text="Create Restore Point", 
             command=self._create_restore_point, 
-            width=200,
+            width=180,
             state="normal" if is_admin else "disabled"
         )
-        self.create_restore_btn.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        self.create_restore_btn.grid(row=0, column=0, padx=(0, 10), sticky="w")
+        
+        self.restore_changes_btn = ctk.CTkButton(
+            button_frame, 
+            text="Restore Changes", 
+            command=self._show_restore_dialog, 
+            width=180,
+            state="normal" if is_admin else "disabled"
+        )
+        self.restore_changes_btn.grid(row=0, column=1, padx=(0, 10), sticky="w")
         
         if not is_admin:
-            # Disable input as well
-            self.restore_name_entry.configure(state="disabled")
+            warning_label = ctk.CTkLabel(
+                restore_frame,
+                text="WARNING: Administrator privileges required for restore operations",
+                font=ctk.CTkFont(size=9),
+                text_color="orange"
+            )
+            warning_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        
+        # Refresh restore point info after UI is ready
+        self.parent.after(100, self._refresh_restore_point_info)
 
     def _create_system_maintenance_section(self, parent: ctk.CTkFrame, row: int, column: int = 0) -> None:
         """Create system maintenance section."""
@@ -271,14 +310,33 @@ class MaintenanceTab:
 
         threading.Thread(target=task, daemon=True).start()
 
-    def _create_restore_point(self) -> None:
-        """Create system restore point."""
-        name = self.restore_name_entry.get().strip()
-        if not name:
-            messagebox.showwarning("Warning", "Please enter a restore point name")
-            return
+    def _refresh_restore_point_info(self) -> None:
+        """Refresh restore point information display."""
+        def task():
+            try:
+                info = self.restore_manager.get_latest_restore_point_info()
+                message = f"Last restore point: {info}"
+                
+                try:
+                    self.parent.after(0, lambda m=message: self.restore_point_info_label.configure(
+                        text=m
+                    ))
+                except Exception as e:
+                    logger.debug(f"GUI update timing issue (safe to ignore): {e}")
+            except Exception as e:
+                logger.error(f"Failed to refresh restore points: {e}")
+                try:
+                    self.parent.after(0, lambda: self.restore_point_info_label.configure(
+                        text="Failed to load restore points"
+                    ))
+                except Exception as ex:
+                    logger.debug(f"GUI update timing issue (safe to ignore): {ex}")
+        
+        threading.Thread(target=task, daemon=True).start()
 
-        logger.info(f"User initiated restore point creation: {name}")
+    def _create_restore_point(self) -> None:
+        """Create system restore point with auto-generated name."""
+        logger.info("User initiated restore point creation")
 
         def task():
             try:
@@ -290,17 +348,19 @@ class MaintenanceTab:
                     ))
                     return
 
-                success = self.system_ops.create_restore_point(name)
+                # Create restore point with auto-generated timestamp name
+                success, message = self.restore_manager.create_restore_point()
+                
                 if success:
                     self.parent.after(0, lambda: messagebox.showinfo(
-                        "Success", f"Restore point '{name}' created successfully!"
+                        "Success", f"Restore point created successfully!"
                     ))
-                    self.parent.after(0, lambda: self.restore_name_entry.delete(0, "end"))
-            except PrivilegeError as e:
-                logger.error(f"Privilege error: {e}")
-                self.parent.after(0, lambda: messagebox.showerror(
-                    "Admin Required", str(e)
-                ))
+                    # Refresh the restore point info
+                    self.parent.after(100, self._refresh_restore_point_info)
+                else:
+                    self.parent.after(0, lambda m=message: messagebox.showerror(
+                        "Error", f"Failed to create restore point:\n{m}"
+                    ))
             except Exception as e:
                 logger.error(f"Restore point creation failed: {e}")
                 self.parent.after(0, lambda: messagebox.showerror(
@@ -308,6 +368,170 @@ class MaintenanceTab:
                 ))
 
         threading.Thread(target=task, daemon=True).start()
+
+    def _show_restore_dialog(self) -> None:
+        """Show dialog to select and restore from a restore point."""
+        if not AdminState.is_admin():
+            messagebox.showerror("Error", "Administrator privileges required for system restore")
+            return
+        
+        logger.info("User initiated restore point selection")
+        
+        def task():
+            try:
+                # Get available restore points
+                restore_points = self.restore_manager.get_restore_points()
+                
+                if not restore_points:
+                    self.parent.after(0, lambda: messagebox.showwarning(
+                        "No Restore Points", "No restore points available"
+                    ))
+                    return
+                
+                # Show dialog on main thread
+                self.parent.after(0, lambda: self._display_restore_selection_dialog(restore_points))
+                    
+            except Exception as e:
+                logger.error(f"Failed to get restore points: {e}")
+                self.parent.after(0, lambda: messagebox.showerror(
+                    "Error", f"Failed to get restore points:\n{e}"
+                ))
+        
+        threading.Thread(target=task, daemon=True).start()
+    
+    def _display_restore_selection_dialog(self, restore_points: list) -> None:
+        """Display restore point selection dialog."""
+        dialog = ctk.CTkToplevel(self.parent)
+        dialog.title("Select Restore Point")
+        dialog.geometry("700x500")
+        dialog.transient(self.parent)
+        dialog.grab_set()
+        
+        # Title
+        title = ctk.CTkLabel(
+            dialog,
+            text="Select a Restore Point",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        title.pack(padx=10, pady=10)
+        
+        # Warning
+        warning = ctk.CTkLabel(
+            dialog,
+            text="This will restore your system to a previous state.\nAll programs installed after the restore point will be removed.",
+            font=ctk.CTkFont(size=11),
+            text_color="orange"
+        )
+        warning.pack(padx=10, pady=5)
+        
+        # Scrollable frame for restore points
+        scroll_frame = ctk.CTkScrollableFrame(dialog, width=650, height=300)
+        scroll_frame.pack(padx=10, pady=10, fill="both", expand=True)
+        scroll_frame.grid_columnconfigure(0, weight=1)
+        
+        selected_sequence = {"value": None}
+        
+        # Create a radio button for each restore point
+        for i, rp in enumerate(restore_points):
+            sequence = rp.get('SequenceNumber', 0)
+            description = rp.get('Description', 'Unknown')
+            creation_time = self.restore_manager.format_creation_time(rp.get('CreationTime', ''))
+            
+            # Frame for each restore point
+            rp_frame = ctk.CTkFrame(scroll_frame)
+            rp_frame.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+            rp_frame.grid_columnconfigure(1, weight=1)
+            
+            # Radio button
+            radio_var = ctk.StringVar(value="")
+            radio = ctk.CTkRadioButton(
+                rp_frame,
+                text="",
+                variable=radio_var,
+                value=str(sequence),
+                command=lambda s=sequence: selected_sequence.update({"value": s})
+            )
+            radio.grid(row=0, column=0, rowspan=2, padx=5, pady=5)
+            
+            # Date/Time label
+            date_label = ctk.CTkLabel(
+                rp_frame,
+                text=creation_time,
+                font=ctk.CTkFont(size=12, weight="bold")
+            )
+            date_label.grid(row=0, column=1, padx=5, pady=(5, 0), sticky="w")
+            
+            # Description label
+            desc_label = ctk.CTkLabel(
+                rp_frame,
+                text=description,
+                font=ctk.CTkFont(size=11),
+                text_color="gray"
+            )
+            desc_label.grid(row=1, column=1, padx=5, pady=(0, 5), sticky="w")
+            
+            # Auto-select the first (most recent) one
+            if i == 0:
+                radio.select()
+                selected_sequence["value"] = sequence
+        
+        # Button frame
+        button_frame = ctk.CTkFrame(dialog, fg_color="transparent")
+        button_frame.pack(padx=10, pady=10)
+        
+        def perform_restore():
+            if selected_sequence["value"] is None:
+                messagebox.showwarning("No Selection", "Please select a restore point")
+                return
+            
+            # Confirm
+            confirm = messagebox.askyesno(
+                "Confirm Restore",
+                "Are you sure you want to restore your system?\n\n"
+                "Your computer will restart automatically.",
+                parent=dialog
+            )
+            
+            if not confirm:
+                return
+            
+            dialog.destroy()
+            
+            # Perform restore
+            def restore_task():
+                success, message = self.restore_manager.restore_system(selected_sequence["value"])
+                
+                if success:
+                    self.parent.after(0, lambda: messagebox.showinfo(
+                        "System Restore", 
+                        "System restore initiated.\nThe system will restart shortly."
+                    ))
+                else:
+                    self.parent.after(0, lambda m=message: messagebox.showerror(
+                        "Error", f"System restore failed:\n{m}"
+                    ))
+            
+            threading.Thread(target=restore_task, daemon=True).start()
+        
+        # Restore button
+        restore_btn = ctk.CTkButton(
+            button_frame,
+            text="Restore System",
+            command=perform_restore,
+            width=150,
+            fg_color="#d9534f",
+            hover_color="#c9302c"
+        )
+        restore_btn.grid(row=0, column=0, padx=5)
+        
+        # Cancel button
+        cancel_btn = ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=dialog.destroy,
+            width=150
+        )
+        cancel_btn.grid(row=0, column=1, padx=5)
 
     def _run_maintenance(self) -> None:
         """Run full system maintenance with real-time output."""
