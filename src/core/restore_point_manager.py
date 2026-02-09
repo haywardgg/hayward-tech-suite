@@ -76,11 +76,27 @@ class RestorePointManager:
             # Create the restore point
             success, stdout, stderr = self.execute_powershell(create_cmd, timeout=120)
             
-            if success and "successfully" in stdout.lower():
+            # Check the output for success or failure messages
+            # The PowerShell script writes to stdout in both success and failure cases
+            output = stdout.lower()
+            
+            if "restore point created successfully" in output:
                 logger.info("Restore point created successfully")
                 return True, "Restore point created successfully"
+            elif "failed to create restore point" in output:
+                # Extract the error message from the output
+                # Format: "Failed to create restore point: <error details>"
+                error_msg = stdout if stdout else "Unknown error"
+                logger.error(f"Failed to create restore point: {error_msg}")
+                return False, error_msg
+            elif not success:
+                # PowerShell command itself failed (not the inner script)
+                error_msg = stderr if stderr else stdout if stdout else "PowerShell execution failed"
+                logger.error(f"Failed to create restore point: {error_msg}")
+                return False, f"Failed to create restore point: {error_msg}"
             else:
-                error_msg = stderr if stderr else stdout
+                # Unexpected output - neither success nor explicit failure message
+                error_msg = stdout if stdout else "Unknown error - no output from restore point creation"
                 logger.error(f"Failed to create restore point: {error_msg}")
                 return False, f"Failed to create restore point: {error_msg}"
                 
