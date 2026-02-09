@@ -8,10 +8,11 @@ import customtkinter as ctk
 from tkinter import messagebox
 import threading
 import subprocess
+from typing import Tuple
 
 from src.utils.logger import get_logger
 from src.utils.admin_state import AdminState
-from src.core.system_operations import SystemOperations, SystemOperationError, PrivilegeError
+from src.core.system_operations import SystemOperations
 from src.core.restore_point_manager import RestorePointManager
 
 logger = get_logger("maintenance_tab")
@@ -37,13 +38,7 @@ class MaintenanceTab:
         
         # Initialize restore point manager with PowerShell executor
         self.restore_manager = RestorePointManager(
-            execute_powershell_func=lambda cmd, timeout: self.system_ops.execute_command(
-                f'powershell -Command "{cmd}"',
-                timeout=timeout,
-                shell=True,
-                require_admin=False,
-                audit=False
-            )
+            execute_powershell_func=self._execute_powershell
         )
         
         # Thread-safe cancellation flag
@@ -61,6 +56,58 @@ class MaintenanceTab:
             self.main_window.update_status("Ready")
 
         logger.info("Maintenance tab initialized")
+    
+    def _execute_powershell(self, command: str, timeout: int = 300) -> Tuple[bool, str, str]:
+        """
+        Execute a PowerShell command properly without double-wrapping.
+        
+        Args:
+            command: PowerShell command to execute
+            timeout: Command timeout in seconds
+            
+        Returns:
+            Tuple of (success, stdout, stderr)
+        """
+        try:
+            # Build PowerShell command properly as a list
+            ps_command = [
+                "powershell.exe",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy", "Bypass",
+                "-Command", command
+            ]
+            
+            logger.debug(f"Executing PowerShell: {command[:100]}...")
+            
+            result = subprocess.run(
+                ps_command,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                creationflags=CREATE_NO_WINDOW
+            )
+            
+            success = result.returncode == 0
+            stdout = result.stdout.strip() if result.stdout else ""
+            stderr = result.stderr.strip() if result.stderr else ""
+            
+            if success:
+                logger.debug("PowerShell command succeeded")
+            else:
+                logger.warning(f"PowerShell command failed with code {result.returncode}")
+                if stderr:
+                    logger.debug(f"Error output: {stderr[:200]}")
+            
+            return success, stdout, stderr
+            
+        except subprocess.TimeoutExpired:
+            logger.error(f"PowerShell command timed out after {timeout}s")
+            return False, "", f"Command timed out after {timeout} seconds"
+            
+        except Exception as e:
+            logger.error(f"PowerShell execution failed: {e}")
+            return False, "", str(e)
 
     def _create_operations(self) -> None:
         """Create operation buttons and options."""
@@ -354,7 +401,7 @@ class MaintenanceTab:
                 
                 if success:
                     self.parent.after(0, lambda: messagebox.showinfo(
-                        "Success", f"Restore point created successfully!"
+                        "Success", "Restore point created successfully!"
                     ))
                     # Refresh the restore point info
                     self.parent.after(100, self._refresh_restore_point_info)
