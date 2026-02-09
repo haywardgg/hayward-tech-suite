@@ -1,0 +1,805 @@
+{
+  "version": "1.0",
+  "tweaks": [
+    {
+      "id": "disable_telemetry",
+      "name": "Disable Telemetry",
+      "description": "Disables Windows telemetry and data collection",
+      "category": "Privacy",
+      "risk_level": "low",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "value_name": "AllowTelemetry",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "value_name": "AllowTelemetry",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_cortana",
+      "name": "Disable Cortana",
+      "description": "Disables Cortana voice assistant",
+      "category": "Privacy",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+        "value_name": "AllowCortana",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+        "value_name": "AllowCortana",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_windows_update",
+      "name": "Disable Windows Update (Temporary)",
+      "description": "Temporarily disables automatic Windows updates (use with caution)",
+      "category": "System",
+      "risk_level": "high",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "value_name": "NoAutoUpdate",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "value_name": "NoAutoUpdate",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "show_file_extensions",
+      "name": "Show File Extensions",
+      "description": "Always show file extensions in File Explorer",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "HideFileExt",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "HideFileExt",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "show_hidden_files",
+      "name": "Show Hidden Files",
+      "description": "Show hidden files and folders in File Explorer",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "Hidden",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "Hidden",
+        "value_data": "2",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_lock_screen",
+      "name": "Disable Lock Screen",
+      "description": "Skip lock screen on startup",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization",
+        "value_name": "NoLockScreen",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization",
+        "value_name": "NoLockScreen",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_uac",
+      "name": "Disable UAC Prompts",
+      "description": "Disables User Account Control prompts (SECURITY RISK)",
+      "category": "Security",
+      "risk_level": "high",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value_name": "EnableLUA",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value_name": "EnableLUA",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_startup_delay",
+      "name": "Disable Startup Program Delay",
+      "description": "Removes 10-second delay for startup programs",
+      "category": "Performance",
+      "risk_level": "low",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize",
+        "value_name": "StartupDelayInMSec",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize",
+        "value_name": "StartupDelayInMSec",
+        "value_data": "10000",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_transparency",
+      "name": "Disable Transparency Effects",
+      "description": "Disables window transparency for better performance",
+      "category": "Performance",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "value_name": "EnableTransparency",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "value_name": "EnableTransparency",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "old_context_menu",
+      "name": "Restore Classic Context Menu",
+      "description": "Restores Windows 10 style right-click context menu",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32",
+        "value_name": "",
+        "value_data": "",
+        "value_type": "REG_SZ"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32",
+        "value_name": "",
+        "value_data": "%SystemRoot%\\System32\\shell32.dll",
+        "value_type": "REG_SZ"
+      }
+    },
+    {
+      "id": "disable_ads",
+      "name": "Disable Start Menu Ads",
+      "description": "Disables suggested apps and ads in Start Menu",
+      "category": "Privacy",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "SystemPaneSuggestionsEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "SystemPaneSuggestionsEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_game_bar",
+      "name": "Disable Xbox Game Bar",
+      "description": "Disables Xbox Game Bar overlay",
+      "category": "Performance",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+        "value_name": "AppCaptureEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+        "value_name": "AppCaptureEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_copilot",
+      "name": "Disable Windows Copilot",
+      "description": "Disables Windows Copilot AI assistant",
+      "category": "Privacy",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+        "value_name": "TurnOffWindowsCopilot",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+        "value_name": "TurnOffWindowsCopilot",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_widgets",
+      "name": "Disable Widgets",
+      "description": "Disables Windows 11 widgets feature",
+      "category": "Performance",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Dsh",
+        "value_name": "AllowNewsAndInterests",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Dsh",
+        "value_name": "AllowNewsAndInterests",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_chat_icon",
+      "name": "Disable Chat Icon",
+      "description": "Removes the chat icon from the taskbar",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "TaskbarMn",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "TaskbarMn",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "enable_compact_mode",
+      "name": "Enable Compact Mode in Explorer",
+      "description": "Enables compact view mode in File Explorer for Windows 11",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "UseCompactMode",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "UseCompactMode",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "show_all_tray_icons",
+      "name": "Show All Tray Icons",
+      "description": "Shows all system tray icons instead of hiding them",
+      "category": "UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+        "value_name": "EnableAutoTray",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+        "value_name": "EnableAutoTray",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "show_seconds_clock",
+      "name": "Show Seconds in Taskbar Clock",
+      "description": "Displays seconds in the system clock on the taskbar",
+      "category": "File Explorer & UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "ShowSecondsInSystemClock",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "ShowSecondsInSystemClock",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_search_highlights",
+      "name": "Disable Search Highlights in Taskbar",
+      "description": "Disables Bing search highlights in the taskbar search box",
+      "category": "File Explorer & UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "value_name": "BingSearchEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "value_name": "BingSearchEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "remove_recommended_start",
+      "name": "Remove Recommended Section from Start Menu",
+      "description": "Removes the 'Recommended' section from Windows 11 Start Menu",
+      "category": "File Explorer & UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "Start_IrisRecommendations",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "Start_IrisRecommendations",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "taskbar_clock_all_monitors",
+      "name": "Show Taskbar Clock on All Monitors",
+      "description": "Displays the system clock on all connected monitors",
+      "category": "File Explorer & UI",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "ShowClockOnSecondaryDisplayMonitors",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "ShowClockOnSecondaryDisplayMonitors",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "enable_hardware_gpu_scheduling",
+      "name": "Enable Hardware-Accelerated GPU Scheduling",
+      "description": "Enables hardware GPU scheduling for improved graphics performance (requires compatible GPU)",
+      "category": "System & Performance",
+      "risk_level": "medium",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+        "value_name": "HwSchMode",
+        "value_data": "2",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+        "value_name": "HwSchMode",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_tip_notifications",
+      "name": "Disable Tip Notifications and Ads",
+      "description": "Disables Windows tips, tricks, and suggestions notifications",
+      "category": "System & Performance",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "SubscribedContent-310093Enabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "SubscribedContent-310093Enabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_spotlight_lockscreen",
+      "name": "Turn Off Windows Spotlight Lock Screen",
+      "description": "Disables Windows Spotlight rotating images on the lock screen",
+      "category": "System & Performance",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "RotatingLockScreenEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "RotatingLockScreenEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_spotlight_lockscreen_overlay",
+      "name": "Disable Spotlight Lock Screen Overlay",
+      "description": "Disables the overlay information on Windows Spotlight lock screen",
+      "category": "System & Performance",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "RotatingLockScreenOverlayEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "value_name": "RotatingLockScreenOverlayEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "enable_verbose_status",
+      "name": "Enable Verbose Startup/Shutdown Status",
+      "description": "Shows detailed status messages during Windows startup and shutdown",
+      "category": "System & Performance",
+      "risk_level": "low",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value_name": "verbosestatus",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value_name": "verbosestatus",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_mpo",
+      "name": "Disable MPO (Multi-Plane Overlay)",
+      "description": "Disables Multi-Plane Overlay to fix potential screen flickering and visual issues",
+      "category": "System & Performance",
+      "risk_level": "medium",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\Dwm",
+        "value_name": "OverlayTestMode",
+        "value_data": "5",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\Dwm",
+        "value_name": "OverlayTestMode",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_storage_sense",
+      "name": "Disable Storage Sense",
+      "description": "Disables automatic Storage Sense cleanup feature",
+      "category": "Storage",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+        "value_name": "01",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+        "value_name": "01",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_thumbs_cache",
+      "name": "Disable Thumbs.db Creation",
+      "description": "Prevents Windows from creating thumbs.db thumbnail cache files",
+      "category": "Storage",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "DisableThumbnailCache",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "DisableThumbnailCache",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_network_throttling",
+      "name": "Disable Network Throttling",
+      "description": "Disables Windows network throttling for improved network performance",
+      "category": "Network",
+      "risk_level": "low",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "value_name": "NetworkThrottlingIndex",
+        "value_data": "4294967295",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "value_name": "NetworkThrottlingIndex",
+        "value_data": "10",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_llmnr",
+      "name": "Disable LLMNR",
+      "description": "Disables Link-Local Multicast Name Resolution (security enhancement)",
+      "category": "Network",
+      "risk_level": "medium",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
+        "value_name": "EnableMulticast",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
+        "value_name": "EnableMulticast",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_smartscreen",
+      "name": "Disable SmartScreen for Files/Apps",
+      "description": "Disables Windows SmartScreen filter for apps and files (reduces security)",
+      "category": "Security & Privacy",
+      "risk_level": "high",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\AppHost",
+        "value_name": "EnableWebContentEvaluation",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\AppHost",
+        "value_name": "EnableWebContentEvaluation",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "block_driver_updates",
+      "name": "Block Windows Update Automatic Driver Updates",
+      "description": "Prevents Windows Update from automatically installing driver updates",
+      "category": "Security & Privacy",
+      "risk_level": "medium",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching",
+        "value_name": "SearchOrderConfig",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching",
+        "value_name": "SearchOrderConfig",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_tailored_experiences",
+      "name": "Disable Tailored Experiences",
+      "description": "Disables personalized experiences with diagnostic data",
+      "category": "Security & Privacy",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+        "value_name": "TailoredExperiencesWithDiagnosticDataEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+        "value_name": "TailoredExperiencesWithDiagnosticDataEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "restore_photo_viewer",
+      "name": "Restore Old Windows Photo Viewer",
+      "description": "Enables the classic Windows Photo Viewer from Windows 7/8",
+      "category": "Legacy & Compatibility",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Classes\\Applications\\photoviewer.dll\\shell\\open",
+        "value_name": "MUIVerb",
+        "value_data": "@photoviewer.dll,-3043",
+        "value_type": "REG_SZ"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Classes\\Applications\\photoviewer.dll\\shell\\open",
+        "value_name": "MUIVerb",
+        "value_data": "",
+        "value_type": "REG_SZ"
+      }
+    },
+    {
+      "id": "disable_snap_assist",
+      "name": "Disable Windows 11 Snap Layouts Popup",
+      "description": "Disables the Snap Assist flyout when hovering over maximize button",
+      "category": "Legacy & Compatibility",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "EnableSnapAssistFlyout",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "value_name": "EnableSnapAssistFlyout",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_auto_restart",
+      "name": "Disable Windows Update Automatic Restart",
+      "description": "Prevents Windows from automatically restarting after updates when users are logged on",
+      "category": "Windows Update",
+      "risk_level": "medium",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "value_name": "NoAutoRebootWithLoggedOnUsers",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "value_name": "NoAutoRebootWithLoggedOnUsers",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_p2p_updates",
+      "name": "Disable P2P Update Sharing",
+      "description": "Disables peer-to-peer Windows Update delivery optimization",
+      "category": "Windows Update",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DeliveryOptimization\\Config",
+        "value_name": "DODownloadMode",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DeliveryOptimization\\Config",
+        "value_name": "DODownloadMode",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "disable_modern_standby",
+      "name": "Disable Modern Standby",
+      "description": "Disables Modern Standby (Connected Standby) power mode",
+      "category": "Miscellaneous",
+      "risk_level": "high",
+      "requires_restart": true,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Power",
+        "value_name": "CsEnabled",
+        "value_data": "0",
+        "value_type": "REG_DWORD"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Power",
+        "value_name": "CsEnabled",
+        "value_data": "1",
+        "value_type": "REG_DWORD"
+      }
+    },
+    {
+      "id": "hide_3d_objects",
+      "name": "Hide 3D Objects Folder",
+      "description": "Removes the 3D Objects folder from File Explorer navigation pane",
+      "category": "Miscellaneous",
+      "risk_level": "low",
+      "requires_restart": false,
+      "apply": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\\PropertyBag",
+        "value_name": "ThisPCPolicy",
+        "value_data": "Hide",
+        "value_type": "REG_SZ"
+      },
+      "restore": {
+        "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\\PropertyBag",
+        "value_name": "ThisPCPolicy",
+        "value_data": "Show",
+        "value_type": "REG_SZ"
+      }
+    }
+  ]
+}

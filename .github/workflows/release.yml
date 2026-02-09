@@ -1,0 +1,54 @@
+name: Build, Sign, and Release Executable
+
+on:
+  push:
+    tags:
+      - "v*" # Trigger this workflow whenever a tag starting with "v" (e.g., v1.0) is pushed.
+
+jobs:
+  build-sign-release:
+    runs-on: windows-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # (Optional) Step 2: Install dependencies
+      # Only include this if your project has dependencies that need to be installed for building. Example for Node.js:
+      # - name: Install Node.js dependencies
+      #   run: npm install
+
+      # Step 3: Build the executable
+      - name: Build the executable
+        run: |
+        python build.py # Replace with your actual build command or script
+        shell: cmd
+
+      # Step 4: Decode the certificate stored as a GitHub Secret
+      - name: Extract and Decode Signing Certificate
+        run: |
+          $certificateBase64 = "${{ secrets.CERTIFICATE_PFX }}"
+          $certificateBytes = [System.Convert]::FromBase64String($certificateBase64)
+          Set-Content -Path "$(pwd)\LeeHayward.pfx" -Value $certificateBytes -Encoding Byte
+        shell: powershell
+
+      # Step 5: Sign the executable with the self-signed certificate
+- name: Sign Executable
+  run: |
+    & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign `
+    /f "$(pwd)\LeeHayward.pfx" `
+    /p "${{ secrets.CERTIFICATE_PASSWORD }}" `
+    /fd SHA256 `
+    /tr http://timestamp.globalsign.com/tsa/r6advanced1 `
+    /td SHA256 `
+    "$(pwd)\dist\HaywardTechSuite.exe"
+  shell: powershell
+
+      # Step 6: Create a GitHub Release and Upload Signed Executable
+      - name: Create GitHub Release and Upload Files
+        uses: softprops/action-gh-release@v1 # Action for creating GitHub releases
+        with:
+          files: dist\HaywardTechSuite.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

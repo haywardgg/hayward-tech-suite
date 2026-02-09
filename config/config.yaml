@@ -1,0 +1,128 @@
+# Hayward Tech Suite Configuration
+# This file contains default configuration values
+
+app:
+  name: "Hayward Tech Suite"
+  version: "1.0.0"
+  author: "HaywardGG"
+  description: "Professional Windows System Maintenance Tool"
+  
+ui:
+  theme: "dark"
+  color_scheme:
+    primary: "#4158D0"
+    secondary: "#993cda"
+    background: "#1a1a1a"
+    text: "#ffffff"
+  window:
+    width: 1200
+    height: 800
+    min_width: 1000
+    min_height: 700
+    resizable: true
+  font:
+    family: "Segoe UI"
+    size: 12
+  
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/hayward_techsuite.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+  console_output: true
+  
+monitoring:
+  cpu_interval: 2  # seconds
+  ram_interval: 2
+  disk_check_interval: 60
+  network_interval: 5
+  battery_interval: 10
+  enable_real_time: true
+  
+system_operations:
+  command_timeout: 300  # seconds
+  require_confirmation: true
+  create_restore_point: true
+  enable_rollback: true
+  max_retries: 3
+  
+backup:
+  default_location: "backups"
+  compression: true
+  encryption: false
+  max_backups: 10
+  include_system_state: false
+  schedule:
+    enabled: false
+    frequency: "weekly"
+    day: "sunday"
+    time: "02:00"
+  
+security:
+  scan_on_startup: false
+  vulnerability_check: true
+  firewall_monitoring: true
+  port_scan: false
+  audit_logging: true
+  audit_log_file: "logs/audit.log"
+  
+maintenance:
+  dns_flush_on_startup: false
+  disk_cleanup_schedule: null
+  defrag_schedule: null
+  update_check_interval: 86400  # 24 hours
+  
+notifications:
+  enabled: true
+  show_completion: true
+  show_errors: true
+  sound_enabled: false
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    use_tls: true
+    username: ""
+    password: ""
+    from_address: ""
+    to_address: ""
+  
+reports:
+  enabled: true
+  format: "pdf"  # pdf, html, or both
+  output_dir: "reports"
+  auto_generate: false
+  include_graphs: true
+  
+features:
+  enable_backup_restore: true
+  enable_security_scanner: true
+  enable_process_manager: true
+  enable_startup_manager: true
+  enable_service_manager: true
+  enable_network_monitor: true
+  enable_scheduled_tasks: true
+  
+advanced:
+  developer_mode: false
+  debug_mode: false
+  verbose_logging: false
+  telemetry: false
+  auto_update_check: true
+  
+profiles:
+  current: "expert"
+  available:
+    - basic
+    - standard
+    - advanced
+    - expert
+  basic:
+    features: ["monitoring", "cleanup", "dns_flush"]
+  standard:
+    features: ["monitoring", "cleanup", "dns_flush", "restore_point", "disk_check"]
+  advanced:
+    features: ["monitoring", "cleanup", "dns_flush", "restore_point", "disk_check", "backup", "security"]
+  expert:
+    features: ["all"]
