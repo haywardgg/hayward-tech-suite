@@ -46,7 +46,19 @@ class RestorePointManager:
         
         logger.info(f"Creating restore point: {description}")
         
-        # First, check if System Restore is enabled
+        # First, disable the 24-hour frequency limit by setting registry key to 0
+        # This allows multiple restore points to be created in a day
+        registry_cmd = """
+        try {
+            $regPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore"
+            Set-ItemProperty -Path $regPath -Name "SystemRestorePointCreationFrequency" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+            Write-Output "Frequency limit disabled"
+        } catch {
+            Write-Output "Could not modify registry (may not affect restore point creation): $_"
+        }
+        """
+        
+        # Enable System Restore on system drive
         enable_cmd = """
         try {
             Enable-ComputerRestore -Drive "$env:SystemDrive" -ErrorAction SilentlyContinue
@@ -56,13 +68,35 @@ class RestorePointManager:
         }
         """
         
-        # Create restore point
+        # Create restore point with verification
         create_cmd = f"""
         try {{
+            # Get count of restore points before creation
+            $beforeCount = @(Get-ComputerRestorePoint).Count
+            
+            # Create the restore point
             Checkpoint-Computer -Description "{description}" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
-            Write-Output "Restore point created successfully"
+            
+            # Wait for Windows to register the restore point in the system
+            # 2 seconds is sufficient for most systems; restore point creation is typically instant
+            Start-Sleep -Seconds 2
+            
+            # Verify the restore point was created by checking the count increased
+            $afterCount = @(Get-ComputerRestorePoint).Count
+            
+            if ($afterCount -gt $beforeCount) {{
+                Write-Output "Restore point created successfully"
+            }} else {{
+                Write-Output "Failed to create restore point: Restore point was not found after creation"
+            }}
         }} catch {{
-            Write-Output "Failed to create restore point: $_"
+            # Check if it's the 24-hour frequency error or related restore point errors
+            $errorMsg = $_.Exception.Message
+            if ($errorMsg -like "*24 hours*" -or $errorMsg -like "*restore point*cannot be created*") {{
+                Write-Output "Failed to create restore point: A restore point was already created within the past 24 hours. The frequency limit setting may not have taken effect yet. Please restart the computer and try again."
+            }} else {{
+                Write-Output "Failed to create restore point: $errorMsg"
+            }}
         }}
         """
         
@@ -70,10 +104,15 @@ class RestorePointManager:
             if not self.execute_powershell:
                 return False, "PowerShell execution function not configured"
                 
-            # Try to enable System Restore first (silent, may already be enabled)
-            success, stdout, stderr = self.execute_powershell(enable_cmd, timeout=60)
+            # Step 1: Disable the 24-hour frequency limit
+            success, stdout, stderr = self.execute_powershell(registry_cmd, timeout=30)
+            logger.debug(f"Registry modification result: {stdout}")
             
-            # Create the restore point
+            # Step 2: Try to enable System Restore (silent, may already be enabled)
+            success, stdout, stderr = self.execute_powershell(enable_cmd, timeout=60)
+            logger.debug(f"System Restore enable result: {stdout}")
+            
+            # Step 3: Create the restore point with verification
             success, stdout, stderr = self.execute_powershell(create_cmd, timeout=120)
             
             # Check the output for success or failure messages
@@ -86,7 +125,7 @@ class RestorePointManager:
             elif "failed to create restore point" in output:
                 # Extract the error message from the output
                 # Format: "Failed to create restore point: <error details>"
-                error_msg = stdout if stdout else "Unknown error"
+                error_msg = stdout.strip() if stdout else "Unknown error"
                 logger.error(f"Failed to create restore point: {error_msg}")
                 return False, error_msg
             elif not success:
