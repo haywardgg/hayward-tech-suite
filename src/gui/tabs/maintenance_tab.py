@@ -11,7 +11,7 @@ import subprocess
 
 from src.utils.logger import get_logger
 from src.utils.admin_state import AdminState
-from src.core.system_operations import SystemOperations, SystemOperationError, PrivilegeError
+from src.core.system_operations import SystemOperations
 from src.core.restore_point_manager import RestorePointManager
 
 logger = get_logger("maintenance_tab")
@@ -92,7 +92,7 @@ class MaintenanceTab:
             stderr = result.stderr.strip() if result.stderr else ""
             
             if success:
-                logger.debug(f"PowerShell command succeeded")
+                logger.debug("PowerShell command succeeded")
             else:
                 logger.warning(f"PowerShell command failed with code {result.returncode}")
                 if stderr:
@@ -400,7 +400,7 @@ class MaintenanceTab:
                 
                 if success:
                     self.parent.after(0, lambda: messagebox.showinfo(
-                        "Success", f"Restore point created successfully!"
+                        "Success", "Restore point created successfully!"
                     ))
                     # Refresh the restore point info
                     self.parent.after(100, self._refresh_restore_point_info)
