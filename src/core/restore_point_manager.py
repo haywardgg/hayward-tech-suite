@@ -129,7 +129,7 @@ class RestorePointManager:
                             try:
                                 timestamp_ms = int(ct[6:-2])
                                 return timestamp_ms
-                            except:
+                            except (ValueError, IndexError):
                                 return 0
                         return 0
                     

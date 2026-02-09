@@ -313,23 +313,23 @@ class MaintenanceTab:
 
     def _refresh_restore_point_info(self) -> None:
         """Refresh restore point information display."""
+        def update_label(text):
+            """Helper to update restore point info label."""
+            self.restore_point_info_label.configure(text=text)
+        
         def task():
             try:
                 info = self.restore_manager.get_latest_restore_point_info()
                 message = f"Last restore point: {info}"
                 
                 try:
-                    self.parent.after(0, lambda m=message: self.restore_point_info_label.configure(
-                        text=m
-                    ))
+                    self.parent.after(0, lambda m=message: update_label(m))
                 except Exception as e:
                     logger.debug(f"GUI update timing issue (safe to ignore): {e}")
             except Exception as e:
                 logger.error(f"Failed to refresh restore points: {e}")
                 try:
-                    self.parent.after(0, lambda: self.restore_point_info_label.configure(
-                        text="Failed to load restore points"
-                    ))
+                    self.parent.after(0, lambda: update_label("Failed to load restore points"))
                 except Exception as ex:
                     logger.debug(f"GUI update timing issue (safe to ignore): {ex}")
         
@@ -433,6 +433,8 @@ class MaintenanceTab:
         scroll_frame.grid_columnconfigure(0, weight=1)
         
         selected_sequence = {"value": None}
+        # Shared radio button variable for proper grouping
+        radio_var = ctk.StringVar(value="")
         
         # Create a radio button for each restore point
         for i, rp in enumerate(restore_points):
@@ -445,8 +447,7 @@ class MaintenanceTab:
             rp_frame.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
             rp_frame.grid_columnconfigure(1, weight=1)
             
-            # Radio button
-            radio_var = ctk.StringVar(value="")
+            # Radio button - all share the same variable
             radio = ctk.CTkRadioButton(
                 rp_frame,
                 text="",
