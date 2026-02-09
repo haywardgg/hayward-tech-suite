@@ -340,46 +340,8 @@ args = [
 ---
 
 ### 📦 Using the Pre-built Application
-## How to verify the authenticity of `HaywardTechSuite`
 
-This file is **digitally signed** and timestamped using a trusted certification authority. Follow these steps to ensure the authenticity of the executable:
-
-### **Step 1: Download the file**
-Download the latest version of `HaywardTechSuite.exe` from the [Releases page](https://github.com/haywardgg/hayward-tech-suite/releases).
-
-### **Step 2: Verify the Digital Signature**
-1. Right-click on the downloaded `HaywardTechSuite.exe` file.
-2. Select **Properties > Digital Signatures**.
-3. Verify the following information:
-   - **Name of signer**: `LeeHayward`
-   - **Timestamp Authority**:
-     - **Issuer Name**: `GlobalSign`
-     - **Expiry Date**: `Sun Dec 10, 2034`
-4. Ensure that the file signature is marked as valid.
-
-### **Step 3: Run the Application**
-If Windows SmartScreen displays a warning, click **More Info**, then choose **Run Anyway** to trust the signed executable.
-
----
-
-#### Technical Details
-For advanced users, here are the technical details of the applied timestamp:
-- **Timestamp Authority:** Verified by GlobalSign
-- **GlobalSign Issuer Details**:
-  - Issued to: GlobalSign
-  - Issued by: GlobalSign
-  - Expires: Sun Dec 10 00:00:00 2034
-  - SHA1 hash: 8094640EB5A7A1CA119C1FDDD59F810263A7FBD1
-- **Intermediate CA Details**:
-  - Issued to: GlobalSign Timestamping CA - SHA384 - G4
-  - Issued by: GlobalSign
-  - Expires: Sun Dec 10 00:00:00 2034
-  - SHA1 hash: F585500925786F88E721D235240A2452AE3D23F9
-- **Leaf Certificate**:
-  - Issued to: GlobalSign TSA for CodeSign1 - R6
-  - Issued by: GlobalSign Timestamping CA - SHA384 - G4
-  - Expires: Sun Dec 10 00:00:00 2034
-  - SHA1 hash: C625B554BF13E9CB8A5C099BC37BF58485D890E5
+TO BE UPDATED
 
 ---
 
