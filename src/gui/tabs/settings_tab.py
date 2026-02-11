@@ -357,246 +357,263 @@ class SettingsTab:
         # Start gathering system info in background
         threading.Thread(target=self._gather_system_info, daemon=True).start()
 
-    def _gather_system_info(self) -> None:
-        """Gather system information in background thread."""
+def _gather_system_info(self) -> None:
+    """Gather system information in background thread."""
+    try:
+        info_lines = []
+
+        # Header
+        info_lines.append("=" * 50)
+        info_lines.append("SYSTEM INFORMATION")
+        info_lines.append("=" * 50)
+        info_lines.append("")
+
+        # Operating System
+        info_lines.append("━━━ OPERATING SYSTEM ━━━")
         try:
-            info_lines = []
-
-            # Header
-            info_lines.append("=" * 50)
-            info_lines.append("SYSTEM INFORMATION")
-            info_lines.append("=" * 50)
-            info_lines.append("")
-
-            # Operating System
-            info_lines.append("━━━ OPERATING SYSTEM ━━━")
+            os_name = platform.system()
+            os_version = platform.version()
+            os_release = platform.release()
+            os_machine = platform.machine()
+            
+            # Try to get Windows edition
             try:
-                os_name = platform.system()
-                os_version = platform.version()
-                os_release = platform.release()
-                os_machine = platform.machine()
+                import winreg
+                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
+                                    r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
+                product_name = winreg.QueryValueEx(key, "ProductName")[0]
+                build_number = winreg.QueryValueEx(key, "CurrentBuild")[0]
+                build_number_int = int(build_number)
+                
+                # Check for Windows 11 (build 22000 or higher)
+                if build_number_int >= 22000:
+                    # Replace "Windows 10" with "Windows 11" in the product name
+                    if "Windows 10" in product_name:
+                        product_name = product_name.replace("Windows 10", "Windows 11")
+                    os_name = "Windows 11"
+                    os_release = "11"
                 
                 info_lines.append(f"OS: {os_name} {os_release}")
                 info_lines.append(f"Version: {os_version}")
                 info_lines.append(f"Architecture: {os_machine}")
                 
-                # Try to get Windows edition
+                # Get DisplayVersion if available
                 try:
-                    import winreg
-                    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
-                                        r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
-                    product_name = winreg.QueryValueEx(key, "ProductName")[0]
-                    build_number = winreg.QueryValueEx(key, "CurrentBuild")[0]
-                    
-                    # Try to get DisplayVersion (available on Windows 10 20H2 and later)
+                    display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
+                    info_lines.append(f"Edition: {product_name} (Version {display_version})")
+                except Exception:
+                    # Try to get ReleaseId for older Windows versions
                     try:
-                        display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
-                        info_lines.append(f"Edition: {product_name} ({display_version})")
+                        release_id = winreg.QueryValueEx(key, "ReleaseId")[0]
+                        info_lines.append(f"Edition: {product_name} (Version {release_id})")
                     except Exception:
-                        # DisplayVersion not available, just show ProductName
                         info_lines.append(f"Edition: {product_name}")
+                
+                info_lines.append(f"Build: {build_number}")
+                winreg.CloseKey(key)
+            except Exception:
+                info_lines.append(f"OS: {os_name} {os_release}")
+                info_lines.append(f"Version: {os_version}")
+                info_lines.append(f"Architecture: {os_machine}")
+                info_lines.append(f"Edition: Unable to detect")
+                
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+        info_lines.append("")
+
+        # CPU Information
+        info_lines.append("━━━ PROCESSOR (CPU) ━━━")
+        try:
+            processor = platform.processor()
+            cpu_count_physical = psutil.cpu_count(logical=False)
+            cpu_count_logical = psutil.cpu_count(logical=True)
+            cpu_freq = psutil.cpu_freq()
+            
+            info_lines.append(f"Model: {processor}")
+            info_lines.append(f"Physical Cores: {cpu_count_physical}")
+            info_lines.append(f"Logical Cores (Threads): {cpu_count_logical}")
+            if cpu_freq:
+                info_lines.append(f"Base Frequency: {cpu_freq.current:.2f} MHz")
+                if cpu_freq.max > 0:
+                    info_lines.append(f"Max Frequency: {cpu_freq.max:.2f} MHz")
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+        info_lines.append("")
+
+        # Memory Information
+        info_lines.append("━━━ MEMORY (RAM) ━━━")
+        try:
+            mem = psutil.virtual_memory()
+            total_gb = mem.total / (1024 ** 3)
+            available_gb = mem.available / (1024 ** 3)
+            used_gb = mem.used / (1024 ** 3)
+            
+            info_lines.append(f"Total: {total_gb:.2f} GB")
+            info_lines.append(f"Available: {available_gb:.2f} GB")
+            info_lines.append(f"Used: {used_gb:.2f} GB")
+            info_lines.append(f"Usage: {mem.percent}%")
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+        info_lines.append("")
+
+        # Storage Information
+        info_lines.append("━━━ STORAGE (DISKS) ━━━")
+        try:
+            partitions = psutil.disk_partitions()
+            for partition in partitions:
+                try:
+                    usage = psutil.disk_usage(partition.mountpoint)
+                    total_gb = usage.total / (1024 ** 3)
+                    used_gb = usage.used / (1024 ** 3)
+                    free_gb = usage.free / (1024 ** 3)
                     
-                    info_lines.append(f"Build: {build_number}")
+                    # Determine drive type
+                    drive_type = "Unknown"
+                    if "cdrom" in partition.opts or partition.fstype == "":
+                        drive_type = "CD/DVD"
+                    elif "removable" in partition.opts:
+                        drive_type = "Removable"
+                    else:
+                        drive_type = "HDD/SSD"
+                    
+                    info_lines.append(f"Drive {partition.device}")
+                    info_lines.append(f"  Type: {drive_type}")
+                    info_lines.append(f"  Filesystem: {partition.fstype}")
+                    info_lines.append(f"  Total: {total_gb:.2f} GB")
+                    info_lines.append(f"  Used: {used_gb:.2f} GB")
+                    info_lines.append(f"  Free: {free_gb:.2f} GB")
+                    info_lines.append(f"  Usage: {usage.percent}%")
+                    info_lines.append("")
+                except PermissionError:
+                    continue
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+            info_lines.append("")
+
+        # Graphics Card Information (Windows only)
+        info_lines.append("━━━ GRAPHICS CARD (GPU) ━━━")
+        try:
+            if platform.system() == "Windows":
+                import winreg
+                gpu_list = []
+                
+                try:
+                    # Try to read from registry
+                    key_path = r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path)
+                    
+                    i = 0
+                    while True:
+                        try:
+                            subkey_name = winreg.EnumKey(key, i)
+                            subkey = winreg.OpenKey(key, subkey_name)
+                            
+                            try:
+                                desc = winreg.QueryValueEx(subkey, "DriverDesc")[0]
+                                if desc and desc not in gpu_list:
+                                    gpu_list.append(desc)
+                                    
+                                    # Try to get VRAM
+                                    try:
+                                        vram = winreg.QueryValueEx(subkey, "HardwareInformation.qwMemorySize")[0]
+                                        vram_gb = vram / (1024 ** 3)
+                                        info_lines.append(f"GPU: {desc}")
+                                        info_lines.append(f"  VRAM: {vram_gb:.2f} GB")
+                                    except Exception:
+                                        info_lines.append(f"GPU: {desc}")
+                                        info_lines.append(f"  VRAM: N/A")
+                            except Exception:
+                                pass
+                            
+                            winreg.CloseKey(subkey)
+                            i += 1
+                        except OSError:
+                            break
+                    
                     winreg.CloseKey(key)
                 except Exception:
                     pass
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-            info_lines.append("")
-
-            # CPU Information
-            info_lines.append("━━━ PROCESSOR (CPU) ━━━")
-            try:
-                processor = platform.processor()
-                cpu_count_physical = psutil.cpu_count(logical=False)
-                cpu_count_logical = psutil.cpu_count(logical=True)
-                cpu_freq = psutil.cpu_freq()
                 
-                info_lines.append(f"Model: {processor}")
-                info_lines.append(f"Physical Cores: {cpu_count_physical}")
-                info_lines.append(f"Logical Cores (Threads): {cpu_count_logical}")
-                if cpu_freq:
-                    info_lines.append(f"Base Frequency: {cpu_freq.current:.2f} MHz")
-                    if cpu_freq.max > 0:
-                        info_lines.append(f"Max Frequency: {cpu_freq.max:.2f} MHz")
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-            info_lines.append("")
-
-            # Memory Information
-            info_lines.append("━━━ MEMORY (RAM) ━━━")
-            try:
-                mem = psutil.virtual_memory()
-                total_gb = mem.total / (1024 ** 3)
-                available_gb = mem.available / (1024 ** 3)
-                used_gb = mem.used / (1024 ** 3)
-                
-                info_lines.append(f"Total: {total_gb:.2f} GB")
-                info_lines.append(f"Available: {available_gb:.2f} GB")
-                info_lines.append(f"Used: {used_gb:.2f} GB")
-                info_lines.append(f"Usage: {mem.percent}%")
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-            info_lines.append("")
-
-            # Storage Information
-            info_lines.append("━━━ STORAGE (DISKS) ━━━")
-            try:
-                partitions = psutil.disk_partitions()
-                for partition in partitions:
-                    try:
-                        usage = psutil.disk_usage(partition.mountpoint)
-                        total_gb = usage.total / (1024 ** 3)
-                        used_gb = usage.used / (1024 ** 3)
-                        free_gb = usage.free / (1024 ** 3)
-                        
-                        # Determine drive type
-                        drive_type = "Unknown"
-                        if "cdrom" in partition.opts or partition.fstype == "":
-                            drive_type = "CD/DVD"
-                        elif "removable" in partition.opts:
-                            drive_type = "Removable"
-                        else:
-                            drive_type = "HDD/SSD"
-                        
-                        info_lines.append(f"Drive {partition.device}")
-                        info_lines.append(f"  Type: {drive_type}")
-                        info_lines.append(f"  Filesystem: {partition.fstype}")
-                        info_lines.append(f"  Total: {total_gb:.2f} GB")
-                        info_lines.append(f"  Used: {used_gb:.2f} GB")
-                        info_lines.append(f"  Free: {free_gb:.2f} GB")
-                        info_lines.append(f"  Usage: {usage.percent}%")
-                        info_lines.append("")
-                    except PermissionError:
-                        continue
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-                info_lines.append("")
-
-            # Graphics Card Information (Windows only)
-            info_lines.append("━━━ GRAPHICS CARD (GPU) ━━━")
-            try:
-                if platform.system() == "Windows":
-                    import winreg
-                    gpu_list = []
-                    
-                    try:
-                        # Try to read from registry
-                        key_path = r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
-                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path)
-                        
-                        i = 0
-                        while True:
-                            try:
-                                subkey_name = winreg.EnumKey(key, i)
-                                subkey = winreg.OpenKey(key, subkey_name)
-                                
-                                try:
-                                    desc = winreg.QueryValueEx(subkey, "DriverDesc")[0]
-                                    if desc and desc not in gpu_list:
-                                        gpu_list.append(desc)
-                                        
-                                        # Try to get VRAM
-                                        try:
-                                            vram = winreg.QueryValueEx(subkey, "HardwareInformation.qwMemorySize")[0]
-                                            vram_gb = vram / (1024 ** 3)
-                                            info_lines.append(f"GPU: {desc}")
-                                            info_lines.append(f"  VRAM: {vram_gb:.2f} GB")
-                                        except Exception:
-                                            info_lines.append(f"GPU: {desc}")
-                                            info_lines.append(f"  VRAM: N/A")
-                                except Exception:
-                                    pass
-                                
-                                winreg.CloseKey(subkey)
-                                i += 1
-                            except OSError:
-                                break
-                        
-                        winreg.CloseKey(key)
-                    except Exception:
-                        pass
-                    
-                    if not gpu_list:
-                        info_lines.append("Unable to detect GPU information")
-                else:
-                    info_lines.append("GPU detection only available on Windows")
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-            info_lines.append("")
-
-            # Motherboard Information (Windows only)
-            info_lines.append("━━━ MOTHERBOARD ━━━")
-            try:
-                if platform.system() == "Windows":
-                    import subprocess
-                    
-                    try:
-                        # Get manufacturer
-                        manufacturer = subprocess.check_output(
-                            ["wmic", "baseboard", "get", "manufacturer"],
-                            text=True, creationflags=0x08000000
-                        ).strip().split("\n")[-1].strip()
-                        
-                        # Get product name
-                        product = subprocess.check_output(
-                            ["wmic", "baseboard", "get", "product"],
-                            text=True, creationflags=0x08000000
-                        ).strip().split("\n")[-1].strip()
-                        
-                        info_lines.append(f"Manufacturer: {manufacturer}")
-                        info_lines.append(f"Model: {product}")
-                    except Exception:
-                        info_lines.append("Unable to detect motherboard information")
-                else:
-                    info_lines.append("Motherboard detection only available on Windows")
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-            info_lines.append("")
-
-            # Network Information
-            info_lines.append("━━━ NETWORK ━━━")
-            try:
-                hostname = platform.node()
-                info_lines.append(f"Computer Name: {hostname}")
-                
-                # Network interfaces
-                net_if_addrs = psutil.net_if_addrs()
-                for interface_name, interface_addresses in net_if_addrs.items():
-                    for address in interface_addresses:
-                        if str(address.family) == 'AddressFamily.AF_INET':
-                            info_lines.append(f"{interface_name}:")
-                            info_lines.append(f"  IP Address: {address.address}")
-                            info_lines.append(f"  Netmask: {address.netmask}")
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-            info_lines.append("")
-
-            # Additional System Info
-            info_lines.append("━━━ ADDITIONAL INFO ━━━")
-            try:
-                boot_time = psutil.boot_time()
-                import datetime
-                boot_time_str = datetime.datetime.fromtimestamp(boot_time).strftime("%Y-%m-%d %H:%M:%S")
-                info_lines.append(f"Boot Time: {boot_time_str}")
-                info_lines.append(f"Python Version: {platform.python_version()}")
-            except Exception as e:
-                info_lines.append(f"Error: {e}")
-
-            info_lines.append("")
-            info_lines.append("=" * 50)
-            info_lines.append("End of System Information")
-            info_lines.append("=" * 50)
-
-            # Store the info
-            self.system_info = "\n".join(info_lines)
-
-            # Update UI on main thread
-            self.parent.after(0, self._update_specs_display)
-
+                if not gpu_list:
+                    info_lines.append("Unable to detect GPU information")
+            else:
+                info_lines.append("GPU detection only available on Windows")
         except Exception as e:
-            logger.error(f"Failed to gather system info: {e}")
-            self.parent.after(0, lambda: self._update_specs_display(error=str(e)))
+            info_lines.append(f"Error: {e}")
+        info_lines.append("")
+
+        # Motherboard Information (Windows only)
+        info_lines.append("━━━ MOTHERBOARD ━━━")
+        try:
+            if platform.system() == "Windows":
+                import subprocess
+                
+                try:
+                    # Get manufacturer
+                    manufacturer = subprocess.check_output(
+                        ["wmic", "baseboard", "get", "manufacturer"],
+                        text=True, creationflags=0x08000000
+                    ).strip().split("\n")[-1].strip()
+                    
+                    # Get product name
+                    product = subprocess.check_output(
+                        ["wmic", "baseboard", "get", "product"],
+                        text=True, creationflags=0x08000000
+                    ).strip().split("\n")[-1].strip()
+                    
+                    info_lines.append(f"Manufacturer: {manufacturer}")
+                    info_lines.append(f"Model: {product}")
+                except Exception:
+                    info_lines.append("Unable to detect motherboard information")
+            else:
+                info_lines.append("Motherboard detection only available on Windows")
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+        info_lines.append("")
+
+        # Network Information
+        info_lines.append("━━━ NETWORK ━━━")
+        try:
+            hostname = platform.node()
+            info_lines.append(f"Computer Name: {hostname}")
+            
+            # Network interfaces
+            net_if_addrs = psutil.net_if_addrs()
+            for interface_name, interface_addresses in net_if_addrs.items():
+                for address in interface_addresses:
+                    if str(address.family) == 'AddressFamily.AF_INET':
+                        info_lines.append(f"{interface_name}:")
+                        info_lines.append(f"  IP Address: {address.address}")
+                        info_lines.append(f"  Netmask: {address.netmask}")
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+        info_lines.append("")
+
+        # Additional System Info
+        info_lines.append("━━━ ADDITIONAL INFO ━━━")
+        try:
+            boot_time = psutil.boot_time()
+            import datetime
+            boot_time_str = datetime.datetime.fromtimestamp(boot_time).strftime("%Y-%m-%d %H:%M:%S")
+            info_lines.append(f"Boot Time: {boot_time_str}")
+            info_lines.append(f"Python Version: {platform.python_version()}")
+        except Exception as e:
+            info_lines.append(f"Error: {e}")
+
+        info_lines.append("")
+        info_lines.append("=" * 50)
+        info_lines.append("End of System Information")
+        info_lines.append("=" * 50)
+
+        # Store the info
+        self.system_info = "\n".join(info_lines)
+
+        # Update UI on main thread
+        self.parent.after(0, self._update_specs_display)
+
+    except Exception as e:
+        logger.error(f"Failed to gather system info: {e}")
+        self.parent.after(0, lambda: self._update_specs_display(error=str(e)))
 
     def _update_specs_display(self, error: str = None) -> None:
         """Update the specs display in UI thread."""
