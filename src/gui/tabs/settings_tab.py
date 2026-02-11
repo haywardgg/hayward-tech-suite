@@ -615,42 +615,42 @@ class SettingsTab:
             logger.error(f"Failed to gather system info: {e}")
             self.parent.after(0, lambda: self._update_specs_display(error=str(e)))
     
-        def _update_specs_display(self, error: str = None) -> None:
-            """Update the specs display in UI thread."""
-            try:
-                # Hide loading label
-                self.specs_loading_label.grid_remove()
+    def _update_specs_display(self, error: str = None) -> None:
+        """Update the specs display in UI thread."""
+        try:
+            # Hide loading label
+            self.specs_loading_label.grid_remove()
     
-                # Update text area
-                self.specs_text.configure(state="normal")
+            # Update text area
+            self.specs_text.configure(state="normal")
                 
-                if error:
-                    self.specs_text.delete("1.0", "end")
-                    self.specs_text.insert("1.0", f"Error gathering system information:\n{error}")
-                elif self.system_info:
-                    self.specs_text.delete("1.0", "end")
-                    self.specs_text.insert("1.0", self.system_info)
-                    # Enable copy button
-                    self.copy_button.configure(state="normal")
+            if error:
+                self.specs_text.delete("1.0", "end")
+                self.specs_text.insert("1.0", f"Error gathering system information:\n{error}")
+            elif self.system_info:
+                self.specs_text.delete("1.0", "end")
+                self.specs_text.insert("1.0", self.system_info)
+                # Enable copy button
+                self.copy_button.configure(state="normal")
                 
-                self.specs_text.configure(state="disabled")
+            self.specs_text.configure(state="disabled")
     
-            except Exception as e:
-                logger.error(f"Failed to update specs display: {e}")
+        except Exception as e:
+            logger.error(f"Failed to update specs display: {e}")
     
-        def _copy_specs_to_clipboard(self) -> None:
-            """Copy system specs to clipboard."""
-            try:
-                if self.system_info:
-                    self.parent.clipboard_clear()
-                    self.parent.clipboard_append(self.system_info)
-                    messagebox.showinfo(
-                        "Copied",
-                        "System specifications copied to clipboard!\n\n"
-                        "You can now paste this information in support forums or tickets."
-                    )
-                    logger.info("System specs copied to clipboard")
-            except Exception as e:
-                logger.error(f"Failed to copy to clipboard: {e}")
-                messagebox.showerror("Error", f"Failed to copy to clipboard: {e}")
+    def _copy_specs_to_clipboard(self) -> None:
+        """Copy system specs to clipboard."""
+        try:
+            if self.system_info:
+                self.parent.clipboard_clear()
+                self.parent.clipboard_append(self.system_info)
+                messagebox.showinfo(
+                    "Copied",
+                    "System specifications copied to clipboard!\n\n"
+                    "You can now paste this information in support forums or tickets."
+                )
+                logger.info("System specs copied to clipboard")
+        except Exception as e:
+            logger.error(f"Failed to copy to clipboard: {e}")
+            messagebox.showerror("Error", f"Failed to copy to clipboard: {e}")
     
