@@ -386,9 +386,16 @@ class SettingsTab:
                     key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
                                         r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
                     product_name = winreg.QueryValueEx(key, "ProductName")[0]
-                    display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
                     build_number = winreg.QueryValueEx(key, "CurrentBuild")[0]
-                    info_lines.append(f"Edition: {product_name} ({display_version})")
+                    
+                    # Try to get DisplayVersion (available on Windows 10 20H2 and later)
+                    try:
+                        display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
+                        info_lines.append(f"Edition: {product_name} ({display_version})")
+                    except Exception:
+                        # DisplayVersion not available, just show ProductName
+                        info_lines.append(f"Edition: {product_name}")
+                    
                     info_lines.append(f"Build: {build_number}")
                     winreg.CloseKey(key)
                 except Exception:
